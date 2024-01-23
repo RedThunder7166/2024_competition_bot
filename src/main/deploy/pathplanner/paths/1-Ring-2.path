@@ -39,15 +39,15 @@
   "eventMarkers": [
     {
       "name": "New Event Marker",
-      "waypointRelativePos": 0,
+      "waypointRelativePos": 0.3,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
           "commands": [
             {
               "type": "wait",
               "data": {
-                "waitTime": 2.0
+                "waitTime": 5.0
               }
             }
           ]
