@@ -6,6 +6,12 @@
           "open": true
         },
         "open": true
+      },
+      "photonvision": {
+        "Arducam_OV9281_USB_Camera": {
+          "open": true
+        },
+        "open": true
       }
     },
     "types": {
@@ -22,7 +28,57 @@
     "visible": true
   },
   "NetworkTables Settings": {
-    "mode": "Client (NT4)",
+    "mode": "Client (NT3)",
     "serverTeam": "7166"
+  },
+  "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 713,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/photonvision/Arducam_OV9281_USB_Camera/targetYaw"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <1>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 679,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/AimTarget/TARGET YAW"
+            }
+          ]
+        }
+      ]
+    }
   }
 }

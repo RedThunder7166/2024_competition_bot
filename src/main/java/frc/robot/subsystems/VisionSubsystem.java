@@ -34,7 +34,7 @@ public class VisionSubsystem extends SubsystemBase {
   private PhotonPipelineResult result;
   private boolean result_has_targets = false;
 
-  private double TURN_P = 0.01;
+  private double TURN_P = 0.02;
   private double TURN_I = 0.001;
   private double TURN_D = 0;
   private final PIDController turn_controller = new PIDController(TURN_P, TURN_I, TURN_D);
@@ -49,13 +49,16 @@ public class VisionSubsystem extends SubsystemBase {
   private GenericEntry aimtarget_i;
   private GenericEntry aimtarget_d;
 
-  private final boolean TUNE_AIM_TARGET_PID_THROUGH_SHUFFLEBOARD = false;
+  private double aimtarget_target_yaw = 0;
+
+  private final boolean TUNE_AIM_TARGET_PID_THROUGH_SHUFFLEBOARD = true;
   public VisionSubsystem() {
     if (TUNE_AIM_TARGET_PID_THROUGH_SHUFFLEBOARD) {
       aimtarget_tab = Shuffleboard.getTab("AimTarget");
       aimtarget_p = aimtarget_tab.add("P", 0).getEntry();
       aimtarget_i = aimtarget_tab.add("I", 0).getEntry();
       aimtarget_d = aimtarget_tab.add("D", 0).getEntry();
+      aimtarget_tab.addNumber("TARGET YAW", () -> aimtarget_target_yaw);
     }
   }
 
@@ -65,19 +68,19 @@ public class VisionSubsystem extends SubsystemBase {
     result = camera.getLatestResult();
     result_has_targets = result.hasTargets();
     if (result_has_targets) {
-      System.out.println("Target found!");
-      List<PhotonTrackedTarget> targets = result.getTargets();
-      for (PhotonTrackedTarget target : targets) {
-        System.out.println(target.getFiducialId());
-        // double range = PhotonUtils.calculateDistanceToTargetMeters(
-        //   CAMERA_HEIGHT_METERS, 
-        //   TARGET_HEIGHT_METERS,
-        //   0,
-        //   Units.degreesToRadians(target.getPitch())
-        // );
-        // SmartDashboard.putNumber("Vision RANGE", range);
-        System.out.println(target.getBestCameraToTarget());
-      }
+      // System.out.println("Target found!");
+      // List<PhotonTrackedTarget> targets = result.getTargets();
+      // for (PhotonTrackedTarget target : targets) {
+      //   System.out.println(target.getFiducialId());
+      //   // double range = PhotonUtils.calculateDistanceToTargetMeters(
+      //   //   CAMERA_HEIGHT_METERS, 
+      //   //   TARGET_HEIGHT_METERS,
+      //   //   0,
+      //   //   Units.degreesToRadians(target.getPitch())
+      //   // );
+      //   // SmartDashboard.putNumber("Vision RANGE", range);
+      //   System.out.println(target.getBestCameraToTarget());
+      // }
     } else {
       // System.out.println("No targets.");
     }
@@ -95,7 +98,13 @@ public class VisionSubsystem extends SubsystemBase {
 
   public double calculateTurnPower(){
     if (result_has_targets) {
-      return turn_controller.calculate(result.getBestTarget().getYaw(), 0);
+      List<PhotonTrackedTarget> targets = result.getTargets();
+      for (PhotonTrackedTarget target : targets) {
+        if (target.getFiducialId() == 4) {
+          aimtarget_target_yaw = target.getYaw();
+          return turn_controller.calculate(aimtarget_target_yaw, 0);
+        }
+      }
     }
     return 0;
   }

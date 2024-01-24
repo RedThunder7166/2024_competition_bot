@@ -43,12 +43,15 @@ public class RobotContainer {
 
   private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
 
+  private boolean automatically_rotate = true;
   private void configureBindings() {
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
         drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
                                                                                            // negative Y (forward)
             .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            // .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            // use vision to rotate the robot when automatically_rotate is true; otherwise use joystick (see above)
+            .withRotationalRate(automatically_rotate ? (m_visionSubsystem.calculateTurnPower() * MaxAngularRate) : -joystick.getRightX() * MaxAngularRate) // booyah!
         ));
 
     joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
@@ -64,7 +67,13 @@ public class RobotContainer {
     drivetrain.registerTelemetry(logger::telemeterize);
 
     // controls for this are not final
-    joystick.x().whileFalse(new TrackAprilTagCommand(drivetrain, m_visionSubsystem, drive, MaxAngularRate));
+    // joystick.x().whileFalse(new TrackAprilTagCommand(drivetrain, m_visionSubsystem, drive, MaxAngularRate));
+    joystick.x().onTrue(new InstantCommand(() -> {
+      automatically_rotate = false;
+    }));
+    joystick.x().onFalse(new InstantCommand(() -> {
+      automatically_rotate = true;
+    }));
   }
   {
     // ...
