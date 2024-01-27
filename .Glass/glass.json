@@ -5,6 +5,15 @@
         "AimTarget": {
           "open": true
         },
+        "Fab test": {
+          "open": true
+        },
+        "open": true
+      },
+      "SmartDashboard": {
+        "SHOOTER R": {
+          "open": true
+        },
         "open": true
       },
       "photonvision": {
@@ -17,6 +26,7 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/Pose": "Field2d",
+      "/Shuffleboard/Fab test/Shooter": "Subsystem",
       "/SmartDashboard/Auto Chooser": "String Chooser",
       "/SmartDashboard/Module 0": "Mechanism2d",
       "/SmartDashboard/Module 1": "Mechanism2d",
@@ -45,12 +55,12 @@
           "series": [
             {
               "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/photonvision/Arducam_OV9281_USB_Camera/targetYaw"
+              "id": "NT:/photonvision/Arducam_OV9281_USB_Camera/targetSkew"
             }
           ]
         }
@@ -78,7 +88,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     }
   }
 }
