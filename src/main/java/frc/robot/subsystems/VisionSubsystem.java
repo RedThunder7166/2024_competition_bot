@@ -13,6 +13,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.PhotonUtils;
+import org.photonvision.targeting.PNPResult;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -20,25 +21,34 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.PubSubOption;
+import edu.wpi.first.networktables.StructEntry;
+import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class VisionSubsystem extends SubsystemBase {
-  private static final double CAMERA_HEIGHT_METERS = 0.7493;
+  private static final double CAMERA_HEIGHT_METERS = 0.635; // changed from 0.7874;
   private static final double TARGET_HEIGHT_METERS = 1.4351;
-  public static double calculateDistanceToTargetMeters(PhotonTrackedTarget target) {
+  private static final double CAMERA_PITCH_RADIANS = Math.toRadians(17);
+  private static double calculateDistanceToTargetMeters(PhotonTrackedTarget target) {
     return PhotonUtils.calculateDistanceToTargetMeters(
       CAMERA_HEIGHT_METERS, 
       TARGET_HEIGHT_METERS,
-      0,
+      CAMERA_PITCH_RADIANS, // changed from 0.16, 0.33, 0.31
       Units.degreesToRadians(target.getPitch())
     );
   }
@@ -71,6 +81,18 @@ public class VisionSubsystem extends SubsystemBase {
 
   private Optional<Double> latest_field_to_camera_rotation_z = Optional.empty();
 
+  private final NetworkTable table = NetworkTableInstance.getDefault().getTable("Vision");
+  private final DoubleEntry field_to_camera_rotation_z_entry = table.getDoubleTopic("FieldToCameraRotationZ").getEntry(0);
+  private final DoubleEntry distance_to_apriltag_4_meters_entry = table.getDoubleTopic("DISTANCE TO APRILTAG 4 METERS").getEntry(0);
+
+  private final StructPublisher<Pose2d> estimated_pose_publisher = table.getStructTopic("EstimatedPose", Pose2d.struct).publish();
+  private final StructPublisher<Pose2d> estimated_global_pose2d_publisher = table.getStructTopic("EstimatedGlobalPose2d", Pose2d.struct).publish();
+  private final StructPublisher<Pose3d> estimated_global_pose3d_publisher = table.getStructTopic("EstimatedGlobalPose3d", Pose3d.struct).publish();
+
+
+  private final StructPublisher<Pose2d> publisher = table
+  .getStructTopic("MyPose", Pose2d.struct).publish();
+
   private final boolean TUNE_AIM_TARGET_PID_THROUGH_SHUFFLEBOARD = true;
   public VisionSubsystem() {
     try {
@@ -87,6 +109,7 @@ public class VisionSubsystem extends SubsystemBase {
       aimtarget_d = aimtarget_tab.add("D", 0).getEntry();
       aimtarget_tab.addNumber("TARGET YAW", () -> aimtarget_target_yaw);
     }
+
   }
 
   @Override
@@ -124,19 +147,61 @@ public class VisionSubsystem extends SubsystemBase {
 
     latest_field_to_camera_rotation_z = getFieldToCameraRotationZ();
     if (latest_field_to_camera_rotation_z.isPresent()) {
-      SmartDashboard.putNumber("FieldToCameraRotationZ", latest_field_to_camera_rotation_z.get());
+      field_to_camera_rotation_z_entry.set(latest_field_to_camera_rotation_z.get());
+    }
+
+    Optional<Double> distance_meters = getTagDistance(4);
+    if (distance_meters.isPresent()) {
+      distance_to_apriltag_4_meters_entry.set(distance_meters.get());
+    }
+
+    Optional<Transform3d> estimated_pose = getMultiTagEstimatedPose();
+    if (estimated_pose.isPresent()) {
+      estimated_pose_publisher.set(new Pose2d(estimated_pose.get().getTranslation().toTranslation2d(), estimated_pose.get().getRotation().toRotation2d()));
+      publisher.set(new Pose2d());
+    }
+
+    Optional<EstimatedRobotPose> estimated_global_pose = getEstimatedGlobalPose();
+    if (estimated_global_pose.isPresent()) {
+      estimated_global_pose2d_publisher.set(estimated_global_pose.get().estimatedPose.toPose2d());
+      estimated_global_pose3d_publisher.set(estimated_global_pose.get().estimatedPose);
     }
   }
 
+  // private class Transform3dSender implements Sendable {
+  //   @Override
+  //   public void initSendable(SendableBuilder builder) {
+  //     // builder.setSmartDashboardType("");
+  //     builder.
+  //   }
+  // }
+
   public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
+    if (result_has_targets) {
+      return pose_estimator.update(result);
+    }
     return pose_estimator.update();
   }
 
+  private Optional<Transform3d> getMultiTagEstimatedPose(){
+    if(!result_has_targets) return Optional.empty();
+
+    PNPResult pnp_result = result.getMultiTagResult().estimatedPose;
+    if (!pnp_result.isPresent) return Optional.empty();
+
+    return Optional.of(pnp_result.best);
+  }
+
   private Optional<Double> getFieldToCameraRotationZ(){
-    Optional<EstimatedRobotPose> field_to_camera = getEstimatedGlobalPose();
-    if (field_to_camera.isPresent()) {
-      Rotation3d rotation = field_to_camera.get().estimatedPose.getRotation();
-      return Optional.of(Math.toDegrees(rotation.getZ()));
+    // Optional<EstimatedRobotPose> field_to_camera = getEstimatedGlobalPose();
+    // if (field_to_camera.isPresent()) {
+    //   Rotation3d rotation = field_to_camera.get().estimatedPose.getRotation();
+    //   return Optional.of(Math.toDegrees(rotation.getZ()));
+    // }
+    // return Optional.empty()
+  
+    if (result_has_targets && result.getMultiTagResult().estimatedPose.isPresent) {
+      return Optional.of(Math.toDegrees(result.getMultiTagResult().estimatedPose.best.getRotation().getZ()));
     }
     return Optional.empty();
   }

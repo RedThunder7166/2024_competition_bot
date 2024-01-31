@@ -44,25 +44,25 @@ public class RobotContainer {
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
   private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
-  private final Shooter m_shooter = new Shooter(m_visionSubsystem);
+  // private final Shooter m_shooter = new Shooter(m_visionSubsystem);
 
-  private boolean automatically_rotate = true;
+  private boolean automatically_rotate = false;
   private void configureBindings() {
-    // drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-    //     drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
-    //                                                                                        // negative Y (forward)
-    //         .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-    //         // .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
-    //         // use vision to rotate the robot when automatically_rotate is true; otherwise use joystick (see above)
-    //         // .withRotationalRate(automatically_rotate ? (m_visionSubsystem.calculateTurnPower() * MaxAngularRate) : -joystick.getRightX() * MaxAngularRate) // booyah!
-    //         .withRotationalRate(((automatically_rotate && m_visionSubsystem.hasTarget(4)) ? m_visionSubsystem.calculateTurnPower() : -joystick.getRightX()) * MaxAngularRate)
-    //     ));
-    drivetrain.setDefaultCommand(drivetrain.applyRequest(() -> brake));
+    drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
+        drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
+                                                                                           // negative Y (forward)
+            .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+            // .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            // use vision to rotate the robot when automatically_rotate is true; otherwise use joystick (see above)
+            // .withRotationalRate(automatically_rotate ? (m_visionSubsystem.calculateTurnPower() * MaxAngularRate) : -joystick.getRightX() * MaxAngularRate) // booyah!
+            .withRotationalRate(((automatically_rotate && m_visionSubsystem.hasTarget(4)) ? m_visionSubsystem.calculateTurnPower() : -joystick.getRightX()) * MaxAngularRate)
+        ));
+    // drivetrain.setDefaultCommand(drivetrain.applyRequest(() -> brake));
     
-    m_shooter.setDefaultCommand(new RunCommand(() -> {
-      // m_shooter.stop();
-      m_shooter.shoot();
-    }, m_shooter));
+    // m_shooter.setDefaultCommand(new RunCommand(() -> {
+    //   // m_shooter.stop();
+    //   m_shooter.shoot();
+    // }, m_shooter));
 
     joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
     joystick.b().whileTrue(drivetrain

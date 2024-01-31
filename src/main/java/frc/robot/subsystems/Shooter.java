@@ -22,8 +22,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
   /** Creates a new Shooter. */
-  TalonFX front_motor = new TalonFX(13);
-  TalonFX back_motor = new TalonFX(14);
+  private final TalonFX front_motor = new TalonFX(13);
+  private final TalonFX back_motor = new TalonFX(14);
  // TalonFX indexer_motor = new TalonFX(28);
   private GenericEntry rps_input;
   private GenericEntry rps_Index_Input;
@@ -47,7 +47,7 @@ public class Shooter extends SubsystemBase {
     Slot0Configs slot0Configs = new Slot0Configs();
     slot0Configs.kS = 0;
     slot0Configs.kV = 0.01;
-    slot0Configs.kP = 0;
+    slot0Configs.kP = 0.05;
     slot0Configs.kI = 0;
     slot0Configs.kD = 0;
 
@@ -55,7 +55,7 @@ public class Shooter extends SubsystemBase {
     back_motor.getConfigurator().apply(slot0Configs, 0.050);
   //  indexer_motor.getConfigurator().apply(slot0Configs,0.050);
    
-    ShuffleboardTab tab = Shuffleboard.getTab("Fab test");
+    ShuffleboardTab tab = Shuffleboard.getTab("Shooter info");
     tab.add(this);
     tab.addDouble("FrontVelocity", ()-> front_motor.getVelocity().getValue() );
     tab.addDouble("BackVelocity", ()-> back_motor.getVelocity().getValue() );
@@ -82,7 +82,6 @@ public class Shooter extends SubsystemBase {
       return;
     }
     System.out.println("YES DISTANCE");
-    SmartDashboard.putNumber("DISTANCE TO APRILTAG", distance_meters.get());
 
     Optional<Double> field_to_camera_rotation_z = m_visionSubsystem.getLatestFieldToCameraRotationZ();
     if (field_to_camera_rotation_z.isEmpty()) {
@@ -105,9 +104,11 @@ public class Shooter extends SubsystemBase {
   }
 
 
+  private static final double SUBWOOFER_MIDDLE_APRIL_TAG_OFFSET_FEET = 3;
   // linear regression in the R programming language resulted in this equation
   public double calculateSpeedRPS(double distance_feet, double angle){
-    double speed_rpm = 2400 + (148.66 * distance_feet) + (12.08 * angle);
+    distance_feet -= Shooter.SUBWOOFER_MIDDLE_APRIL_TAG_OFFSET_FEET;
+    double speed_rpm = 2400 + (148.66 * distance_feet) + (12.08 * Math.abs(angle));
     SmartDashboard.putNumber("SHOOTER R/MINUTE", speed_rpm);
     // our data used revolutions per MINUTE, but TalonFX velocity uses revolutions per SECOND
     return speed_rpm / 60;
