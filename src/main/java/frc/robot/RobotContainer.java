@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.TrackAprilTagCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.VisionSubsystem;
 
@@ -32,7 +33,8 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
 
   /* Setting up bindings for necessary control of the swerve drive platform */
-  private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
+  private final CommandXboxController driver_joystick = new CommandXboxController(0); // My joystick
+  private final CommandXboxController operator_joystick = new CommandXboxController(1);
   private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
 
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -45,31 +47,36 @@ public class RobotContainer {
 
   private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
   // private final Shooter m_shooter = new Shooter(m_visionSubsystem);
+  private final Shooter m_shooter = new Shooter();
+  private final LauncherSubsystem m_launcher = new LauncherSubsystem();
 
   private boolean automatically_rotate = false;
   private void configureBindings() {
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
+        drivetrain.applyRequest(() -> drive.withVelocityX(-driver_joystick.getLeftY() * MaxSpeed) // Drive forward with
                                                                                            // negative Y (forward)
-            .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            // .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            .withVelocityY(-driver_joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+            .withRotationalRate(-driver_joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             // use vision to rotate the robot when automatically_rotate is true; otherwise use joystick (see above)
             // .withRotationalRate(automatically_rotate ? (m_visionSubsystem.calculateTurnPower() * MaxAngularRate) : -joystick.getRightX() * MaxAngularRate) // booyah!
-            .withRotationalRate(((automatically_rotate && m_visionSubsystem.hasTarget(4)) ? m_visionSubsystem.calculateTurnPower() : -joystick.getRightX()) * MaxAngularRate)
+            // .withRotationalRate(((automatically_rotate && m_visionSubsystem.hasTarget(4)) ? m_visionSubsystem.calculateTurnPower() : -joystick.getRightX()) * MaxAngularRate)
         ));
     // drivetrain.setDefaultCommand(drivetrain.applyRequest(() -> brake));
-    
-    // m_shooter.setDefaultCommand(new RunCommand(() -> {
-    //   // m_shooter.stop();
-    //   m_shooter.shoot();
-    // }, m_shooter));
+    m_launcher.setDefaultCommand(new RunCommand(() -> {
+      m_launcher.stopAim();
+    }, m_launcher));
 
-    joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-    joystick.b().whileTrue(drivetrain
-        .applyRequest(() -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
+    m_shooter.setDefaultCommand(new RunCommand(() -> {
+      m_shooter.stop();
+      // m_shooter.shoot();
+    }, m_shooter));
+
+    // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+    // joystick.b().whileTrue(drivetrain
+    //     .applyRequest(() -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
 
     // reset the field-centric heading on left bumper press
-    joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
+    driver_joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
 
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
@@ -77,13 +84,34 @@ public class RobotContainer {
     drivetrain.registerTelemetry(logger::telemeterize);
 
     // controls for this are not final
-    // joystick.x().whileFalse(new TrackAprilTagCommand(drivetrain, m_visionSubsystem, drive, MaxAngularRate));
-    joystick.rightBumper().onTrue(new InstantCommand(() -> {
+    // operator_joystick.x().whileFalse(new TrackAprilTagCommand(drivetrain, m_visionSubsystem, drive, MaxAngularRate));
+    driver_joystick.rightBumper().onTrue(new InstantCommand(() -> {
       automatically_rotate = false;
     }));
-    joystick.rightBumper().onFalse(new InstantCommand(() -> {
+    driver_joystick.rightBumper().onFalse(new InstantCommand(() -> {
       automatically_rotate = true;
     }));
+
+    driver_joystick.a().whileTrue(new RunCommand(() -> {
+      m_launcher.setAimSpeed(1);
+    }, m_launcher));
+    driver_joystick.b().whileTrue(new RunCommand(() -> {
+      m_launcher.setAimSpeed(-1);
+    }, m_launcher));
+
+    driver_joystick.y().whileTrue(new RunCommand(() -> {
+      // m_launcher.setAimPosition(
+    }, m_launcher));
+    driver_joystick.x().whileTrue(new RunCommand(() -> {
+      m_launcher.setAimPosition(-271);
+    }, m_launcher));
+
+    operator_joystick.a().whileTrue(new RunCommand(() -> {
+      m_shooter.setVelocityRPS(80);
+    }, m_launcher));
+    operator_joystick.b().whileTrue(new RunCommand(() -> {
+      
+    }, m_launcher));
   }
   {
     // ...

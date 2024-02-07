@@ -19,6 +19,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -53,7 +54,13 @@ public class VisionSubsystem extends SubsystemBase {
     );
   }
 
-  private final PhotonCamera camera = new PhotonCamera("Arducam_OV9281_USB_Camera");
+  // private final PhotonCamera camera = new PhotonCamera("Arducam_OV9281_USB_Camera");
+  private final PhotonCamera camera = new PhotonCamera("front_cam");
+  // private final PhotonCamera front_camera = new PhotonCamera("front_cam");
+  // private final PhotonCamera back_camera = new PhotonCamera("back_cam");
+  // private final PhotonCamera left_camera = new PhotonCamera("left_cam");
+  // private final PhotonCamera right_camera = new PhotonCamera("right_cam");
+
   private PhotonPipelineResult result;
   private boolean result_has_targets = false;
   private final Transform3d robot_to_cam = new Transform3d(new Translation3d(0.619125, 0.10795, 0.31115), new Rotation3d(0, Math.toRadians(10), 0));
@@ -101,6 +108,12 @@ public class VisionSubsystem extends SubsystemBase {
     } catch(IOException e){
       e.printStackTrace();
     }
+
+    CameraServer.startAutomaticCapture();
+    CameraServer.startAutomaticCapture();
+    CameraServer.startAutomaticCapture();
+    CameraServer.startAutomaticCapture();
+
 
     if (TUNE_AIM_TARGET_PID_THROUGH_SHUFFLEBOARD) {
       aimtarget_tab = Shuffleboard.getTab("AimTarget");

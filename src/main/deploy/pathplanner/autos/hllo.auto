@@ -1,0 +1,43 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.3367291599448063,
+      "y": 4.816490353701429
+    },
+    "rotation": 146.45309769669004
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B1-ring-3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B1-ring-7"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "ring-7-to-shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "New Path"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
