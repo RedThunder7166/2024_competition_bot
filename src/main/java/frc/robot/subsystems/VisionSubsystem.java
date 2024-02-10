@@ -28,6 +28,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleEntry;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -42,9 +43,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class VisionSubsystem extends SubsystemBase {
-  private static final double CAMERA_HEIGHT_METERS = 0.635; // changed from 0.7874;
+  // private static final double CAMERA_HEIGHT_METERS = 0.635; // changed from 0.7874;
+  private static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(6);
   private static final double TARGET_HEIGHT_METERS = 1.4351;
-  private static final double CAMERA_PITCH_RADIANS = Math.toRadians(17);
+  // private static final double CAMERA_PITCH_RADIANS = Math.toRadians(17);
+  private static final double CAMERA_PITCH_RADIANS = Math.toRadians(18);
   private static double calculateDistanceToTargetMeters(PhotonTrackedTarget target) {
     return PhotonUtils.calculateDistanceToTargetMeters(
       CAMERA_HEIGHT_METERS, 
@@ -55,15 +58,16 @@ public class VisionSubsystem extends SubsystemBase {
   }
 
   // private final PhotonCamera camera = new PhotonCamera("Arducam_OV9281_USB_Camera");
-  private final PhotonCamera camera = new PhotonCamera("front_cam");
+  private final PhotonCamera camera = new PhotonCamera("back_cam");
   // private final PhotonCamera front_camera = new PhotonCamera("front_cam");
   // private final PhotonCamera back_camera = new PhotonCamera("back_cam");
   // private final PhotonCamera left_camera = new PhotonCamera("left_cam");
-  // private final PhotonCamera right_camera = new PhotonCamera("right_cam");
+  private final PhotonCamera right_camera = new PhotonCamera("right_cam");
 
   private PhotonPipelineResult result;
   private boolean result_has_targets = false;
-  private final Transform3d robot_to_cam = new Transform3d(new Translation3d(0.619125, 0.10795, 0.31115), new Rotation3d(0, Math.toRadians(10), 0));
+  // private final Transform3d robot_to_cam = new Transform3d(new Translation3d(0.619125, 0.10795, 0.31115), new Rotation3d(0, Math.toRadians(10), 0));
+  private final Transform3d robot_to_cam = new Transform3d(new Translation3d(Units.inchesToMeters(16), 0, Units.inchesToMeters(2)), new Rotation3d(0, Math.toRadians(18), 0));
   private PhotonPoseEstimator pose_estimator;
 
   // private double TURN_P = 0.02;
@@ -96,6 +100,13 @@ public class VisionSubsystem extends SubsystemBase {
   private final StructPublisher<Pose2d> estimated_global_pose2d_publisher = table.getStructTopic("EstimatedGlobalPose2d", Pose2d.struct).publish();
   private final StructPublisher<Pose3d> estimated_global_pose3d_publisher = table.getStructTopic("EstimatedGlobalPose3d", Pose3d.struct).publish();
 
+  private final DoublePublisher pitch_publisher = table.getDoubleTopic("Pitch").publish();
+  private final DoublePublisher yaw_publisher = table.getDoubleTopic("Yaw").publish();
+  private final DoublePublisher skew_publisher = table.getDoubleTopic("Skew").publish();
+
+  private final DoublePublisher tag4_distance = table.getDoubleTopic("tag4_distance").publish();
+
+  
 
   private final StructPublisher<Pose2d> publisher = table
   .getStructTopic("MyPose", Pose2d.struct).publish();
@@ -104,15 +115,26 @@ public class VisionSubsystem extends SubsystemBase {
   public VisionSubsystem() {
     try {
       AprilTagFieldLayout april_tag_field_layout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
-      pose_estimator = new PhotonPoseEstimator(april_tag_field_layout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, robot_to_cam);
+      // pose_estimator = new PhotonPoseEstimator(
+      //   april_tag_field_layout,
+      //   PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+      //   camera,
+      //   robot_to_cam
+      // );
+      pose_estimator = new PhotonPoseEstimator(
+        april_tag_field_layout, 
+        PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+        right_camera,
+        robot_to_cam
+      );
     } catch(IOException e){
       e.printStackTrace();
     }
 
-    CameraServer.startAutomaticCapture();
-    CameraServer.startAutomaticCapture();
-    CameraServer.startAutomaticCapture();
-    CameraServer.startAutomaticCapture();
+    // CameraServer.startAutomaticCapture();
+    // CameraServer.startAutomaticCapture();
+    // CameraServer.startAutomaticCapture();
+    // CameraServer.startAutomaticCapture();
 
 
     if (TUNE_AIM_TARGET_PID_THROUGH_SHUFFLEBOARD) {
@@ -146,6 +168,17 @@ public class VisionSubsystem extends SubsystemBase {
       // }
     } else {
       // System.out.println("No targets.");
+    }
+
+    if (result_has_targets) {
+      Optional<PhotonTrackedTarget> target = getTarget(4);
+      if (target.isPresent()) {
+        pitch_publisher.set(target.get().getPitch());
+        // yaw_publisher.set(target.get().getYaw());
+        // skew_publisher.set(target.get().getSkew());
+
+        tag4_distance.set(calculateDistanceToTargetMeters(target.get()));
+      }
     }
 
     if (TUNE_AIM_TARGET_PID_THROUGH_SHUFFLEBOARD) {
@@ -236,13 +269,16 @@ public class VisionSubsystem extends SubsystemBase {
   }
 
   public boolean hasTarget(int id) {
-    if (!result_has_targets) return false;
+    return getTarget(id).isPresent();
+  }
+  public Optional<PhotonTrackedTarget> getTarget(int id) {
+    if (!result_has_targets) return Optional.empty();
     for (PhotonTrackedTarget target : result.getTargets()) {
       if (target.getFiducialId() == id) {
-        return true;
+        return Optional.of(target);
       }
     }
-    return false;
+    return Optional.empty();
   }
 
   // public double calculateDrivePo

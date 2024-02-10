@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.AllianceAprilTagIDs;
 
 public class Shooter extends SubsystemBase {
   /** Creates a new Shooter. */
@@ -30,8 +31,6 @@ public class Shooter extends SubsystemBase {
   private final VelocityDutyCycle rps_DutyVelocity = new VelocityDutyCycle(0);
  
   // private final VisionSubsystem m_visionSubsystem;
-
-  private int subwoofer_middle_tag_id = 4; // TODO: 4 if red alliance; 7 if blue alliance
 
   // public Shooter(VisionSubsystem vision) {
   //   m_visionSubsystem = vision;
@@ -76,7 +75,7 @@ public class Shooter extends SubsystemBase {
   }
 
   // public void shoot(){
-  //   Optional<Double> distance_meters = m_visionSubsystem.getTagDistance(subwoofer_middle_tag_id);
+  //   Optional<Double> distance_meters = m_visionSubsystem.getTagDistance(AllianceAprilTagIDs.SUBWOOFER_CENTER);
   //   if (distance_meters.isEmpty()){
   //     System.out.println("NO DISTANCE");
   //     stop();

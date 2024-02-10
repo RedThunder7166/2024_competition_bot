@@ -26,10 +26,13 @@ public class LauncherSubsystem extends SubsystemBase {
     m_aimMotor.setNeutralMode(NeutralModeValue.Brake);
     
     SoftwareLimitSwitchConfigs aim_softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs();
-    aim_softwareLimitSwitchConfigs.ForwardSoftLimitEnable = true;
-    aim_softwareLimitSwitchConfigs.ForwardSoftLimitThreshold = LauncherConstants.AIM_MOTOR_HIGHEST_ANGLE_POSITIONS;
-    aim_softwareLimitSwitchConfigs.ReverseSoftLimitEnable = true;
-    aim_softwareLimitSwitchConfigs.ReverseSoftLimitThreshold = LauncherConstants.AIM_MOTOR_LOWEST_ANGLE_POSITIONS;
+    // aim_softwareLimitSwitchConfigs.ForwardSoftLimitEnable = true;
+    // aim_softwareLimitSwitchConfigs.ForwardSoftLimitThreshold = LauncherConstants.AIM_MOTOR_HIGHEST_ANGLE_POSITIONS;
+    // aim_softwareLimitSwitchConfigs.ReverseSoftLimitEnable = true;
+    // aim_softwareLimitSwitchConfigs.ReverseSoftLimitThreshold = LauncherConstants.AIM_MOTOR_LOWEST_ANGLE_POSITIONS;
+
+    aim_softwareLimitSwitchConfigs.ForwardSoftLimitEnable = false;
+    aim_softwareLimitSwitchConfigs.ReverseSoftLimitEnable = false;
 
     m_aimMotor.getConfigurator().apply(aim_softwareLimitSwitchConfigs, 0.05);
 

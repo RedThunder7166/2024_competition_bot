@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -22,7 +23,9 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.TrackAprilTagCommand;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.VisionSubsystem;
@@ -49,6 +52,8 @@ public class RobotContainer {
   // private final Shooter m_shooter = new Shooter(m_visionSubsystem);
   private final Shooter m_shooter = new Shooter();
   private final LauncherSubsystem m_launcher = new LauncherSubsystem();
+  private final IndexerSubsystem m_indexer = new IndexerSubsystem();
+  private final ClimberSubsystem m_climber = new ClimberSubsystem(drivetrain);
 
   private boolean automatically_rotate = false;
   private void configureBindings() {
@@ -62,6 +67,7 @@ public class RobotContainer {
             // .withRotationalRate(((automatically_rotate && m_visionSubsystem.hasTarget(4)) ? m_visionSubsystem.calculateTurnPower() : -joystick.getRightX()) * MaxAngularRate)
         ));
     // drivetrain.setDefaultCommand(drivetrain.applyRequest(() -> brake));
+
     m_launcher.setDefaultCommand(new RunCommand(() -> {
       m_launcher.stopAim();
     }, m_launcher));
@@ -109,10 +115,18 @@ public class RobotContainer {
     operator_joystick.a().whileTrue(new RunCommand(() -> {
       m_shooter.setVelocityRPS(80);
     }, m_launcher));
-    operator_joystick.b().whileTrue(new RunCommand(() -> {
-      
+    operator_joystick.b().onTrue(new RunCommand(() -> {
+      m_indexer.toggle();
     }, m_launcher));
+
+    operator_joystick.povUp().onTrue(new InstantCommand(() -> {
+      m_climber.setPercent(0.5);
+    }, m_climber));
+    operator_joystick.povDown().onTrue(new InstantCommand(() -> {
+      m_climber.setPercent(-0.5);
+    }, m_climber));
   }
+
   {
     // ...
 
@@ -126,6 +140,7 @@ public class RobotContainer {
   }
 
   public RobotContainer() {
+    DriverStation.silenceJoystickConnectionWarning(true);
     configureBindings();
   }
 
