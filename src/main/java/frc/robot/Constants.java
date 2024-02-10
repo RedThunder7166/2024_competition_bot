@@ -4,6 +4,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class Constants {
+    public static final class ControllerConstants {
+        public static final int DRIVER_PORT = 0;
+        public static final int OPERATOR_PORT = 1;
+    }
     public static final class AllianceAprilTagIDs {
         private static final Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Red);
         private static final boolean is_red_alliance = alliance == Alliance.Red;

@@ -11,9 +11,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
-  private final TalonFX m_extender_motor = new TalonFX(IntakeConstants.EXTENDER_MOTOR_ID);
-  private final CANcoder m_extender_cancoder = new CANcoder(IntakeConstants.EXTENDER_CANCODER_ID);
-  private final TalonFX m_intake_motor = new TalonFX(IntakeConstants.INTAKE_MOTOR_ID);
+  private final TalonFX m_extenderMotor = new TalonFX(IntakeConstants.EXTENDER_MOTOR_ID);
+  private final CANcoder m_extenderCancoder = new CANcoder(IntakeConstants.EXTENDER_CANCODER_ID);
+  private final TalonFX m_intakeMotor = new TalonFX(IntakeConstants.INTAKE_MOTOR_ID);
   
   public IntakeSubsystem() {
 

@@ -8,15 +8,15 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.VisionSubsystemOLD;
 
 public class TrackAprilTagCommand extends Command {
   /** Creates a new AimAtTarget. */
   private final CommandSwerveDrivetrain m_driveTrain;
-  private final VisionSubsystem m_visionSubsystem;
+  private final VisionSubsystemOLD m_visionSubsystem;
   private final SwerveRequest.FieldCentric m_driveRequest;
   private final double MaxAngularRate;
-  public TrackAprilTagCommand(CommandSwerveDrivetrain drive, VisionSubsystem vision, SwerveRequest.FieldCentric drive_request, double max_angular_rate) {
+  public TrackAprilTagCommand(CommandSwerveDrivetrain drive, VisionSubsystemOLD vision, SwerveRequest.FieldCentric drive_request, double max_angular_rate) {
     addRequirements(drive, vision);
 
     m_driveTrain = drive;
