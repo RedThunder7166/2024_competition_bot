@@ -48,20 +48,26 @@ public class Constants {
 
         public static final double AIM_MOTOR_HIGHEST_ANGLE_POSITIONS = -109;
         public static final double AIM_MOTOR_LOWEST_ANGLE_POSITIONS = -436;
+
+        public static final int AIM_CANCODER_ID = -100;
+    }
+    public static final class ShooterConstants {
+        public static final int TOP_MOTOR_ID = 10;
+        public static final int BOTTOM_MOTOR_ID = 9;
     }
     public static final class IndexerConstants {
         public static final int MOTOR_ID = -100;
     }
     public static final class ClimberConstants {
-        public static final int LEFT_CLIMB_MOTOR_ID = -200;
-        public static final int RIGHT_CLIMB_MOTOR_ID = -201;
+        public static final int LEFT_CLIMB_MOTOR_ID = -100;
+        public static final int RIGHT_CLIMB_MOTOR_ID = -100;
 
-        public static final int LEFT_ARM_LIMIT_SWITCH_ID = -202;
-        public static final int RIGHT_ARM_LIMIT_SWITCH_ID = -203;
+        public static final int LEFT_ARM_LIMIT_SWITCH_ID = -100;
+        public static final int RIGHT_ARM_LIMIT_SWITCH_ID = -100;
     }
     public static final class IntakeConstants {
-        public static final int EXTENDER_MOTOR_ID = -300;
-        public static final int EXTENDER_CANCODER_ID = -301;
-        public static final int INTAKE_MOTOR_ID = -302;
+        public static final int EXTENDER_MOTOR_ID = -100;
+        // public static final int EXTENDER_CANCODER_ID = -100;
+        public static final int INTAKE_MOTOR_ID = -100;
     } 
 }

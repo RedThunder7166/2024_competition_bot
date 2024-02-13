@@ -14,28 +14,25 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.ShooterConstants;
 
-public class Shooter extends SubsystemBase {
+public class ShooterSubsystem extends SubsystemBase {
   /** Creates a new Shooter. */
-  private final TalonFX top_motor = new TalonFX(10); // 13
-  private final TalonFX bottom_motor = new TalonFX(9); // 14
- // TalonFX indexer_motor = new TalonFX(28);
-  private GenericEntry rps_input;
-  private GenericEntry rps_Index_Input;
-  private final VelocityDutyCycle rps_DutyVelocity = new VelocityDutyCycle(0);
+  private final TalonFX m_topMotor = new TalonFX(ShooterConstants.TOP_MOTOR_ID); // 13
+  private final TalonFX m_bottomMotor = new TalonFX(ShooterConstants.BOTTOM_MOTOR_ID); // 14
+  private final VelocityDutyCycle m_request = new VelocityDutyCycle(0);
  
   // private final VisionSubsystem m_visionSubsystem;
 
   // public Shooter(VisionSubsystem vision) {
   //   m_visionSubsystem = vision;
-  public Shooter(){
+  public ShooterSubsystem(){
 
-    top_motor.setNeutralMode(NeutralModeValue.Brake);
-    bottom_motor.setNeutralMode(NeutralModeValue.Brake);
-    // indexer_motor.setNeutralMode(NeutralModeValue.Brake);
+    m_topMotor.setNeutralMode(NeutralModeValue.Coast);
+    m_bottomMotor.setNeutralMode(NeutralModeValue.Coast);
 
-    top_motor.setInverted(false);
-    bottom_motor.setInverted(false);
+    m_topMotor.setInverted(false);
+    m_bottomMotor.setInverted(false);
     // indexer_motor.setInverted(true);
   
     Slot0Configs slot0Configs = new Slot0Configs();
@@ -45,27 +42,22 @@ public class Shooter extends SubsystemBase {
     slot0Configs.kI = 0;
     slot0Configs.kD = 0;
 
-    top_motor.getConfigurator().apply(slot0Configs, 0.050);
-    bottom_motor.getConfigurator().apply(slot0Configs, 0.050);
-    // indexer_motor.getConfigurator().apply(slot0Configs,0.050);
+    m_topMotor.getConfigurator().apply(slot0Configs, 0.050);
+    m_bottomMotor.getConfigurator().apply(slot0Configs, 0.050);
    
     ShuffleboardTab tab = Shuffleboard.getTab("Shooter info");
     tab.add(this);
-    tab.addDouble("FrontVelocity", () -> top_motor.getVelocity().getValue() );
-    tab.addDouble("BackVelocity", () -> bottom_motor.getVelocity().getValue() );
-    // tab.addDouble("IndexerVelocity", () -> indexer_motor.getVelocity().getValue() );
-
- 
+    tab.addDouble("FrontVelocity", () -> m_topMotor.getVelocity().getValue() );
+    tab.addDouble("BackVelocity", () -> m_bottomMotor.getVelocity().getValue() ); 
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    
   }
   public void stop() {
-    top_motor.set(0);
-    bottom_motor.set(0);
-    // indexer_motor.set(0);
+    m_topMotor.stopMotor();
+    m_bottomMotor.stopMotor();
   }
 
   // public void shoot(){
@@ -92,16 +84,15 @@ public class Shooter extends SubsystemBase {
   // }
 
   public void setVelocityRPS(double value) {
-    top_motor.setControl(rps_DutyVelocity.withSlot(0).withVelocity(value));
-    bottom_motor.setControl(rps_DutyVelocity.withSlot(0).withVelocity(value));
- //   indexer_motor.setControl(rps_DutyVelocity.withSlot(0).withVelocity(value));
+    m_topMotor.setControl(m_request.withSlot(0).withVelocity(value));
+    m_bottomMotor.setControl(m_request.withSlot(0).withVelocity(value));
   }
 
 
   private static final double SUBWOOFER_MIDDLE_APRIL_TAG_OFFSET_FEET = 3;
   // linear regression in the R programming language resulted in this equation
   public double calculateSpeedRPS(double distance_feet, double angle){
-    distance_feet -= Shooter.SUBWOOFER_MIDDLE_APRIL_TAG_OFFSET_FEET;
+    distance_feet -= ShooterSubsystem.SUBWOOFER_MIDDLE_APRIL_TAG_OFFSET_FEET;
     double speed_rpm = 2400 + (148.66 * distance_feet) + (12.08 * Math.abs(angle));
     SmartDashboard.putNumber("SHOOTER R/MINUTE", speed_rpm);
     // our data used revolutions per MINUTE, but TalonFX velocity uses revolutions per SECOND

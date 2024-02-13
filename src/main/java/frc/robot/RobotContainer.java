@@ -25,7 +25,7 @@ import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
-import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystemOLD;
 
 public class RobotContainer {
@@ -48,7 +48,7 @@ public class RobotContainer {
 
   private final VisionSubsystemOLD m_visionSubsystem = new VisionSubsystemOLD();
   // private final Shooter m_shooter = new Shooter(m_visionSubsystem);
-  private final Shooter m_shooter = new Shooter();
+  private final ShooterSubsystem m_shooter = new ShooterSubsystem();
   private final LauncherSubsystem m_launcher = new LauncherSubsystem();
   private final IndexerSubsystem m_indexer = new IndexerSubsystem();
   private final ClimberSubsystem m_climber = new ClimberSubsystem(drivetrain);
@@ -118,10 +118,10 @@ public class RobotContainer {
     }, m_launcher));
 
     operator_joystick.povUp().onTrue(new InstantCommand(() -> {
-      m_climber.setPercent(0.5);
+      m_climber.setOutput(0.5);
     }, m_climber));
     operator_joystick.povDown().onTrue(new InstantCommand(() -> {
-      m_climber.setPercent(-0.5);
+      m_climber.setOutput(-0.5);
     }, m_climber));
   }
 

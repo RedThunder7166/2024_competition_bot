@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -12,6 +13,7 @@ import frc.robot.Constants.IndexerConstants;
 public class IndexerSubsystem extends SubsystemBase {
   private final TalonFX m_motor = new TalonFX(IndexerConstants.MOTOR_ID);
   private double m_speed = 0;
+  private final DutyCycleOut m_request = new DutyCycleOut(m_speed);
 
   public IndexerSubsystem() {
 
@@ -19,7 +21,7 @@ public class IndexerSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    m_motor.set(m_speed);
+    m_motor.setControl(m_request.withOutput(m_speed));
   }
 
   public void toggle() {

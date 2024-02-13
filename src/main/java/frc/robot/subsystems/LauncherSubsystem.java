@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -18,6 +19,7 @@ import frc.robot.Constants.LauncherConstants;
 public class LauncherSubsystem extends SubsystemBase {
   private final TalonFX m_aimMotor = new TalonFX(LauncherConstants.AIM_MOTOR_ID);
   private final PositionVoltage m_aimMotorPositionRequest = new PositionVoltage(0).withSlot(0);
+  private final CANcoder m_aimCANCoder = new CANcoder(LauncherConstants.AIM_CANCODER_ID);
 
   private final ShuffleboardTab m_shuffleBoardTab = Shuffleboard.getTab("Launcher");
   
@@ -47,11 +49,11 @@ public class LauncherSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    
   }
 
   public void stopAim(){
-    m_aimMotor.set(0);
+    m_aimMotor.stopMotor();
   }
 
   public void setAimSpeed(double speed) {

@@ -12,14 +12,16 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 public class ClimberSubsystem extends SubsystemBase {
-  private final TalonFX leftClimbMotor = new TalonFX(ClimberConstants.LEFT_CLIMB_MOTOR_ID);
-  private final TalonFX rightClimbMotor = new TalonFX(ClimberConstants.RIGHT_CLIMB_MOTOR_ID);
-  private final DigitalInput rightArmInput = new DigitalInput(ClimberConstants.RIGHT_ARM_LIMIT_SWITCH_ID);
-  private final DigitalInput leftArmInput = new DigitalInput(ClimberConstants.LEFT_ARM_LIMIT_SWITCH_ID);
+  private final TalonFX m_leftClimbMotor = new TalonFX(ClimberConstants.LEFT_CLIMB_MOTOR_ID);
+  private final TalonFX m_rightClimbMotor = new TalonFX(ClimberConstants.RIGHT_CLIMB_MOTOR_ID);
+  private final DigitalInput m_rightArmInput = new DigitalInput(ClimberConstants.RIGHT_ARM_LIMIT_SWITCH_ID);
+  private final DigitalInput m_leftArmInput = new DigitalInput(ClimberConstants.LEFT_ARM_LIMIT_SWITCH_ID);
 
   private final CommandSwerveDrivetrain m_swerve;
 
-  private double m_percent = 0;
+  private double m_output = 0;
+  private final DutyCycleOut m_leftRequest = new DutyCycleOut(m_output);
+  private final DutyCycleOut m_rightRequest = new DutyCycleOut(m_output);
     
   /** Creates a new ClimberSubsystem. */
   public ClimberSubsystem(CommandSwerveDrivetrain swerve) {
@@ -30,19 +32,19 @@ public class ClimberSubsystem extends SubsystemBase {
     return Math.toDegrees(m_swerve.getRotation3d().getX());
   }
 
-  public void driveArms(double left_percent, double right_percent) {
-    boolean left_switch_is_down = !leftArmInput.get();
-    if (left_switch_is_down && left_percent <= 0) {
-      leftClimbMotor.set(0);
+  public void driveArms(double left_output, double right_output) {
+    boolean left_switch_is_down = !m_leftArmInput.get();
+    if (left_switch_is_down && left_output <= 0) {
+      m_leftClimbMotor.set(0);
     } else {
-      leftClimbMotor.setControl(new DutyCycleOut(left_percent));
+      m_leftClimbMotor.setControl(m_leftRequest.withOutput(left_output));
     }
 
-    boolean right_switch_is_down = !rightArmInput.get();
-    if (right_switch_is_down && right_percent <= 0) {
-      rightClimbMotor.set(0);
+    boolean right_switch_is_down = !m_rightArmInput.get();
+    if (right_switch_is_down && right_output <= 0) {
+      m_rightClimbMotor.set(0);
     } else {
-      rightClimbMotor.setControl(new DutyCycleOut(right_percent));
+      m_rightClimbMotor.setControl(m_rightRequest.withOutput(right_output));
     }
   }
 
@@ -50,19 +52,20 @@ public class ClimberSubsystem extends SubsystemBase {
   public void periodic() {
     double roll = getRollDegrees();
 
-    double left_percent = m_percent;
-    double right_percent = m_percent;
+    double left_output = m_output;
+    double right_output = m_output;
     if (roll >= 5) {
       // left_percent = (left_percent < 0) ? (left_percent + 0.5) : (left_percent - 0.5);
-      left_percent /= 2;
+      left_output /= 2;
     } else if (roll <= -5) {
-      right_percent /= 2;
+      right_output /= 2;
     }
 
-    driveArms(left_percent, right_percent);
+    driveArms(left_output, right_output);
   }
 
-  public void setPercent(double percent) {
-    m_percent = percent;
+  // -1 to 1
+  public void setOutput(double output) {
+    m_output = output;
   }
 }

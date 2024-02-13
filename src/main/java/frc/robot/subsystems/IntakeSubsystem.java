@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -12,8 +13,10 @@ import frc.robot.Constants.IntakeConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
   private final TalonFX m_extenderMotor = new TalonFX(IntakeConstants.EXTENDER_MOTOR_ID);
-  private final CANcoder m_extenderCancoder = new CANcoder(IntakeConstants.EXTENDER_CANCODER_ID);
+  // private final CANcoder m_extenderCancoder = new CANcoder(IntakeConstants.EXTENDER_CANCODER_ID);
   private final TalonFX m_intakeMotor = new TalonFX(IntakeConstants.INTAKE_MOTOR_ID);
+
+  private final DutyCycleOut m_intakeRequest = new DutyCycleOut(0);
   
   public IntakeSubsystem() {
 
@@ -22,5 +25,13 @@ public class IntakeSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     
+  }
+
+  public void startIntake() {
+    m_intakeMotor.setControl(m_intakeRequest.withOutput(1));
+  }
+
+  public void stopIntake() {
+    m_intakeMotor.stopMotor();
   }
 }
