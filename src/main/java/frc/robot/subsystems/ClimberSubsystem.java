@@ -22,8 +22,7 @@ public class ClimberSubsystem extends SubsystemBase {
   private double m_output = 0;
   private final DutyCycleOut m_leftRequest = new DutyCycleOut(m_output);
   private final DutyCycleOut m_rightRequest = new DutyCycleOut(m_output);
-    
-  /** Creates a new ClimberSubsystem. */
+
   public ClimberSubsystem(CommandSwerveDrivetrain swerve) {
     m_swerve = swerve;
   }

@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,14 +19,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.IndexerSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.VisionSubsystemOLD;
 
 public class RobotContainer {
@@ -47,11 +52,24 @@ public class RobotContainer {
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
   private final VisionSubsystemOLD m_visionSubsystem = new VisionSubsystemOLD();
+  private final VisionSubsystem m_vision = new VisionSubsystem(drivetrain);
   // private final Shooter m_shooter = new Shooter(m_visionSubsystem);
+  private final LauncherSubsystem m_launcher = new LauncherSubsystem(m_vision);
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
-  private final LauncherSubsystem m_launcher = new LauncherSubsystem();
-  private final IndexerSubsystem m_indexer = new IndexerSubsystem();
+  private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_launcher);
+  private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final ClimberSubsystem m_climber = new ClimberSubsystem(drivetrain);
+
+  private final SequentialCommandGroup m_startPickingUpPiece = new SequentialCommandGroup(
+    m_launcher.m_startWantingToLoad,
+    m_intake.m_deployAndStartCommand
+  );
+  private final SequentialCommandGroup m_stopPickingUpPiece = new SequentialCommandGroup(
+    m_launcher.m_stopWantingToLoad,
+    m_intake.m_retractAndStopCommand
+  );
+
+  private boolean wants_to_pickup_piece = false;
 
   private boolean automatically_rotate = false;
   private void configureBindings() {
@@ -66,14 +84,10 @@ public class RobotContainer {
         ));
     // drivetrain.setDefaultCommand(drivetrain.applyRequest(() -> brake));
 
-    m_launcher.setDefaultCommand(new RunCommand(() -> {
-      m_launcher.stopAim();
-    }, m_launcher));
-
-    m_shooter.setDefaultCommand(new RunCommand(() -> {
-      m_shooter.stop();
-      // m_shooter.shoot();
-    }, m_shooter));
+    // m_shooter.setDefaultCommand(new RunCommand(() -> {
+    //   m_shooter.stop();
+    //   // m_shooter.shoot();
+    // }, m_shooter));
 
     // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
     // joystick.b().whileTrue(drivetrain
@@ -87,42 +101,50 @@ public class RobotContainer {
     }
     drivetrain.registerTelemetry(logger::telemeterize);
 
-    // controls for this are not final
-    // operator_joystick.x().whileFalse(new TrackAprilTagCommand(drivetrain, m_visionSubsystem, drive, MaxAngularRate));
-    driver_joystick.rightBumper().onTrue(new InstantCommand(() -> {
-      automatically_rotate = false;
-    }));
-    driver_joystick.rightBumper().onFalse(new InstantCommand(() -> {
-      automatically_rotate = true;
-    }));
 
-    driver_joystick.a().whileTrue(new RunCommand(() -> {
-      m_launcher.setAimSpeed(1);
-    }, m_launcher));
-    driver_joystick.b().whileTrue(new RunCommand(() -> {
-      m_launcher.setAimSpeed(-1);
-    }, m_launcher));
+    // // operator_joystick.x().whileFalse(new TrackAprilTagCommand(drivetrain, m_visionSubsystem, drive, MaxAngularRate));
+    // driver_joystick.rightBumper().onTrue(new InstantCommand(() -> {
+    //   automatically_rotate = false;
+    // }));
+    // driver_joystick.rightBumper().onFalse(new InstantCommand(() -> {
+    //   automatically_rotate = true;
+    // }));
 
-    driver_joystick.y().whileTrue(new RunCommand(() -> {
-      // m_launcher.setAimPosition(
-    }, m_launcher));
-    driver_joystick.x().whileTrue(new RunCommand(() -> {
-      m_launcher.setAimPosition(-271);
-    }, m_launcher));
+    // driver_joystick.a().whileTrue(new RunCommand(() -> {
+    //   m_launcher.setAimSpeed(1);
+    // }, m_launcher));
+    // driver_joystick.b().whileTrue(new RunCommand(() -> {
+    //   m_launcher.setAimSpeed(-1);
+    // }, m_launcher));
 
-    operator_joystick.a().whileTrue(new RunCommand(() -> {
-      m_shooter.setVelocityRPS(80);
-    }, m_launcher));
-    operator_joystick.b().onTrue(new RunCommand(() -> {
-      m_indexer.toggle();
-    }, m_launcher));
+    // // driver_joystick.y().whileTrue(new RunCommand(() -> {
+    // //   m_launcher.setAimPosition(
+    // // }, m_launcher));
+    // // driver_joystick.x().whileTrue(new RunCommand(() -> {
+    // //   m_launcher.setAimPosition(-271);
+    // // }, m_launcher));
 
-    operator_joystick.povUp().onTrue(new InstantCommand(() -> {
-      m_climber.setOutput(0.5);
-    }, m_climber));
-    operator_joystick.povDown().onTrue(new InstantCommand(() -> {
-      m_climber.setOutput(-0.5);
-    }, m_climber));
+    // operator_joystick.a().whileTrue(new RunCommand(() -> {
+    //   m_shooter.setVelocityRPS(80);
+    // }, m_launcher));
+    // operator_joystick.b().onTrue(m_launcher.m_toggleWantingToLoad);
+
+    // operator_joystick.povUp().onTrue(new InstantCommand(() -> {
+    //   m_climber.setOutput(0.5);
+    // }, m_climber));
+    // operator_joystick.povDown().onTrue(new InstantCommand(() -> {
+    //   m_climber.setOutput(-0.5);
+    // }, m_climber));
+
+    operator_joystick.a().onTrue(new InstantCommand(() -> {
+      wants_to_pickup_piece = !wants_to_pickup_piece;
+      if (wants_to_pickup_piece)
+        m_startPickingUpPiece.schedule();
+      else
+        m_stopPickingUpPiece.schedule();
+    }, m_launcher, m_intake));
+
+    operator_joystick.b().onTrue(m_shooter.m_toggleWantingToShoot);
   }
 
   {
@@ -139,7 +161,18 @@ public class RobotContainer {
 
   public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
+
+    NamedCommands.registerCommand("StartPickingUpPiece", m_startPickingUpPiece);
+    NamedCommands.registerCommand("StopPickingUpPiece", m_stopPickingUpPiece);
+
+    NamedCommands.registerCommand("StartShooter", m_shooter.m_startWantingToShoot);
+    NamedCommands.registerCommand("StopShooter", m_shooter.m_stopWantingToShoot);
+
     configureBindings();
+  }
+
+  public void teleopInit() {
+    m_launcher.teleopInit();
   }
 
   public Command getAutonomousCommand() {

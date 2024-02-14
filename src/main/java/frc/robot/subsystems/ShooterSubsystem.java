@@ -13,19 +13,17 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
-  /** Creates a new Shooter. */
   private final TalonFX m_topMotor = new TalonFX(ShooterConstants.TOP_MOTOR_ID); // 13
   private final TalonFX m_bottomMotor = new TalonFX(ShooterConstants.BOTTOM_MOTOR_ID); // 14
-  private final VelocityDutyCycle m_request = new VelocityDutyCycle(0);
+  private final VelocityDutyCycle m_request = new VelocityDutyCycle(ShooterConstants.TARGET_VELOCITY_RPS);
  
-  // private final VisionSubsystem m_visionSubsystem;
+  private boolean m_wantsToShoot = false;
 
-  // public Shooter(VisionSubsystem vision) {
-  //   m_visionSubsystem = vision;
   public ShooterSubsystem(){
 
     m_topMotor.setNeutralMode(NeutralModeValue.Coast);
@@ -53,12 +51,28 @@ public class ShooterSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    
+    if (m_wantsToShoot) {
+      m_topMotor.setControl(m_request);
+      m_bottomMotor.setControl(m_request);
+    } else {
+      m_topMotor.disable();
+      m_bottomMotor.disable();
+    }
   }
-  public void stop() {
-    m_topMotor.stopMotor();
-    m_bottomMotor.stopMotor();
-  }
+  // public void stop() {
+  //   m_topMotor.disable();
+  //   m_bottomMotor.disable();
+  // }
+
+  public InstantCommand m_toggleWantingToShoot = new InstantCommand(() -> {
+    m_wantsToShoot = !m_wantsToShoot;
+  }, this);
+  public InstantCommand m_startWantingToShoot = new InstantCommand(() -> {
+    m_wantsToShoot = true;
+  }, this);
+  public InstantCommand m_stopWantingToShoot = new InstantCommand(() -> {
+    m_wantsToShoot = false;
+  }, this);
 
   // public void shoot(){
   //   Optional<Double> distance_meters = m_visionSubsystem.getTagDistance(AllianceAprilTagIDs.SUBWOOFER_CENTER);
@@ -83,19 +97,19 @@ public class ShooterSubsystem extends SubsystemBase {
   //   setVelocityRPS(speed);
   // }
 
-  public void setVelocityRPS(double value) {
-    m_topMotor.setControl(m_request.withSlot(0).withVelocity(value));
-    m_bottomMotor.setControl(m_request.withSlot(0).withVelocity(value));
-  }
+  // public void setVelocityRPS(double value) {
+  //   m_topMotor.setControl(m_request.withSlot(0).withVelocity(value));
+  //   m_bottomMotor.setControl(m_request.withSlot(0).withVelocity(value));
+  // }
 
 
-  private static final double SUBWOOFER_MIDDLE_APRIL_TAG_OFFSET_FEET = 3;
-  // linear regression in the R programming language resulted in this equation
-  public double calculateSpeedRPS(double distance_feet, double angle){
-    distance_feet -= ShooterSubsystem.SUBWOOFER_MIDDLE_APRIL_TAG_OFFSET_FEET;
-    double speed_rpm = 2400 + (148.66 * distance_feet) + (12.08 * Math.abs(angle));
-    SmartDashboard.putNumber("SHOOTER R/MINUTE", speed_rpm);
-    // our data used revolutions per MINUTE, but TalonFX velocity uses revolutions per SECOND
-    return speed_rpm / 60;
-  }
+  // private static final double SUBWOOFER_MIDDLE_APRIL_TAG_OFFSET_FEET = 3;
+  // // linear regression in the R programming language resulted in this equation
+  // public double calculateSpeedRPS(double distance_feet, double angle){
+  //   distance_feet -= ShooterSubsystem.SUBWOOFER_MIDDLE_APRIL_TAG_OFFSET_FEET;
+  //   double speed_rpm = 2400 + (148.66 * distance_feet) + (12.08 * Math.abs(angle));
+  //   SmartDashboard.putNumber("SHOOTER R/MINUTE", speed_rpm);
+  //   // our data used revolutions per MINUTE, but TalonFX velocity uses revolutions per SECOND
+  //   return speed_rpm / 60;
+  // }
 }

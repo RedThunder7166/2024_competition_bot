@@ -215,4 +215,17 @@ public class VisionSubsystem extends SubsystemBase {
     }
     return Optional.empty();
   }
+
+  public Optional<Double> calculateLauncherSpeakerAimAngle() {
+    if (m_frontResult.hasTargets()) {
+      final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceAprilTagIDs.SUBWOOFER_CENTER, m_frontResult);
+      if (target_optional.isPresent()) {
+        final double distance = calculateDistanceToTargetMeters(target_optional.get());
+        double angle = 0;
+        // TODO: equation magic here
+        return Optional.of(angle);
+      }
+    }
+    return Optional.empty();
+  }
 }
