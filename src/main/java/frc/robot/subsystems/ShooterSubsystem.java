@@ -5,11 +5,19 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,44 +28,58 @@ import frc.robot.Constants.ShooterConstants;
 public class ShooterSubsystem extends SubsystemBase {
   private final TalonFX m_topMotor = new TalonFX(ShooterConstants.TOP_MOTOR_ID); // 13
   private final TalonFX m_bottomMotor = new TalonFX(ShooterConstants.BOTTOM_MOTOR_ID); // 14
+  private final TalonFX m_feederMotor = new TalonFX(ShooterConstants.FEEDER_MOTOR_ID);
+
   private final VelocityDutyCycle m_request = new VelocityDutyCycle(ShooterConstants.TARGET_VELOCITY_RPS);
+  private final MotionMagicDutyCycle m_indexerRequest = new MotionMagicDutyCycle(ShooterConstants.TARGET_INDEXER_POSITION);
  
   private boolean m_wantsToShoot = false;
 
+  private final NetworkTable table = NetworkTableInstance.getDefault().getTable("Shooter info");
+  private final DoublePublisher m_topRPMPublisher = table.getDoubleTopic("TopRPM").publish();
+  private final DoublePublisher m_bottomRPMPublisher = table.getDoubleTopic("BottomRPM").publish();
+
+  // private final DoubleSubscriber m_targetRPMSubscriber = table.getDoubleTopic("TargetRPM").subscribe(4350);
+
   public ShooterSubsystem(){
+    m_feederMotor.setPosition(0);
 
-    m_topMotor.setNeutralMode(NeutralModeValue.Coast);
-    m_bottomMotor.setNeutralMode(NeutralModeValue.Coast);
-
-    m_topMotor.setInverted(false);
-    m_bottomMotor.setInverted(false);
+    m_topMotor.setInverted(false); //changed from true
+    m_bottomMotor.setInverted(true);//changed from true
     // indexer_motor.setInverted(true);
   
-    Slot0Configs slot0Configs = new Slot0Configs();
+    TalonFXConfiguration configs = new TalonFXConfiguration();
+
+    Slot0Configs slot0Configs = configs.Slot0;
     slot0Configs.kS = 0;
-    slot0Configs.kV = 0.01;
+    slot0Configs.kA = 0.02;
+    slot0Configs.kV = 0.52;
     slot0Configs.kP = 0.05;
     slot0Configs.kI = 0;
     slot0Configs.kD = 0;
 
-    m_topMotor.getConfigurator().apply(slot0Configs, 0.050);
-    m_bottomMotor.getConfigurator().apply(slot0Configs, 0.050);
-   
-    ShuffleboardTab tab = Shuffleboard.getTab("Shooter info");
-    tab.add(this);
-    tab.addDouble("FrontVelocity", () -> m_topMotor.getVelocity().getValue() );
-    tab.addDouble("BackVelocity", () -> m_bottomMotor.getVelocity().getValue() ); 
+    configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    m_feederMotor.setNeutralMode(NeutralModeValue.Brake);
+
+    m_topMotor.getConfigurator().apply(configs, 0.050);
+    m_bottomMotor.getConfigurator().apply(configs, 0.050);
+
+    m_bottomMotor.setControl(new Follower(m_topMotor.getDeviceID(), false));
   }
 
   @Override
   public void periodic() {
-    if (m_wantsToShoot) {
-      m_topMotor.setControl(m_request);
-      m_bottomMotor.setControl(m_request);
-    } else {
-      m_topMotor.disable();
-      m_bottomMotor.disable();
-    }
+    m_topRPMPublisher.set(m_topMotor.getVelocity().getValueAsDouble() * 60);
+    m_bottomRPMPublisher.set(m_bottomMotor.getVelocity().getValueAsDouble() * 60);
+
+    // TODO: PUT THIS BACK (REMOVED FOR MANUAL TESTING)
+    // if (m_wantsToShoot) {
+    //   m_topMotor.setControl(m_request);
+    //   m_bottomMotor.setControl(m_request);
+    // } else {
+    //   m_topMotor.disable();
+    //   m_bottomMotor.disable();
+    // }
   }
   // public void stop() {
   //   m_topMotor.disable();
@@ -73,6 +95,28 @@ public class ShooterSubsystem extends SubsystemBase {
   public InstantCommand m_stopWantingToShoot = new InstantCommand(() -> {
     m_wantsToShoot = false;
   }, this);
+
+  public void manualRunDeleteMe(double value) {
+    m_topMotor.setControl(new DutyCycleOut(value));
+  }
+  public void manualRunRPMDeleteMe(double value) {
+    m_topMotor.setControl(m_request.withVelocity(value / 60));
+    // m_feederMotor.setControl(new DutyCycleOut(value));
+  }
+  // public void manualRunRPMDeleteMe() {
+  //   manualRunRPMDeleteMe(m_targetRPMSubscriber.getAsDouble());
+  // }
+  public void manualStopDeleteMe() {
+    m_topMotor.disable();
+    // m_feederMotor.disable();
+  }
+
+  public void manualRunFeederDeleteMe(double value) {
+    m_feederMotor.setControl(new DutyCycleOut(value));
+  }
+  public void manualStopFeederDeleteMe() {
+    m_feederMotor.disable();
+  }
 
   // public void shoot(){
   //   Optional<Double> distance_meters = m_visionSubsystem.getTagDistance(AllianceAprilTagIDs.SUBWOOFER_CENTER);

@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -25,10 +26,18 @@ public class IndexerSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (m_launcher.getIsAtLoadingPosition() && m_launcher.getWantsToLoad()) {
-      m_motor.setControl(m_request);
-    } else {
-      m_motor.disable();
-    }
+    // TODO: PUT THIS BACK (REMOVED FOR MANUAL TESTING)
+    // if (m_launcher.getIsAtLoadingPosition() && m_launcher.getWantsToLoad()) {
+    //   m_motor.setControl(m_request);
+    // } else {
+    //   m_motor.disable();
+    // }
+  }
+
+  public void manualRunDeleteMe(double value) {
+    m_motor.setControl(new DutyCycleOut(value));
+  }
+  public void manualStopDeleteMe() {
+    m_motor.disable();
   }
 }

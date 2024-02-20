@@ -216,14 +216,15 @@ public class VisionSubsystem extends SubsystemBase {
     return Optional.empty();
   }
 
-  public Optional<Double> calculateLauncherSpeakerAimAngle() {
+  public Optional<Double> calculateLauncherSpeakerAimPosition() {
     if (m_frontResult.hasTargets()) {
       final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceAprilTagIDs.SUBWOOFER_CENTER, m_frontResult);
       if (target_optional.isPresent()) {
         final double distance = calculateDistanceToTargetMeters(target_optional.get());
-        double angle = 0;
+        // this should be cancoder position, so when you are doing your data use that (cancoder.getAbsolutePosition())
+        double position = 0;
         // TODO: equation magic here
-        return Optional.of(angle);
+        return Optional.of(position);
       }
     }
     return Optional.empty();

@@ -44,40 +44,49 @@ public class Constants {
     }
 
     public static final class LauncherConstants {
-        public static final int AIM_MOTOR_ID = 28;
-        public static final double AIM_MOTOR_GEAR_RATIO = Math.pow(5, 3);
+        public static final int AIM_MOTOR_ID = 12;
+        public static final double AIM_MOTOR_GEAR_RATIO = 125;
+        public static final double AIM_MOTOR_SPROCKET_RATIO = 18;
 
-        public static final double AIM_MOTOR_HIGHEST_ANGLE_POSITIONS = -109;
-        public static final double AIM_MOTOR_LOWEST_ANGLE_POSITIONS = -436;
+        // these are cancoder absolute position (cancoder.getAbsolutePosition())
+        public static final double AIM_POSITION_AMP = 0.4301757;
+        public static final double AIM_POSITION_TRAP = 0.43679151;
+        public static final double AIM_POSITION_SPEAKER = 0.350;
 
-        public static final int AIM_CANCODER_ID = -100; // TODO: CHANGE THIS
+        // public static final double AIM_MOTOR_HIGHEST_ANGLE_POSITIONS = -109;
+        // public static final double AIM_MOTOR_LOWEST_ANGLE_POSITIONS = -436;
+
+        public static final int AIM_CANCODER_ID = 26;
         public static final double AIM_CANCODER_LOADING_POSITION = 0; // TODO: CHANGE THIS
         public static final double ALLOWABLE_CANCODER_ERROR = 0.5;
     }
     public static final class ShooterConstants {
         public static final int TOP_MOTOR_ID = 10;
         public static final int BOTTOM_MOTOR_ID = 9;
+        public static final int FEEDER_MOTOR_ID = 11;
 
-        public static final double TARGET_VELOCITY_RPS = 80.0; // TODO: CHANGE THIS
+        public static final double TARGET_VELOCITY_RPS = -80.0; // TODO: CHANGE THIS
+
+        public static final double TARGET_INDEXER_POSITION = 2048.0; // TODO: THIS SHOULD BE MAXIMUM POSITION (360 degrees)
     }
     public static final class IndexerConstants {
-        public static final int MOTOR_ID = -100; // TODO: CHANGE THIS
+        public static final int MOTOR_ID = 11;
         public static final int TARGET_VELOCITY = 80; // TODO: CHANGE THIS
     }
     public static final class ClimberConstants {
-        public static final int LEFT_CLIMB_MOTOR_ID = -100; // TODO: CHANGE THIS
-        public static final int RIGHT_CLIMB_MOTOR_ID = -100; // TODO: CHANGE THIS
+        public static final int LEFT_CLIMB_MOTOR_ID = 16;
+        public static final int RIGHT_CLIMB_MOTOR_ID = 15;
 
         public static final int LEFT_ARM_LIMIT_SWITCH_ID = -100; // TODO: CHANGE THIS
         public static final int RIGHT_ARM_LIMIT_SWITCH_ID = -100; // TODO: CHANGE THIS
     }
     public static final class IntakeConstants {
-        public static final int EXTENDER_MOTOR_ID = -100; // TODO: CHANGE THIS
-        public static final int EXTENDER_CANCODER_ID = -100; // TODO: CHANGE THIS
-        public static final int SUCKER_MOTOR_ID = -100; // TODO: CHANGE THIS
+        public static final int ACTUATOR_MOTOR_ID = 13;
+        public static final int ACTUATOR_CANCODER_ID = 25;
+        public static final int SUCKER_MOTOR_ID = 14;
 
-        public static final double EXTENDER_CANCODER_HOME_POSITION = 0.0; // TODO: CHANGE THIS
-        public static final double EXTENDER_CANCODER_EXTENDED_POSITION = 0.0; // TODO: CHANGE THIS
+        public static final double ACTUATOR_CANCODER_HOME_POSITION = 0.0; // TODO: CHANGE THIS
+        public static final double ACTUATOR_CANCODER_EXTENDED_POSITION = 0.0; // TODO: CHANGE THIS
 
         public static final int SUCKER_TARGET_VELOCITY_RPS = 80; // TODO: CHANGE THIS
     } 
