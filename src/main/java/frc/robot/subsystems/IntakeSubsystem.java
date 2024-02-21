@@ -53,13 +53,13 @@ public class IntakeSubsystem extends SubsystemBase {
     }
   }
 
-  public void manualSuckDeleteMe(double value) {
-    m_suckerMotor.setControl(new DutyCycleOut(value));
-  }
+  // public void manualSuckDeleteMe(double value) {
+  //   m_suckerMotor.setControl(new DutyCycleOut(value));
+  // }
 
-  public void manualSuckStopDeleteMe() {
-    m_suckerMotor.disable();
-  }
+  // public void manualSuckStopDeleteMe() {
+  //   m_suckerMotor.disable();
+  // }
 
   public final InstantCommand m_startForwardCommand = new InstantCommand(() -> {
     m_forwardState = true;

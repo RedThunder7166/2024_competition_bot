@@ -58,20 +58,20 @@ public class RobotContainer {
   // private final VisionSubsystem m_vision = new VisionSubsystem(drivetrain);
   private final VisionSubsystemTEMPORARYDELETETHIS m_vision = new VisionSubsystemTEMPORARYDELETETHIS();
   // private final Shooter m_shooter = new Shooter(m_visionSubsystem);
-  private final LauncherSubsystem m_launcher = new LauncherSubsystem(m_vision);
+  private final LauncherSubsystem m_launcher = new LauncherSubsystem(m_vision, () -> operator_joystick.getLeftY());
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
   private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_launcher);
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   // private final ClimberSubsystem m_climber = new ClimberSubsystem(drivetrain);
 
-  private final SequentialCommandGroup m_startPickingUpPiece = new SequentialCommandGroup(
-    m_launcher.m_startWantingToLoad/*,
-    m_intake.m_deployAndStartCommand*/
-  );
-  private final SequentialCommandGroup m_stopPickingUpPiece = new SequentialCommandGroup(
-    m_launcher.m_stopWantingToLoad/*,
-    m_intake.m_retractAndStopCommand*/
-  );
+  // private final SequentialCommandGroup m_startPickingUpPiece = new SequentialCommandGroup(
+  //   m_launcher.m_startWantingToLoad/*,
+  //   m_intake.m_deployAndStartCommand*/
+  // );
+  // private final SequentialCommandGroup m_stopPickingUpPiece = new SequentialCommandGroup(
+  //   m_launcher.m_stopWantingToLoad/*,
+  //   m_intake.m_retractAndStopCommand*/
+  // );
 
   private boolean wants_to_pickup_piece = false;
 
@@ -107,11 +107,23 @@ public class RobotContainer {
 
     driver_joystick.rightTrigger().onTrue(m_intake.m_startForwardCommand);
     driver_joystick.rightTrigger().onFalse(m_intake.m_stopForwardCommand);
+
     driver_joystick.leftTrigger().onTrue(m_intake.m_startReverseCommand);
     driver_joystick.leftTrigger().onFalse(m_intake.m_stopReverseCommand);
 
-    operator_joystick.rightTrigger().onTrue(m_shooter.m_startWantingToShoot);
-    operator_joystick.rightTrigger().onFalse(m_shooter.m_stopWantingToShoot);
+    operator_joystick.rightTrigger().onTrue(m_shooter.m_startShooterCommand);
+    operator_joystick.rightTrigger().onFalse(m_shooter.m_stopShooterCommand);
+
+    operator_joystick.leftTrigger().onTrue(m_shooter.m_startFeederCommand);
+    operator_joystick.leftTrigger().onFalse(m_shooter.m_stopFeederCommand);
+
+    // a double supplier for manual mode is placed in the launcher constructor
+    operator_joystick.start().onTrue(m_launcher.m_enableAimManualModeCommand);
+
+    operator_joystick.povUp().onTrue(m_launcher.m_aimAtLoadingPositionCommand);
+    operator_joystick.povRight().onTrue(m_launcher.m_aimAtAmpCommand);
+    operator_joystick.povDown().onTrue(m_launcher.m_aimAtTrapCommand);
+    operator_joystick.povLeft().onTrue(m_launcher.m_aimAtSpeakerCommand);
 
     // // operator_joystick.x().whileFalse(new TrackAprilTagCommand(drivetrain, m_visionSubsystem, drive, MaxAngularRate));
     // driver_joystick.rightBumper().onTrue(new InstantCommand(() -> {
@@ -157,55 +169,55 @@ public class RobotContainer {
 
     // operator_joystick.b().onTrue(m_shooter.m_toggleWantingToShoot);
 
-    // TODO: MANUAL TESTING DELETE THIS (DONT FORGET TO PUT LAUNCHER, INDEXER, INTAKE, AND SHOOTER PERIODIC BACK)
-    m_launcher.setDefaultCommand(new RunCommand(() -> {
-      m_launcher.stopAimMotor();
-    }, m_launcher));
-    m_indexer.setDefaultCommand(new RunCommand(() -> {
-      m_indexer.manualStopDeleteMe();
-    }, m_indexer));
-    m_intake.setDefaultCommand(new RunCommand(() -> {
-      // m_intake.manualExtendStopDeleteMe();
-      m_intake.manualSuckStopDeleteMe();
-    }, m_intake));
-    m_shooter.setDefaultCommand(new RunCommand(() -> {
-      m_shooter.manualStopDeleteMe();
-      m_shooter.manualStopFeederDeleteMe();
-    }, m_shooter));
-
-    operator_joystick.a().whileTrue(new RunCommand(() -> {
-      m_launcher.manualAimDeleteMe(0.2);
-    }, m_launcher));
-    operator_joystick.b().whileTrue(new RunCommand(() -> {
-      m_launcher.manualAimDeleteMe(-0.2);
-    }, m_launcher));
-
-    operator_joystick.x().whileTrue(new RunCommand(() -> {
-      // m_indexer.manualRunDeleteMe(-0.6);
-      // m_intake.manualSuckDeleteMe(-0.6);
-      m_shooter.manualRunRPMDeleteMe(3900); //4350
-      // m_shooter.manualRunFeederDeleteMe(-0.6);
-    }, /* m_indexer, m_intake,*/ m_shooter));
-    // operator_joystick.y().whileTrue(new RunCommand(() -> {
-    //   m_shooter.manualRunFeederDeleteMe(-0.6);
+    // // TODO: MANUAL TESTING DELETE THIS (DONT FORGET TO PUT LAUNCHER, INDEXER, INTAKE, AND SHOOTER PERIODIC BACK)
+    // m_launcher.setDefaultCommand(new RunCommand(() -> {
+    //   m_launcher.stopAimMotor();
+    // }, m_launcher));
+    // m_indexer.setDefaultCommand(new RunCommand(() -> {
+    //   m_indexer.manualStopDeleteMe();
+    // }, m_indexer));
+    // m_intake.setDefaultCommand(new RunCommand(() -> {
+    //   // m_intake.manualExtendStopDeleteMe();
+    //   m_intake.manualSuckStopDeleteMe();
+    // }, m_intake));
+    // m_shooter.setDefaultCommand(new RunCommand(() -> {
+    //   m_shooter.manualStopDeleteMe();
+    //   m_shooter.manualStopFeederDeleteMe();
     // }, m_shooter));
 
-    // operator_joystick.leftBumper().whileTrue(new RunCommand(() -> {
-    //   m_intake.manualExtendDeleteMe(0.4);
-    // }, m_intake));
-    // operator_joystick.rightBumper().whileTrue(new RunCommand(() -> {
-    //   m_intake.manualExtendDeleteMe(-0.4);
-    // }, m_intake));
+    // operator_joystick.a().whileTrue(new RunCommand(() -> {
+    //   m_launcher.manualAimDeleteMe(0.2);
+    // }, m_launcher));
+    // operator_joystick.b().whileTrue(new RunCommand(() -> {
+    //   m_launcher.manualAimDeleteMe(-0.2);
+    // }, m_launcher));
 
-    operator_joystick.povUp().whileTrue(new RunCommand(() -> {
-      m_launcher.setAimPosition(LauncherConstants.AIM_POSITION_AMP);
-      m_shooter.manualRunDeleteMe(0.25);
-    }, m_launcher, m_shooter));
-    operator_joystick.povDown().whileTrue(new RunCommand(() -> {
-      m_launcher.setAimPosition(LauncherConstants.AIM_POSITION_TRAP);
-      m_shooter.manualRunDeleteMe(0.37);
-    }, m_launcher, m_shooter));
-    // TODO: MANUAL TESTING DELETE THIS
+    // operator_joystick.x().whileTrue(new RunCommand(() -> {
+    //   // m_indexer.manualRunDeleteMe(-0.6);
+    //   // m_intake.manualSuckDeleteMe(-0.6);
+    //   m_shooter.manualRunRPMDeleteMe(3900); //4350
+    //   // m_shooter.manualRunFeederDeleteMe(-0.6);
+    // }, /* m_indexer, m_intake,*/ m_shooter));
+    // // operator_joystick.y().whileTrue(new RunCommand(() -> {
+    // //   m_shooter.manualRunFeederDeleteMe(-0.6);
+    // // }, m_shooter));
+
+    // // operator_joystick.leftBumper().whileTrue(new RunCommand(() -> {
+    // //   m_intake.manualExtendDeleteMe(0.4);
+    // // }, m_intake));
+    // // operator_joystick.rightBumper().whileTrue(new RunCommand(() -> {
+    // //   m_intake.manualExtendDeleteMe(-0.4);
+    // // }, m_intake));
+
+    // operator_joystick.povUp().whileTrue(new RunCommand(() -> {
+    //   m_launcher.setAimPosition(LauncherConstants.AIM_POSITION_AMP);
+    //   m_shooter.manualRunDeleteMe(0.25);
+    // }, m_launcher, m_shooter));
+    // operator_joystick.povDown().whileTrue(new RunCommand(() -> {
+    //   m_launcher.setAimPosition(LauncherConstants.AIM_POSITION_TRAP);
+    //   m_shooter.manualRunDeleteMe(0.37);
+    // }, m_launcher, m_shooter));
+    // // TODO: MANUAL TESTING DELETE THIS
   }
 
   {
@@ -223,11 +235,11 @@ public class RobotContainer {
   public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
 
-    NamedCommands.registerCommand("StartPickingUpPiece", m_startPickingUpPiece);
-    NamedCommands.registerCommand("StopPickingUpPiece", m_stopPickingUpPiece);
+    // NamedCommands.registerCommand("StartPickingUpPiece", m_startPickingUpPiece);
+    // NamedCommands.registerCommand("StopPickingUpPiece", m_stopPickingUpPiece);
 
-    NamedCommands.registerCommand("StartShooter", m_shooter.m_startWantingToShoot);
-    NamedCommands.registerCommand("StopShooter", m_shooter.m_stopWantingToShoot);
+    NamedCommands.registerCommand("StartShooter", m_shooter.m_startShooterCommand);
+    NamedCommands.registerCommand("StopShooter", m_shooter.m_stopShooterCommand);
 
     configureBindings();
   }

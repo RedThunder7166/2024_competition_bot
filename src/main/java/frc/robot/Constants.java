@@ -49,15 +49,25 @@ public class Constants {
         public static final double AIM_MOTOR_SPROCKET_RATIO = 18;
 
         // these are cancoder absolute position (cancoder.getAbsolutePosition())
-        public static final double AIM_POSITION_AMP = 0.4301757;
-        public static final double AIM_POSITION_TRAP = 0.43679151;
-        public static final double AIM_POSITION_SPEAKER = 0.350;
+        public static enum AimPosition {
+            Loading(0), // TODO: RECORD LOADING AIM CANCODER ABSOLUTEPOSITION
+            Amp(0.4301757),
+            Trap(0.43679151),
+            Speaker(0.350);
+
+            public final double position;
+            AimPosition(double pos) {
+                position = pos;
+            }
+        }
+
+        public static final double MANUAL_AIM_DEADBAND = 0.25;
 
         // public static final double AIM_MOTOR_HIGHEST_ANGLE_POSITIONS = -109;
         // public static final double AIM_MOTOR_LOWEST_ANGLE_POSITIONS = -436;
 
         public static final int AIM_CANCODER_ID = 26;
-        public static final double AIM_CANCODER_LOADING_POSITION = 0; // TODO: CHANGE THIS
+        // public static final double AIM_CANCODER_LOADING_POSITION = 0; // TODO: CHANGE THIS
         public static final double ALLOWABLE_CANCODER_ERROR = 0.5;
     }
     public static final class ShooterConstants {
@@ -65,9 +75,9 @@ public class Constants {
         public static final int BOTTOM_MOTOR_ID = 9;
         public static final int FEEDER_MOTOR_ID = 11;
 
-        public static final double TARGET_VELOCITY_RPS = -80.0; // TODO: CHANGE THIS
+        public static final double TARGET_SHOOTER_RPS = 80.0; // TODO: CHANGE THIS
 
-        public static final double TARGET_INDEXER_POSITION = 2048.0; // TODO: THIS SHOULD BE MAXIMUM POSITION (360 degrees)
+        public static final double TARGET_FEEDER_RPS = 5; // TODO: CHANGE THIS
     }
     public static final class IndexerConstants {
         public static final int MOTOR_ID = 11;
