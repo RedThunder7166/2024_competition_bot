@@ -4,11 +4,14 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IndexerConstants;
 
@@ -18,11 +21,23 @@ public class IndexerSubsystem extends SubsystemBase {
 
   private final LauncherSubsystem m_launcher;
 
+  private boolean m_forwardState = false;
+  private boolean m_reverseState = false;
+
   public IndexerSubsystem(LauncherSubsystem launcher) {
     m_launcher = launcher;
 
-    m_motor.setNeutralMode(NeutralModeValue.Coast);
+    TalonFXConfiguration configs = new TalonFXConfiguration();
+    // clockwise is true
+    // counterclockwise is false
+    configs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+    configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+
+    m_motor.getConfigurator().apply(configs);
   }
+
+  private static final double speed = 0.65;
 
   @Override
   public void periodic() {
@@ -32,12 +47,39 @@ public class IndexerSubsystem extends SubsystemBase {
     // } else {
     //   m_motor.disable();
     // }
+
+    if (m_forwardState) {
+      m_motor.setControl(new DutyCycleOut(speed));
+    } else if (m_reverseState) {
+      m_motor.setControl(new DutyCycleOut(-speed));
+    } else {
+      m_motor.disable();
+    }
   }
 
-  public void manualRunDeleteMe(double value) {
-    m_motor.setControl(new DutyCycleOut(value));
+  // public void manualRunDeleteMe(double value) {
+  //   m_motor.setControl(new DutyCycleOut(value));
+  // }
+  // public void manualStopDeleteMe() {
+  //   m_motor.disable();
+  // }
+
+  public void disabledInit() {
+    m_forwardState = false;
+    m_reverseState = false;
   }
-  public void manualStopDeleteMe() {
-    m_motor.disable();
-  }
+
+  public InstantCommand m_enableForwardCommand = new InstantCommand(() -> {
+    m_forwardState = true;
+  }, this);
+  public InstantCommand m_disableForwardCommand = new InstantCommand(() -> {
+    m_forwardState = false;
+  }, this);
+
+  public InstantCommand m_enableReverseCommand = new InstantCommand(() -> {
+    m_reverseState = true;
+  }, this);
+  public InstantCommand m_disableReverseCommand = new InstantCommand(() -> {
+    m_reverseState = false;
+  }, this);
 }

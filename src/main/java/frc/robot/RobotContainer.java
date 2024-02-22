@@ -58,7 +58,7 @@ public class RobotContainer {
   // private final VisionSubsystem m_vision = new VisionSubsystem(drivetrain);
   private final VisionSubsystemTEMPORARYDELETETHIS m_vision = new VisionSubsystemTEMPORARYDELETETHIS();
   // private final Shooter m_shooter = new Shooter(m_visionSubsystem);
-  private final LauncherSubsystem m_launcher = new LauncherSubsystem(m_vision, () -> operator_joystick.getLeftY());
+  private final LauncherSubsystem m_launcher = new LauncherSubsystem(m_vision);
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
   private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_launcher);
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
@@ -94,8 +94,7 @@ public class RobotContainer {
     // }, m_shooter));
 
     driver_joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-    driver_joystick.b().whileTrue(drivetrain
-        .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver_joystick.getLeftY(), -driver_joystick.getLeftX()))));
+    driver_joystick.b().whileTrue(drivetrain.applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver_joystick.getLeftY(), -driver_joystick.getLeftX()))));
 
     // reset the field-centric heading on left bumper press
     driver_joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
@@ -104,12 +103,32 @@ public class RobotContainer {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
     drivetrain.registerTelemetry(logger::telemeterize);
+    
+    SequentialCommandGroup start_intake_and_indexer = new SequentialCommandGroup(
+      m_intake.m_enableForwardCommand,
+      m_indexer.m_enableForwardCommand
+    );
 
-    driver_joystick.rightTrigger().onTrue(m_intake.m_startForwardCommand);
-    driver_joystick.rightTrigger().onFalse(m_intake.m_stopForwardCommand);
+    SequentialCommandGroup stop_intake_and_indexer = new SequentialCommandGroup(
+      m_intake.m_disableForwardCommand,
+      m_indexer.m_disableForwardCommand
+    );
 
-    driver_joystick.leftTrigger().onTrue(m_intake.m_startReverseCommand);
-    driver_joystick.leftTrigger().onFalse(m_intake.m_stopReverseCommand);
+    SequentialCommandGroup start_intake_and_indexer_reverse = new SequentialCommandGroup(
+      m_intake.m_enableReverseCommand,
+      m_indexer.m_enableReverseCommand
+    );
+
+    SequentialCommandGroup stop_intake_and_indexer_reverse = new SequentialCommandGroup(
+      m_intake.m_disableReverseCommand,
+      m_indexer.m_disableReverseCommand
+    );
+
+    driver_joystick.rightTrigger().onTrue(start_intake_and_indexer);
+    driver_joystick.rightTrigger().onFalse(stop_intake_and_indexer);
+
+    driver_joystick.leftTrigger().onTrue(start_intake_and_indexer_reverse);
+    driver_joystick.leftTrigger().onFalse(stop_intake_and_indexer_reverse);
 
     operator_joystick.rightTrigger().onTrue(m_shooter.m_startShooterCommand);
     operator_joystick.rightTrigger().onFalse(m_shooter.m_stopShooterCommand);
@@ -117,8 +136,8 @@ public class RobotContainer {
     operator_joystick.leftTrigger().onTrue(m_shooter.m_startFeederCommand);
     operator_joystick.leftTrigger().onFalse(m_shooter.m_stopFeederCommand);
 
-    // a double supplier for manual mode is placed in the launcher constructor
     operator_joystick.start().onTrue(m_launcher.m_enableAimManualModeCommand);
+    m_launcher.configureManualMode(() -> operator_joystick.getLeftY());
 
     operator_joystick.povUp().onTrue(m_launcher.m_aimAtLoadingPositionCommand);
     operator_joystick.povRight().onTrue(m_launcher.m_aimAtAmpCommand);
@@ -246,6 +265,11 @@ public class RobotContainer {
 
   public void teleopInit() {
     m_launcher.teleopInit();
+  }
+  public void disabledInit() {
+    m_indexer.disabledInit();
+    m_intake.disabledInit();
+    m_shooter.disabledInit();
   }
 
   public Command getAutonomousCommand() {

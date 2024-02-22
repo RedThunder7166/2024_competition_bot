@@ -33,10 +33,11 @@ public class ShooterSubsystem extends SubsystemBase {
   private final TalonFX m_feederMotor = new TalonFX(ShooterConstants.FEEDER_MOTOR_ID);
 
   private final VelocityDutyCycle m_shooterRequest = new VelocityDutyCycle(ShooterConstants.TARGET_SHOOTER_RPS);
-  private final MotionMagicDutyCycle m_feederRequest = new MotionMagicDutyCycle(ShooterConstants.TARGET_FEEDER_RPS);
+  private final VelocityDutyCycle m_feederRequest = new VelocityDutyCycle(ShooterConstants.TARGET_FEEDER_RPS);
  
   private boolean m_shooterState = false;
   private boolean m_feederState = false;
+  private boolean m_shooterIsUpToSpeed = false;
 
   private final NetworkTable table = NetworkTableInstance.getDefault().getTable("Shooter info");
   private final DoublePublisher m_topRPMPublisher = table.getDoubleTopic("TopRPM").publish();
@@ -46,7 +47,6 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public ShooterSubsystem(){  
     TalonFXConfiguration top_configs = new TalonFXConfiguration();
-    TalonFXConfiguration bottom_configs = new TalonFXConfiguration();
     TalonFXConfiguration feeder_configs = new TalonFXConfiguration();
 
     Slot0Configs slot0Configs = top_configs.Slot0;
@@ -57,19 +57,18 @@ public class ShooterSubsystem extends SubsystemBase {
     slot0Configs.kI = 0;
     slot0Configs.kD = 0;
 
-    bottom_configs.Slot0 = slot0Configs;
+    feeder_configs.Slot0 = slot0Configs;
 
     // clockwise is true
     // counterclockwise is false
-    top_configs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    bottom_configs.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    top_configs.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    feeder_configs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     top_configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-    bottom_configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     feeder_configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     m_topMotor.getConfigurator().apply(top_configs);
-    m_bottomMotor.getConfigurator().apply(bottom_configs);
+    m_bottomMotor.getConfigurator().apply(top_configs);
     m_feederMotor.getConfigurator().apply(feeder_configs);
 
     m_bottomMotor.setControl(new Follower(m_topMotor.getDeviceID(), false));
@@ -84,13 +83,16 @@ public class ShooterSubsystem extends SubsystemBase {
       m_bottomMotor.getVelocity().getValueAsDouble()
     ));
 
+    // TODO: double check this and put this back
+    // m_shooterIsUpToSpeed = m_topMotor.getVelocity().getValueAsDouble() >= ShooterConstants.SHOOTER_UP_TO_SPEED_THRESHOLD;
+
     if (m_shooterState) {
       m_topMotor.setControl(m_shooterRequest);
     } else {
       m_topMotor.disable();
     }
 
-    if (m_feederState) {
+    if (m_shooterIsUpToSpeed || m_feederState) {
       m_feederMotor.setControl(m_feederRequest);
     } else {
       m_feederMotor.disable();
@@ -100,6 +102,12 @@ public class ShooterSubsystem extends SubsystemBase {
   //   m_topMotor.disable();
   //   m_bottomMotor.disable();
   // }
+
+  public void disabledInit() {
+    m_shooterState = false;
+    m_feederState = false;
+    m_shooterIsUpToSpeed = false;
+  }
 
   public InstantCommand m_startShooterCommand = new InstantCommand(() -> {
     m_shooterState = true;

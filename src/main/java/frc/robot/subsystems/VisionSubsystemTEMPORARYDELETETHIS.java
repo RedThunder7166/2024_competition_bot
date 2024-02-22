@@ -17,7 +17,7 @@ public class VisionSubsystemTEMPORARYDELETETHIS extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public Optional<Double> calculateLauncherSpeakerAimPosition() {
-    return Optional.empty();
-  }
+  // public Optional<Double> calculateLauncherSpeakerAimPosition() { //TODO this is causing schedule overrun, temporarily commented
+  //   return Optional.empty();
+  // }
 }

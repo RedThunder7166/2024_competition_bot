@@ -41,7 +41,7 @@ public class LauncherSubsystem extends SubsystemBase {
   // private final MotionMagicDutyCycle m_aimAtSpeakerRequest = new MotionMagicDutyCycle(0);
 
   private final MotionMagicDutyCycle m_aimRequest = new MotionMagicDutyCycle(0);
-  private final VelocityDutyCycle m_aimManualRequest = new VelocityDutyCycle(0);
+  private final DutyCycleOut m_aimManualRequest = new DutyCycleOut(0);
 
   private boolean m_isAtLoadingPosition = false;
   private boolean m_wantsToLoad = false;
@@ -51,14 +51,13 @@ public class LauncherSubsystem extends SubsystemBase {
 
   // private final VisionSubsystem m_vision;
   private final VisionSubsystemTEMPORARYDELETETHIS m_vision;
-  private final DoubleSupplier m_manual_aim_supplier;
+  private DoubleSupplier m_manual_aim_supplier;
 
   private final ShuffleboardTab m_shuffleBoardTab = Shuffleboard.getTab("Launcher");
   
   // public LauncherSubsystem(VisionSubsystem vision) {
-  public LauncherSubsystem(VisionSubsystemTEMPORARYDELETETHIS vision, DoubleSupplier manual_aim_supplier) {
+  public LauncherSubsystem(VisionSubsystemTEMPORARYDELETETHIS vision) {
     m_vision = vision;
-    m_manual_aim_supplier = manual_aim_supplier;
 
     final TalonFXConfiguration aim_config = new TalonFXConfiguration();
     
@@ -74,15 +73,17 @@ public class LauncherSubsystem extends SubsystemBase {
     
     // TODO: TUNE THIS
     final Slot0Configs aim_slot0configs = aim_config.Slot0;
-    aim_slot0configs.kP = 0.1; // 0.05
+    aim_slot0configs.kP = .0001; // 0.05
     aim_slot0configs.kI = 0;
     aim_slot0configs.kD = 0;
+    // aim_slot0configs.kS = .4;
     
     // TODO: TUNE THIS
     final var aim_motionmagic_configs = aim_config.MotionMagic;
-    aim_motionmagic_configs.MotionMagicCruiseVelocity = 80; // Target cruise velocity of 80 rps
-    aim_motionmagic_configs.MotionMagicAcceleration = 160; // Target acceleration of 160 rps/s (0.5 seconds)
-    aim_motionmagic_configs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1 seconds)
+    
+    aim_motionmagic_configs.MotionMagicCruiseVelocity = 1000; // Target cruise velocity of 80 rps
+    aim_motionmagic_configs.MotionMagicAcceleration = 2000; // Target acceleration of 160 rps/s (0.5 seconds)
+    aim_motionmagic_configs.MotionMagicJerk = 20000; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
     aim_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     m_aimMotor.getConfigurator().apply(aim_config);
@@ -90,7 +91,11 @@ public class LauncherSubsystem extends SubsystemBase {
     m_shuffleBoardTab.addDouble("Aim Motor Position Degree", () -> m_aimMotor.getPosition().getValueAsDouble());
     m_shuffleBoardTab.addDouble("Aim Motor CANCoder AbsolutePosition Degree", this::getAimCANCoderAbsolutePositionDegrees);
     m_shuffleBoardTab.addDouble("Aim Motor CANCoder AbsolutePosition", this::getAimCANCoderAbsolutePosition);
+    m_shuffleBoardTab.addDouble("Velocity", ()-> m_aimMotor.get() );
+  }
 
+  public void configureManualMode(DoubleSupplier supplier) {
+    m_manual_aim_supplier = supplier;
   }
 
   public double getAimCANCoderAbsolutePositionDegrees() {
@@ -114,8 +119,7 @@ public class LauncherSubsystem extends SubsystemBase {
     // } else {
     //   aim();
     // }
-
-    m_aimMotor.setPosition(getAimCANCoderAbsolutePosition());
+    m_aimMotor.setPosition(getAimCANCoderAbsolutePosition()*125*18);
     if (m_manualAimState) {
       manualAim(m_manual_aim_supplier.getAsDouble());
     } else {
@@ -144,7 +148,7 @@ public class LauncherSubsystem extends SubsystemBase {
       return;
     }
 
-    m_aimMotor.setControl(m_aimManualRequest.withVelocity(value));
+    m_aimMotor.setControl(m_aimManualRequest.withOutput(value));
   }
   private void aimAtPosition(AimPosition position) {
     m_aimMotor.setControl(m_aimRequest.withPosition(position.position));
@@ -157,18 +161,22 @@ public class LauncherSubsystem extends SubsystemBase {
   public final InstantCommand m_aimAtLoadingPositionCommand = new InstantCommand(() -> {
     m_manualAimState = false;
     m_aimTargetPosition = AimPosition.Loading;
+      System.out.print("It works");
   }, this);
   public final InstantCommand m_aimAtAmpCommand = new InstantCommand(() -> {
     m_manualAimState = false;
     m_aimTargetPosition = AimPosition.Amp;
+      System.out.print("It works2");
   }, this);
   public final InstantCommand m_aimAtTrapCommand = new InstantCommand(() -> {
     m_manualAimState = false;
     m_aimTargetPosition = AimPosition.Trap;
+      System.out.print("It works3");
   }, this);
   public final InstantCommand m_aimAtSpeakerCommand = new InstantCommand(() -> {
     m_manualAimState = false;
     m_aimTargetPosition = AimPosition.Speaker;
+    System.out.print("It works4");
   }, this);
     
   // public void setAimPosition(double position) {

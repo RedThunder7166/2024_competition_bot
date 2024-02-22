@@ -50,10 +50,10 @@ public class Constants {
 
         // these are cancoder absolute position (cancoder.getAbsolutePosition())
         public static enum AimPosition {
-            Loading(0), // TODO: RECORD LOADING AIM CANCODER ABSOLUTEPOSITION
-            Amp(0.4301757),
-            Trap(0.43679151),
-            Speaker(0.350);
+            Loading(847.5),//.3767 // TODO: RECORD LOADING AIM CANCODER ABSOLUTEPOSITION
+            Amp(967),//.4301757
+            Trap(981),//0.43679151
+            Speaker(787);//.35
 
             public final double position;
             AimPosition(double pos) {
@@ -76,11 +76,12 @@ public class Constants {
         public static final int FEEDER_MOTOR_ID = 11;
 
         public static final double TARGET_SHOOTER_RPS = 80.0; // TODO: CHANGE THIS
+        public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 80.0; // TODO: CHANGE THIS
 
-        public static final double TARGET_FEEDER_RPS = 5; // TODO: CHANGE THIS
+        public static final double TARGET_FEEDER_RPS = 5.0; // TODO: CHANGE THIS
     }
     public static final class IndexerConstants {
-        public static final int MOTOR_ID = 11;
+        public static final int MOTOR_ID = 17;
         public static final int TARGET_VELOCITY = 80; // TODO: CHANGE THIS
     }
     public static final class ClimberConstants {
@@ -91,13 +92,13 @@ public class Constants {
         public static final int RIGHT_ARM_LIMIT_SWITCH_ID = -100; // TODO: CHANGE THIS
     }
     public static final class IntakeConstants {
-        public static final int ACTUATOR_MOTOR_ID = 13;
-        public static final int ACTUATOR_CANCODER_ID = 25;
-        public static final int SUCKER_MOTOR_ID = 14;
+        public static final int LOWER_MOTOR_ID = 13;
+        // public static final int ACTUATOR_CANCODER_ID = 25;
+        public static final int UPPER_MOTOR_ID = 14;
 
-        public static final double ACTUATOR_CANCODER_HOME_POSITION = 0.0; // TODO: CHANGE THIS
-        public static final double ACTUATOR_CANCODER_EXTENDED_POSITION = 0.0; // TODO: CHANGE THIS
+        // public static final double ACTUATOR_CANCODER_HOME_POSITION = 0.0; // TODO: CHANGE THIS
+        // public static final double ACTUATOR_CANCODER_EXTENDED_POSITION = 0.0; // TODO: CHANGE THIS
 
-        public static final int SUCKER_TARGET_VELOCITY_RPS = 80; // TODO: CHANGE THIS
+        public static final int TARGET_VELOCITY_RPS = 80; // TODO: CHANGE THIS
     } 
 }
