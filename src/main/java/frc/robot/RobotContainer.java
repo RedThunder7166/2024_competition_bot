@@ -104,42 +104,89 @@ public class RobotContainer {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
     drivetrain.registerTelemetry(logger::telemeterize);
-    
-    SequentialCommandGroup start_intake_and_indexer = new SequentialCommandGroup(
-      m_intake.m_enableForwardCommand,
-      m_indexer.m_enableForwardCommand
-    );
 
-    SequentialCommandGroup stop_intake_and_indexer = new SequentialCommandGroup(
-      m_intake.m_disableForwardCommand,
-      m_indexer.m_disableForwardCommand
-    );
+    // TODO: my worry for this is that it might not let multiple commands use the shooter,
+    // so the shooter feeder might need to be moved to either the intake subsystem or its own subsystem
 
-    SequentialCommandGroup start_intake_and_indexer_reverse = new SequentialCommandGroup(
-      m_intake.m_enableReverseCommand,
-      m_indexer.m_enableReverseCommand
-    );
+    // ^ this should be fine since we stopped using sequentialcommandgroups and are just using methods,
+    // but this might lead to conflicts
+    // letting go of buttons will turn everything off, so it should be fine
+    driver_joystick.x().onTrue(new InstantCommand(() -> {
+      m_intake.enableForward();
+      m_indexer.enableForward();
+      m_shooter.enableFeeder();
+    }, m_intake, m_indexer, m_shooter));
+    driver_joystick.x().onFalse(new InstantCommand(() -> {
+      m_intake.disableForward();
+      m_indexer.disableForward();
+      m_shooter.disableFeeder();
+    }, m_intake, m_indexer, m_shooter));
 
-    SequentialCommandGroup stop_intake_and_indexer_reverse = new SequentialCommandGroup(
-      m_intake.m_disableReverseCommand,
-      m_indexer.m_disableReverseCommand
-    );
+    /*
+    driver:
+      left trigger -> intake reverse
+      right trigger -> intake forward
+      left bumper -> indexer reverse
+      right bumper -> indexer forward
+    operator:
+      left trigger -> shoot reverse
+      right trigger -> shoot forward
+      left bumper -> feeder reverse
+      right bumper -> feeder forward
+    */
 
-    driver_joystick.rightTrigger().onTrue(start_intake_and_indexer);
-    driver_joystick.rightTrigger().onFalse(stop_intake_and_indexer);
+    driver_joystick.leftTrigger().onTrue(new InstantCommand(() -> {
+      m_intake.enableReverse();
+    }, m_intake));
+    driver_joystick.leftTrigger().onFalse(new InstantCommand(() -> {
+      m_intake.disableReverse();
+    }, m_intake));
 
-    driver_joystick.leftTrigger().onTrue(start_intake_and_indexer_reverse);
-    driver_joystick.leftTrigger().onFalse(stop_intake_and_indexer_reverse);
+    driver_joystick.rightTrigger().onTrue(new InstantCommand(() -> {
+      m_intake.enableForward();
+    }, m_intake));
+    driver_joystick.rightTrigger().onFalse(new InstantCommand(() -> {
+      m_intake.disableForward();
+    }, m_intake));
 
-    operator_joystick.rightTrigger().onTrue(m_shooter.m_startShooterCommand);
-    operator_joystick.rightTrigger().onFalse(m_shooter.m_stopShooterCommand);
+    driver_joystick.leftBumper().onTrue(new InstantCommand(() -> {
+      m_indexer.enableReverse();
+    }, m_indexer));
+    driver_joystick.leftBumper().onFalse(new InstantCommand(() -> {
+      m_indexer.disableReverse();
+    }, m_indexer));
 
-    operator_joystick.leftTrigger().onTrue(m_shooter.m_startFeederCommand);
-    operator_joystick.leftTrigger().onFalse(m_shooter.m_stopFeederCommand);
+    driver_joystick.rightBumper().onTrue(new InstantCommand(() -> {
+      m_indexer.enableForward();
+    }, m_indexer));
+    driver_joystick.rightBumper().onFalse(new InstantCommand(() -> {
+      m_indexer.disableForward();
+    }, m_indexer));
+
+    operator_joystick.leftTrigger().onTrue(m_shooter.m_enableShooterReverseCommand);
+    operator_joystick.leftTrigger().onFalse(m_shooter.m_disableShooterReverseCommand);
+
+    operator_joystick.rightTrigger().onTrue(m_shooter.m_enableShooterCommand);
+    operator_joystick.rightTrigger().onFalse(m_shooter.m_disableShooterCommand);
+
+    operator_joystick.leftBumper().onTrue(new InstantCommand(() -> {
+      m_shooter.enableFeederReverse();
+    }, m_shooter));
+    operator_joystick.leftBumper().onFalse(new InstantCommand(() -> {
+      m_shooter.disableFeederReverse();
+    }, m_shooter));
+
+    operator_joystick.rightBumper().onTrue(new InstantCommand(() -> {
+      m_shooter.enableFeeder();
+    }, m_shooter));
+    operator_joystick.rightBumper().onFalse(new InstantCommand(() -> {
+      m_shooter.disableFeeder();
+    }, m_shooter));
 
     operator_joystick.start().onTrue(m_launcher.m_enableAimManualModeCommand);
     m_launcher.configureManualMode(() -> operator_joystick.getLeftY());
 
+    // these all turn off manual mode
     operator_joystick.povUp().onTrue(m_launcher.m_aimAtLoadingPositionCommand);
     operator_joystick.povRight().onTrue(m_launcher.m_aimAtAmpCommand);
     operator_joystick.povDown().onTrue(m_launcher.m_aimAtTrapCommand);
@@ -258,8 +305,8 @@ public class RobotContainer {
     // NamedCommands.registerCommand("StartPickingUpPiece", m_startPickingUpPiece);
     // NamedCommands.registerCommand("StopPickingUpPiece", m_stopPickingUpPiece);
 
-    NamedCommands.registerCommand("StartShooter", m_shooter.m_startShooterCommand);
-    NamedCommands.registerCommand("StopShooter", m_shooter.m_stopShooterCommand);
+    NamedCommands.registerCommand("StartShooter", m_shooter.m_enableShooterCommand);
+    NamedCommands.registerCommand("StopShooter", m_shooter.m_disableShooterCommand);
 
     configureBindings();
   }

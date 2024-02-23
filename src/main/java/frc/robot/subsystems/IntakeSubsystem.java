@@ -73,17 +73,31 @@ public class IntakeSubsystem extends SubsystemBase {
     m_reverseState = false;
   }
 
-  public final InstantCommand m_enableForwardCommand = new InstantCommand(() -> {
-    m_forwardState = true;
-  }, this);
-  public final InstantCommand m_disableForwardCommand = new InstantCommand(() -> {
-    m_forwardState = false;
-  }, this);
+  // public final InstantCommand m_enableForwardCommand = new InstantCommand(() -> {
+  //   m_forwardState = true;
+  // }, this);
+  // public final InstantCommand m_disableForwardCommand = new InstantCommand(() -> {
+  //   m_forwardState = false;
+  // }, this);
 
-  public final InstantCommand m_enableReverseCommand = new InstantCommand(() -> {
+  // public final InstantCommand m_enableReverseCommand = new InstantCommand(() -> {
+  //   m_reverseState = true;
+  // }, this);
+  // public final InstantCommand m_disableReverseCommand = new InstantCommand(() -> {
+  //   m_reverseState = false;
+  // }, this);
+
+  public void enableForward() {
+    m_forwardState = true;
+  }
+  public void disableForward() {
+    m_forwardState = false;
+  }
+
+  public void enableReverse() {
     m_reverseState = true;
-  }, this);
-  public final InstantCommand m_disableReverseCommand = new InstantCommand(() -> {
+  }
+  public void disableReverse() {
     m_reverseState = false;
-  }, this);
+  }
 }

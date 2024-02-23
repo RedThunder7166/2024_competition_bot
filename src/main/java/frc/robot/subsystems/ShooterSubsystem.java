@@ -33,10 +33,17 @@ public class ShooterSubsystem extends SubsystemBase {
   private final TalonFX m_feederMotor = new TalonFX(ShooterConstants.FEEDER_MOTOR_ID);
 
   private final VelocityDutyCycle m_shooterRequest = new VelocityDutyCycle(ShooterConstants.TARGET_SHOOTER_RPS);
+  private final VelocityDutyCycle m_shooterReverseRequest = new VelocityDutyCycle(-ShooterConstants.TARGET_SHOOTER_RPS);
+
   private final VelocityDutyCycle m_feederRequest = new VelocityDutyCycle(ShooterConstants.TARGET_FEEDER_RPS);
+  private final VelocityDutyCycle m_feederReverseRequest = new VelocityDutyCycle(-ShooterConstants.TARGET_FEEDER_RPS);
  
   private boolean m_shooterState = false;
+  private boolean m_shooterReverseState = false;
+
   private boolean m_feederState = false;
+  private boolean m_feederReverseState = false;
+
   private boolean m_shooterIsUpToSpeed = false;
 
   private final NetworkTable table = NetworkTableInstance.getDefault().getTable("Shooter info");
@@ -88,12 +95,22 @@ public class ShooterSubsystem extends SubsystemBase {
 
     if (m_shooterState) {
       m_topMotor.setControl(m_shooterRequest);
+    } else if (m_shooterReverseState) {
+      m_topMotor.setControl(m_shooterReverseRequest);
     } else {
       m_topMotor.disable();
     }
 
-    if (m_shooterIsUpToSpeed || m_feederState) {
+    // if (m_shooterIsUpToSpeed || m_feederState) {
+    //   m_feederMotor.setControl(m_feederRequest);
+    // } else {
+    //   m_feederMotor.disable();
+    // }
+
+    if (m_feederState) {
       m_feederMotor.setControl(m_feederRequest);
+    } else if (m_feederReverseState) {
+      m_feederMotor.setControl(m_feederReverseRequest);
     } else {
       m_feederMotor.disable();
     }
@@ -105,23 +122,46 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void disabledInit() {
     m_shooterState = false;
+    m_shooterReverseState = false;
     m_feederState = false;
+    m_feederReverseState = false;
     m_shooterIsUpToSpeed = false;
   }
 
-  public InstantCommand m_startShooterCommand = new InstantCommand(() -> {
+  public InstantCommand m_enableShooterCommand = new InstantCommand(() -> {
     m_shooterState = true;
   }, this);
-  public InstantCommand m_stopShooterCommand = new InstantCommand(() -> {
+  public InstantCommand m_disableShooterCommand = new InstantCommand(() -> {
     m_shooterState = false;
   }, this);
 
-  public InstantCommand m_startFeederCommand = new InstantCommand(() -> {
+  public InstantCommand m_enableShooterReverseCommand = new InstantCommand(() -> {
+    m_shooterReverseState = true;
+  }, this);
+  public InstantCommand m_disableShooterReverseCommand = new InstantCommand(() -> {
+    m_shooterReverseState = false;
+  }, this);
+
+  // public InstantCommand m_enableFeederCommand = new InstantCommand(() -> {
+  //   m_feederState = true;
+  // }, this);
+  // public InstantCommand m_disableFeederCommand = new InstantCommand(() -> {
+  //   m_feederState = false;
+  // }, this);
+
+  public void enableFeeder() {
     m_feederState = true;
-  }, this);
-  public InstantCommand m_stopFeederCommand = new InstantCommand(() -> {
+  }
+  public void disableFeeder() {
     m_feederState = false;
-  }, this);
+  }
+
+  public void enableFeederReverse() {
+    m_feederReverseState = true;
+  }
+  public void disableFeederReverse() {
+    m_feederReverseState = false;
+  }
 
   // public void manualRunDeleteMe(double value) {
   //   m_topMotor.setControl(new DutyCycleOut(value));

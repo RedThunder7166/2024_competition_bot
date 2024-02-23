@@ -123,7 +123,7 @@ public class LauncherSubsystem extends SubsystemBase {
     if (m_manualAimState) {
       manualAim(m_manual_aim_supplier.getAsDouble());
     } else {
-      aimAtPosition(m_aimTargetPosition);
+      m_aimMotor.setControl(m_aimRequest.withPosition(m_aimTargetPosition.position));
     }
   }
 
@@ -150,33 +150,27 @@ public class LauncherSubsystem extends SubsystemBase {
 
     m_aimMotor.setControl(m_aimManualRequest.withOutput(value));
   }
-  private void aimAtPosition(AimPosition position) {
-    m_aimMotor.setControl(m_aimRequest.withPosition(position.position));
-  }
 
   public final InstantCommand m_enableAimManualModeCommand = new InstantCommand(() -> {
     m_manualAimState = true;
   }, this);
 
-  public final InstantCommand m_aimAtLoadingPositionCommand = new InstantCommand(() -> {
+  private void setAimTarget(AimPosition position) {
     m_manualAimState = false;
-    m_aimTargetPosition = AimPosition.Loading;
-      System.out.print("It works");
+    m_aimTargetPosition = position;
+  }
+
+  public final InstantCommand m_aimAtLoadingPositionCommand = new InstantCommand(() -> {
+    setAimTarget(AimPosition.Loading);
   }, this);
   public final InstantCommand m_aimAtAmpCommand = new InstantCommand(() -> {
-    m_manualAimState = false;
-    m_aimTargetPosition = AimPosition.Amp;
-      System.out.print("It works2");
+    setAimTarget(AimPosition.Amp);
   }, this);
   public final InstantCommand m_aimAtTrapCommand = new InstantCommand(() -> {
-    m_manualAimState = false;
-    m_aimTargetPosition = AimPosition.Trap;
-      System.out.print("It works3");
+    setAimTarget(AimPosition.Trap);
   }, this);
   public final InstantCommand m_aimAtSpeakerCommand = new InstantCommand(() -> {
-    m_manualAimState = false;
-    m_aimTargetPosition = AimPosition.Speaker;
-    System.out.print("It works4");
+    setAimTarget(AimPosition.Speaker);
   }, this);
     
   // public void setAimPosition(double position) {
