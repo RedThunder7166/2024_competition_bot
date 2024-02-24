@@ -34,13 +34,16 @@ public class IntakeSubsystem extends SubsystemBase {
   
   public IntakeSubsystem() {
     // m_upperMotor.setNeutralMode(NeutralModeValue.Brake);
-    TalonFXConfiguration configs = new TalonFXConfiguration();
+    TalonFXConfiguration config = new TalonFXConfiguration();
     // clockwise is true
     // counterclockwise is false
-    configs.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-    m_upperMotor.getConfigurator().apply(configs);
-    m_lowerMotor.getConfigurator().apply(configs);
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimit = 20;
+
+    m_upperMotor.getConfigurator().apply(config);
+    m_lowerMotor.getConfigurator().apply(config);
 
     m_lowerMotor.setControl(new Follower(m_upperMotor.getDeviceID(), false));
   }

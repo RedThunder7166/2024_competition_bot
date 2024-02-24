@@ -61,37 +61,39 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     private void configureMotors() {
-        for (int index = 0; index < 4; index++) {
-            SwerveModule module = getModule(index);
-            TalonFXConfiguration config = new TalonFXConfiguration();
-            module.getSteerMotor().getConfigurator().refresh(config);
+        // for (int index = 0; index < 4; index++) {
+        //     SwerveModule module = getModule(index);
+        //     TalonFXConfiguration config = new TalonFXConfiguration();
+        //     module.getSteerMotor().getConfigurator().refresh(config);
 
-            config.CurrentLimits.SupplyCurrentLimitEnable = true;
-            config.CurrentLimits.SupplyCurrentThreshold = 25;
-            config.CurrentLimits.SupplyTimeThreshold = 0.1;
+        //     config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        //     config.CurrentLimits.SupplyCurrentLimit = 30;
+        //     config.CurrentLimits.SupplyCurrentThreshold = 25;
+        //     config.CurrentLimits.SupplyTimeThreshold = 0.1;
 
-            config.TorqueCurrent.PeakForwardTorqueCurrent = 19;
-            config.TorqueCurrent.PeakReverseTorqueCurrent = -19;
+        //     // config.TorqueCurrent.PeakForwardTorqueCurrent = 19;
+        //     // config.TorqueCurrent.PeakReverseTorqueCurrent = -19;
 
-            module.getSteerMotor().getConfigurator().apply(config);
+        //     module.getSteerMotor().getConfigurator().apply(config);
 
-            config.CurrentLimits.SupplyCurrentLimitEnable = true;
-            config.CurrentLimits.SupplyCurrentThreshold = 60;
-            config.CurrentLimits.SupplyTimeThreshold = 10;
+        //     config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        //     config.CurrentLimits.SupplyCurrentLimit = 40;
+        //     config.CurrentLimits.SupplyCurrentThreshold = 60;
+        //     config.CurrentLimits.SupplyTimeThreshold = 10;
             
-            config.TorqueCurrent.PeakForwardTorqueCurrent = 30;
-            config.TorqueCurrent.PeakReverseTorqueCurrent = -30;
+        //     // config.TorqueCurrent.PeakForwardTorqueCurrent = 30;
+        //     // config.TorqueCurrent.PeakReverseTorqueCurrent = -30;
 
-            config.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.1;
-            config.OpenLoopRamps.TorqueOpenLoopRampPeriod = 0.1;
-            config.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.1;
+        //     // config.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.1;
+        //     // config.OpenLoopRamps.TorqueOpenLoopRampPeriod = 0.1;
+        //     // config.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.1;
 
-            config.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.1;
-            config.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.1;
-            config.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.1;
+        //     // config.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.1;
+        //     // config.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.1;
+        //     // config.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.1;
 
-            module.getDriveMotor().getConfigurator().apply(config);
-        }
+        //     module.getDriveMotor().getConfigurator().apply(config);
+        // }
     }
 
     private void configurePathPlanner() {

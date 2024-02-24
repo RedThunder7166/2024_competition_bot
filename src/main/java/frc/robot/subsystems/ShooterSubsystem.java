@@ -74,6 +74,12 @@ public class ShooterSubsystem extends SubsystemBase {
     top_configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     feeder_configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
+    top_configs.CurrentLimits.SupplyCurrentLimitEnable = true;
+    top_configs.CurrentLimits.SupplyCurrentLimit = 40;
+
+    feeder_configs.CurrentLimits.SupplyCurrentLimitEnable = true;
+    feeder_configs.CurrentLimits.SupplyCurrentLimit = 10;
+
     m_topMotor.getConfigurator().apply(top_configs);
     m_bottomMotor.getConfigurator().apply(top_configs);
     m_feederMotor.getConfigurator().apply(feeder_configs);
@@ -90,8 +96,7 @@ public class ShooterSubsystem extends SubsystemBase {
       m_bottomMotor.getVelocity().getValueAsDouble()
     ));
 
-    // TODO: double check this and put this back
-    // m_shooterIsUpToSpeed = m_topMotor.getVelocity().getValueAsDouble() >= ShooterConstants.SHOOTER_UP_TO_SPEED_THRESHOLD;
+    m_shooterIsUpToSpeed = m_topMotor.getVelocity().getValueAsDouble() >= ShooterConstants.SHOOTER_UP_TO_SPEED_THRESHOLD;
 
     if (m_shooterState) {
       m_topMotor.setControl(m_shooterRequest);
@@ -101,16 +106,10 @@ public class ShooterSubsystem extends SubsystemBase {
       m_topMotor.disable();
     }
 
-    // if (m_shooterIsUpToSpeed || m_feederState) {
-    //   m_feederMotor.setControl(m_feederRequest);
-    // } else {
-    //   m_feederMotor.disable();
-    // }
-
-    if (m_feederState) {
-      m_feederMotor.setControl(m_feederRequest);
-    } else if (m_feederReverseState) {
+    if (m_feederReverseState) {
       m_feederMotor.setControl(m_feederReverseRequest);
+    } else if (m_shooterIsUpToSpeed || m_feederState) {
+      m_feederMotor.setControl(m_feederRequest);
     } else {
       m_feederMotor.disable();
     }

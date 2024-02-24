@@ -125,21 +125,8 @@ public class RobotContainer {
     // but this might lead to conflicts
     // letting go of buttons will turn everything off, so it should be fine
 
-    driver_joystick.x().onTrue(m_startPickingUpPiece);
-    driver_joystick.x().onFalse(m_stopPickingUpPiece);
-
-    /*
-    driver:
-      left trigger -> intake reverse
-      right trigger -> intake forward
-      left bumper -> indexer reverse
-      right bumper -> indexer forward
-    operator:
-      left trigger -> shoot reverse
-      right trigger -> shoot forward
-      left bumper -> feeder reverse
-      right bumper -> feeder forward
-    */
+    // driver_joystick.x().onTrue(m_startPickingUpPiece);
+    // driver_joystick.x().onFalse(m_stopPickingUpPiece);
 
     driver_joystick.leftTrigger().onTrue(new InstantCommand(() -> {
       m_intake.enableReverse();
@@ -148,12 +135,16 @@ public class RobotContainer {
       m_intake.disableReverse();
     }, m_intake));
 
-    driver_joystick.rightTrigger().onTrue(new InstantCommand(() -> {
-      m_intake.enableForward();
-    }, m_intake));
-    driver_joystick.rightTrigger().onFalse(new InstantCommand(() -> {
-      m_intake.disableForward();
-    }, m_intake));
+    
+    driver_joystick.rightTrigger().onTrue(m_startPickingUpPiece);
+    driver_joystick.rightTrigger().onFalse(m_stopPickingUpPiece);
+
+    // driver_joystick.rightTrigger().onTrue(new InstantCommand(() -> {
+    //   m_intake.enableForward();
+    // }, m_intake));
+    // driver_joystick.rightTrigger().onFalse(new InstantCommand(() -> {
+    //   m_intake.disableForward();
+    // }, m_intake));
 
     driver_joystick.leftBumper().onTrue(new InstantCommand(() -> {
       m_indexer.enableReverse();
@@ -316,14 +307,14 @@ public class RobotContainer {
     NamedCommands.registerCommand("StartShooter", m_shooter.m_enableShooterCommand);
     NamedCommands.registerCommand("StopShooter", m_shooter.m_disableShooterCommand);
 
-    NamedCommands.registerCommand("WaitForShooter", new WaitCommand(ShooterConstants.TIME_FOR_SHOOTER_TO_GET_UP_TO_SPEED));
+    // NamedCommands.registerCommand("WaitForShooter", new WaitCommand(ShooterConstants.TIME_FOR_SHOOTER_TO_GET_UP_TO_SPEED));
 
-    NamedCommands.registerCommand("StartFeeder", new InstantCommand(() -> {
-      m_shooter.enableFeeder();
-    }, m_shooter));
-    NamedCommands.registerCommand("StopFeeder", new InstantCommand(() -> {
-      m_shooter.disableFeeder();
-    }, m_shooter));
+    // NamedCommands.registerCommand("StartFeeder", new InstantCommand(() -> {
+    //   m_shooter.enableFeeder();
+    // }, m_shooter));
+    // NamedCommands.registerCommand("StopFeeder", new InstantCommand(() -> {
+    //   m_shooter.disableFeeder();
+    // }, m_shooter));
 
     configureBindings();
   }

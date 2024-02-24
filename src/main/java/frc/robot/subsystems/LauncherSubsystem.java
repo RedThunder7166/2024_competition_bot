@@ -18,6 +18,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -46,6 +47,13 @@ public class LauncherSubsystem extends SubsystemBase {
   private boolean m_isAtLoadingPosition = false;
   private boolean m_wantsToLoad = false;
 
+  private final PIDController m_aimPIDController = new PIDController(
+    0.15,
+    0,
+    0
+  );
+  private final double m_aimMaxSpeed = 1.5;
+
   private boolean m_manualAimState = false;
   private AimPosition m_aimTargetPosition = AimPosition.Loading;
 
@@ -71,27 +79,34 @@ public class LauncherSubsystem extends SubsystemBase {
     aim_sotware_limit_switch_configs.ForwardSoftLimitEnable = false;
     aim_sotware_limit_switch_configs.ReverseSoftLimitEnable = false;
     
-    // TODO: TUNE THIS
-    final Slot0Configs aim_slot0configs = aim_config.Slot0;
-    // aim_slot0configs.kP = 0.01; // 0.05
-    aim_slot0configs.kI = 0;
-    aim_slot0configs.kD = 0;
-    // aim_slot0configs.kV = .1;
+    // // TODO: TUNE THIS
+    // final Slot0Configs aim_slot0configs = aim_config.Slot0;
+    // // aim_slot0configs.kP = 0.01; // 0.05
+    // aim_slot0configs.kP = 0.00001;
+    // aim_slot0configs.kI = 0.0001;
+    // aim_slot0configs.kD = 0;
+    // // aim_slot0configs.kV = .1;
+    // aim_slot0configs.kS = 0.2;
     
-    // TODO: TUNE THIS
-    final var aim_motionmagic_configs = aim_config.MotionMagic;
+    // // TODO: TUNE THIS
+    // final var aim_motionmagic_configs = aim_config.MotionMagic;
     
-    aim_motionmagic_configs.MotionMagicCruiseVelocity = 1000; // Target cruise velocity of 80 rps
-    aim_motionmagic_configs.MotionMagicAcceleration = 2000; // Target acceleration of 160 rps/s (0.5 seconds)
-    aim_motionmagic_configs.MotionMagicJerk = 20000; // Target jerk of 1600 rps/s/s (0.1 seconds)
+    // aim_motionmagic_configs.MotionMagicCruiseVelocity = 800; // Target cruise velocity of 80 rps
+    // aim_motionmagic_configs.MotionMagicAcceleration = 1800; // Target acceleration of 160 rps/s (0.5 seconds)
+    // aim_motionmagic_configs.MotionMagicJerk = 18000; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
     aim_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+    aim_config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    aim_config.CurrentLimits.SupplyCurrentLimit = 30;
+
     m_aimMotor.getConfigurator().apply(aim_config);
 
     m_shuffleBoardTab.addDouble("Aim Motor Position Degree", () -> m_aimMotor.getPosition().getValueAsDouble());
     m_shuffleBoardTab.addDouble("Aim Motor CANCoder AbsolutePosition Degree", this::getAimCANCoderAbsolutePositionDegrees);
     m_shuffleBoardTab.addDouble("Aim Motor CANCoder AbsolutePosition", this::getAimCANCoderAbsolutePosition);
     m_shuffleBoardTab.addDouble("Velocity", ()-> m_aimMotor.get() );
+    m_shuffleBoardTab.addDouble("PID Error", () -> m_aimPIDController.getPositionError());
 
     m_shuffleBoardTab.addString("Aim Position", () -> m_aimTargetPosition.toString());
   }
@@ -125,7 +140,15 @@ public class LauncherSubsystem extends SubsystemBase {
     if (m_manualAimState) {
       manualAim(m_manual_aim_supplier.getAsDouble());
     } else {
-      m_aimMotor.setControl(m_aimRequest.withPosition(m_aimTargetPosition.position));
+      // m_aimMotor.setControl(m_aimRequest.withPosition(m_aimTargetPosition.position));
+      double value = m_aimPIDController.calculate(
+          m_aimMotor.getPosition().getValueAsDouble(), m_aimTargetPosition.position
+      ) * m_aimMaxSpeed;
+      if (Math.abs(m_aimPIDController.getPositionError()) > 0.5) {
+        m_aimMotor.setControl(new DutyCycleOut(value));
+      } else {
+        m_aimMotor.disable();
+      }
     }
   }
 

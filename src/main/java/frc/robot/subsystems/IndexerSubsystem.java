@@ -27,14 +27,17 @@ public class IndexerSubsystem extends SubsystemBase {
   public IndexerSubsystem(LauncherSubsystem launcher) {
     m_launcher = launcher;
 
-    TalonFXConfiguration configs = new TalonFXConfiguration();
+    TalonFXConfiguration config = new TalonFXConfiguration();
     // clockwise is true
     // counterclockwise is false
-    configs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-    configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-    m_motor.getConfigurator().apply(configs);
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimit = 30;
+
+    m_motor.getConfigurator().apply(config);
   }
 
   private static final double speed = 0.65;

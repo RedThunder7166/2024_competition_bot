@@ -9,7 +9,7 @@ public class Constants {
         public static final int OPERATOR_PORT = 1;
     }
     public static final class AllianceColor {
-        public static final Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Red);
+        public static final Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
         public static final boolean is_red_alliance = alliance == Alliance.Red;
 
         public static final int SOURCE_RIGHT = is_red_alliance ? 9 : 1;
@@ -76,10 +76,10 @@ public class Constants {
         public static final int FEEDER_MOTOR_ID = 11;
 
         public static final double TARGET_SHOOTER_RPS = 80.0; // TODO: CHANGE THIS
-        public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 80.0; // TODO: CHANGE THIS
-        public static final double TIME_FOR_SHOOTER_TO_GET_UP_TO_SPEED = 0.4; // TODO: CHANGE THIS
+        public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 90.0; // TODO: CHANGE THIS
+        // public static final double TIME_FOR_SHOOTER_TO_GET_UP_TO_SPEED = 0.4; // TODO: CHANGE THIS
 
-        public static final double TARGET_FEEDER_RPS = 5.0; // TODO: CHANGE THIS
+        public static final double TARGET_FEEDER_RPS = 4.0; // TODO: CHANGE THIS
     }
     public static final class IndexerConstants {
         public static final int MOTOR_ID = 17;

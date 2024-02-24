@@ -5,7 +5,7 @@
       "x": 1.2073033155075317,
       "y": 6.6192074726491805
     },
-    "rotation": -136.19348942398202
+    "rotation": -131.8670225605706
   },
   "command": {
     "type": "sequential",
@@ -50,6 +50,6 @@
       ]
     }
   },
-  "folder": "BLUE ALLIANCE COMPTION CODE",
+  "folder": null,
   "choreoAuto": false
 }
