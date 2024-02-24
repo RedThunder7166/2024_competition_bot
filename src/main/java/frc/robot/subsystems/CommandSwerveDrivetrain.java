@@ -1,10 +1,13 @@
 package frc.robot.subsystems;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -14,10 +17,16 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Constants.AllianceColor;
 import frc.robot.generated.TunerConstants;
 
 
@@ -32,9 +41,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     private final SwerveRequest.ApplyChassisSpeeds autoRequest = new SwerveRequest.ApplyChassisSpeeds();
 
+    private final NetworkTable table = NetworkTableInstance.getDefault().getTable("Drivetrain");
+
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
         configurePathPlanner();
+        configureMotors();
         if (Utils.isSimulation()) {
             startSimThread();
         }
@@ -42,8 +54,43 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
         configurePathPlanner();
+        configureMotors();
         if (Utils.isSimulation()) {
             startSimThread();
+        }
+    }
+
+    private void configureMotors() {
+        for (int index = 0; index < 4; index++) {
+            SwerveModule module = getModule(index);
+            TalonFXConfiguration config = new TalonFXConfiguration();
+            module.getSteerMotor().getConfigurator().refresh(config);
+
+            config.CurrentLimits.SupplyCurrentLimitEnable = true;
+            config.CurrentLimits.SupplyCurrentThreshold = 25;
+            config.CurrentLimits.SupplyTimeThreshold = 0.1;
+
+            config.TorqueCurrent.PeakForwardTorqueCurrent = 19;
+            config.TorqueCurrent.PeakReverseTorqueCurrent = -19;
+
+            module.getSteerMotor().getConfigurator().apply(config);
+
+            config.CurrentLimits.SupplyCurrentLimitEnable = true;
+            config.CurrentLimits.SupplyCurrentThreshold = 60;
+            config.CurrentLimits.SupplyTimeThreshold = 10;
+            
+            config.TorqueCurrent.PeakForwardTorqueCurrent = 30;
+            config.TorqueCurrent.PeakReverseTorqueCurrent = -30;
+
+            config.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.1;
+            config.OpenLoopRamps.TorqueOpenLoopRampPeriod = 0.1;
+            config.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.1;
+
+            config.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.1;
+            config.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.1;
+            config.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.1;
+
+            module.getDriveMotor().getConfigurator().apply(config);
         }
     }
 
@@ -63,7 +110,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                                             TunerConstants.kSpeedAt12VoltsMps,
                                             driveBaseRadius,
                                             new ReplanningConfig()),
-            ()->false, // Change this if the path needs to be flipped on red vs blue
+            () -> {
+              return AllianceColor.is_red_alliance;
+            },
             this); // Subsystem for requirements
     }
 
@@ -92,5 +141,39 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             updateSimState(deltaTime, RobotController.getBatteryVoltage());
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
+    }
+
+    // private final DoublePublisher[] module_publishers = {
+    //     table.getDoubleTopic("Module0Drive StatorCurrent").publish(),
+    //     table.getDoubleTopic("Module0Steer StatorCurrent").publish(),
+    //     table.getDoubleTopic("Module1Drive StatorCurrent").publish(),
+    //     table.getDoubleTopic("Module1Steer StatorCurrent").publish(),
+    //     table.getDoubleTopic("Module2Drive StatorCurrent").publish(),
+    //     table.getDoubleTopic("Module2Steer StatorCurrent").publish(),
+    //     table.getDoubleTopic("Module3Drive StatorCurrent").publish(),
+    //     table.getDoubleTopic("Module3Steer StatorCurrent").publish(),
+    //     table.getDoubleTopic("Module4Drive StatorCurrent").publish(),
+    //     table.getDoubleTopic("Module4Steer StatorCurrent").publish(),
+    // };
+
+    private final DoublePublisher module0drive_statorcurrent = table.getDoubleTopic("Module0Drive StatorCurrent").publish();
+    private final DoublePublisher module0drive_velocity = table.getDoubleTopic("Module0Drive Velocity").publish();
+
+
+    @Override
+    public void periodic() {
+        // int publisher_index = 0;
+        // // amperage of each motor
+        // for (int index = 0; index < 4; index++) {
+        //     SwerveModule module = getModule(index);
+            
+        //     module_publishers[publisher_index].set(module.getDriveMotor().getStatorCurrent().getValueAsDouble());
+        //     module_publishers[publisher_index + 1].set(module.getSteerMotor().getStatorCurrent().getValueAsDouble());
+        //     publisher_index += 2;
+        // }
+
+        SwerveModule module = getModule(0);
+        module0drive_statorcurrent.set(module.getDriveMotor().getStatorCurrent().getValueAsDouble());
+        module0drive_velocity.set(module.getDriveMotor().getVelocity().getValueAsDouble());
     }
 }

@@ -21,10 +21,12 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.LauncherConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -65,6 +67,17 @@ public class RobotContainer {
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   // private final ClimberSubsystem m_climber = new ClimberSubsystem(drivetrain);
 
+  private final InstantCommand m_startPickingUpPiece = new InstantCommand(() -> {
+    m_intake.enableForward();
+    m_indexer.enableForward();
+    m_shooter.enableFeeder();
+  }, m_intake, m_indexer, m_shooter);
+  private final InstantCommand m_stopPickingUpPiece = new InstantCommand(() -> {
+    m_intake.disableForward();
+    m_indexer.disableForward();
+    m_shooter.disableFeeder();
+  }, m_intake, m_indexer, m_shooter);
+
   // private final SequentialCommandGroup m_startPickingUpPiece = new SequentialCommandGroup(
   //   m_launcher.m_startWantingToLoad/*,
   //   m_intake.m_deployAndStartCommand*/
@@ -98,7 +111,7 @@ public class RobotContainer {
     driver_joystick.b().whileTrue(drivetrain.applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver_joystick.getLeftY(), -driver_joystick.getLeftX()))));
 
     // reset the field-centric heading on left bumper press
-    driver_joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
+    driver_joystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
 
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
@@ -111,16 +124,9 @@ public class RobotContainer {
     // ^ this should be fine since we stopped using sequentialcommandgroups and are just using methods,
     // but this might lead to conflicts
     // letting go of buttons will turn everything off, so it should be fine
-    driver_joystick.x().onTrue(new InstantCommand(() -> {
-      m_intake.enableForward();
-      m_indexer.enableForward();
-      m_shooter.enableFeeder();
-    }, m_intake, m_indexer, m_shooter));
-    driver_joystick.x().onFalse(new InstantCommand(() -> {
-      m_intake.disableForward();
-      m_indexer.disableForward();
-      m_shooter.disableFeeder();
-    }, m_intake, m_indexer, m_shooter));
+
+    driver_joystick.x().onTrue(m_startPickingUpPiece);
+    driver_joystick.x().onFalse(m_stopPickingUpPiece);
 
     /*
     driver:
@@ -191,6 +197,8 @@ public class RobotContainer {
     operator_joystick.povRight().onTrue(m_launcher.m_aimAtAmpCommand);
     operator_joystick.povDown().onTrue(m_launcher.m_aimAtTrapCommand);
     operator_joystick.povLeft().onTrue(m_launcher.m_aimAtSpeakerCommand);
+
+    // m_climber.configureManualMode(() -> operator_joystick.getRightY());
 
     // // operator_joystick.x().whileFalse(new TrackAprilTagCommand(drivetrain, m_visionSubsystem, drive, MaxAngularRate));
     // driver_joystick.rightBumper().onTrue(new InstantCommand(() -> {
@@ -302,11 +310,20 @@ public class RobotContainer {
   public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
 
-    // NamedCommands.registerCommand("StartPickingUpPiece", m_startPickingUpPiece);
-    // NamedCommands.registerCommand("StopPickingUpPiece", m_stopPickingUpPiece);
+    NamedCommands.registerCommand("StartPickingUpPiece", m_startPickingUpPiece);
+    NamedCommands.registerCommand("StopPickingUpPiece", m_stopPickingUpPiece);
 
     NamedCommands.registerCommand("StartShooter", m_shooter.m_enableShooterCommand);
     NamedCommands.registerCommand("StopShooter", m_shooter.m_disableShooterCommand);
+
+    NamedCommands.registerCommand("WaitForShooter", new WaitCommand(ShooterConstants.TIME_FOR_SHOOTER_TO_GET_UP_TO_SPEED));
+
+    NamedCommands.registerCommand("StartFeeder", new InstantCommand(() -> {
+      m_shooter.enableFeeder();
+    }, m_shooter));
+    NamedCommands.registerCommand("StopFeeder", new InstantCommand(() -> {
+      m_shooter.disableFeeder();
+    }, m_shooter));
 
     configureBindings();
   }

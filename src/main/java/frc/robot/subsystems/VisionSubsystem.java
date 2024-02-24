@@ -30,7 +30,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.AllianceAprilTagIDs;
+import frc.robot.Constants.AllianceColor;
 
 public class VisionSubsystem extends SubsystemBase {
   private AprilTagFieldLayout m_aprilTagFieldLayout = null;
@@ -189,7 +189,7 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     if (m_frontResult.hasTargets()) {
-      Optional<PhotonTrackedTarget> subwoofer_center_tag = getTarget(AllianceAprilTagIDs.SUBWOOFER_CENTER, m_frontResult);
+      Optional<PhotonTrackedTarget> subwoofer_center_tag = getTarget(AllianceColor.SUBWOOFER_CENTER, m_frontResult);
       if (subwoofer_center_tag.isPresent()) {
         PhotonTrackedTarget target = subwoofer_center_tag.get();
         m_pitchPublisher.set(target.getPitch());
@@ -218,7 +218,7 @@ public class VisionSubsystem extends SubsystemBase {
 
   public Optional<Double> calculateLauncherSpeakerAimPosition() {
     if (m_frontResult.hasTargets()) {
-      final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceAprilTagIDs.SUBWOOFER_CENTER, m_frontResult);
+      final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceColor.SUBWOOFER_CENTER, m_frontResult);
       if (target_optional.isPresent()) {
         final double distance = calculateDistanceToTargetMeters(target_optional.get());
         // this should be cancoder position, so when you are doing your data use that (cancoder.getAbsolutePosition())

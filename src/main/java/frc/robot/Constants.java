@@ -8,9 +8,9 @@ public class Constants {
         public static final int DRIVER_PORT = 0;
         public static final int OPERATOR_PORT = 1;
     }
-    public static final class AllianceAprilTagIDs {
-        private static final Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Red);
-        private static final boolean is_red_alliance = alliance == Alliance.Red;
+    public static final class AllianceColor {
+        public static final Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Red);
+        public static final boolean is_red_alliance = alliance == Alliance.Red;
 
         public static final int SOURCE_RIGHT = is_red_alliance ? 9 : 1;
         public static final int SOURCE_LEFT = is_red_alliance ? 10 : 2;
@@ -77,6 +77,7 @@ public class Constants {
 
         public static final double TARGET_SHOOTER_RPS = 80.0; // TODO: CHANGE THIS
         public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 80.0; // TODO: CHANGE THIS
+        public static final double TIME_FOR_SHOOTER_TO_GET_UP_TO_SPEED = 0.4; // TODO: CHANGE THIS
 
         public static final double TARGET_FEEDER_RPS = 5.0; // TODO: CHANGE THIS
     }
@@ -90,6 +91,8 @@ public class Constants {
 
         public static final int LEFT_ARM_LIMIT_SWITCH_ID = -100; // TODO: CHANGE THIS
         public static final int RIGHT_ARM_LIMIT_SWITCH_ID = -100; // TODO: CHANGE THIS
+
+        public static final double MANUAL_DEADBAND = 0.25;
     }
     public static final class IntakeConstants {
         public static final int LOWER_MOTOR_ID = 13;

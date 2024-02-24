@@ -14,7 +14,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "B1-ring-2"
+            "pathName": "B1-to-2"
           }
         },
         {
@@ -26,6 +26,6 @@
       ]
     }
   },
-  "folder": null,
+  "folder": "Random autos",
   "choreoAuto": false
 }

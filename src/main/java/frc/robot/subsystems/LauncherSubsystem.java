@@ -73,10 +73,10 @@ public class LauncherSubsystem extends SubsystemBase {
     
     // TODO: TUNE THIS
     final Slot0Configs aim_slot0configs = aim_config.Slot0;
-    aim_slot0configs.kP = .0001; // 0.05
+    // aim_slot0configs.kP = 0.01; // 0.05
     aim_slot0configs.kI = 0;
     aim_slot0configs.kD = 0;
-    // aim_slot0configs.kS = .4;
+    // aim_slot0configs.kV = .1;
     
     // TODO: TUNE THIS
     final var aim_motionmagic_configs = aim_config.MotionMagic;
@@ -92,6 +92,8 @@ public class LauncherSubsystem extends SubsystemBase {
     m_shuffleBoardTab.addDouble("Aim Motor CANCoder AbsolutePosition Degree", this::getAimCANCoderAbsolutePositionDegrees);
     m_shuffleBoardTab.addDouble("Aim Motor CANCoder AbsolutePosition", this::getAimCANCoderAbsolutePosition);
     m_shuffleBoardTab.addDouble("Velocity", ()-> m_aimMotor.get() );
+
+    m_shuffleBoardTab.addString("Aim Position", () -> m_aimTargetPosition.toString());
   }
 
   public void configureManualMode(DoubleSupplier supplier) {

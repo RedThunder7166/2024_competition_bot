@@ -1,0 +1,49 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.1610797996370767,
+      "y": 4.668575102915972
+    },
+    "rotation": 142.59464336859136
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B2-to-3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B1-ring-2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B1-ring-1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B1-ring-4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B-shoot-4"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "Random autos",
+  "choreoAuto": false
+}

@@ -5,8 +5,11 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimberConstants;
+
+import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -19,7 +22,9 @@ public class ClimberSubsystem extends SubsystemBase {
 
   private final CommandSwerveDrivetrain m_swerve;
 
-  private double m_output = 0;
+  private DoubleSupplier m_manual_supplier;
+
+  private final double m_output = 0;
   private final DutyCycleOut m_leftRequest = new DutyCycleOut(m_output);
   private final DutyCycleOut m_rightRequest = new DutyCycleOut(m_output);
 
@@ -27,11 +32,15 @@ public class ClimberSubsystem extends SubsystemBase {
     m_swerve = swerve;
   }
 
-  public double getRollDegrees() {
+  public void configureManualMode(DoubleSupplier supplier) {
+    m_manual_supplier = supplier;
+  }
+
+  private double getRollDegrees() {
     return Math.toDegrees(m_swerve.getRotation3d().getX());
   }
 
-  public void driveArms(double left_output, double right_output) {
+  private void driveArms(double left_output, double right_output) {
     boolean left_switch_is_down = !m_leftArmInput.get();
     if (left_switch_is_down && left_output <= 0) {
       m_leftClimbMotor.set(0);
@@ -49,22 +58,27 @@ public class ClimberSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double roll = getRollDegrees();
+    // TODO: PUT THIS BACK ONCE THE CLIMBER IS WORKING
+    // double left_output = m_manual_supplier.getAsDouble();
+    // if (Math.abs(left_output) < ClimberConstants.MANUAL_DEADBAND) {
+    //   left_output = 0;
+    // }
+    // double right_output = left_output;
 
-    double left_output = m_output;
-    double right_output = m_output;
-    if (roll >= 5) {
-      // left_percent = (left_percent < 0) ? (left_percent + 0.5) : (left_percent - 0.5);
-      left_output /= 2;
-    } else if (roll <= -5) {
-      right_output /= 2;
-    }
+    // double roll = getRollDegrees();
 
-    driveArms(left_output, right_output);
+    // if (roll >= 5) {
+    //   // left_percent = (left_percent < 0) ? (left_percent + 0.5) : (left_percent - 0.5);
+    //   left_output /= 2;
+    // } else if (roll <= -5) {
+    //   right_output /= 2;
+    // }
+
+    // driveArms(left_output, right_output);
   }
 
   // -1 to 1
-  public void setOutput(double output) {
-    m_output = output;
-  }
+  // public void setOutput(double output) {
+  //   m_output = output;
+  // }
 }

@@ -1,0 +1,55 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.3644632694670795,
+      "y": 5.583800717150984
+    },
+    "rotation": -179.3259631020155
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B-A3-P1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B-A3-P2.5"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B-A3-P3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B-A3-P4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B-A3-P5"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B-A3-P6"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "BLUE ALLIANCE COMPTION CODE",
+  "choreoAuto": false
+}
