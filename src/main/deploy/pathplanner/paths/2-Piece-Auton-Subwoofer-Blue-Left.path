@@ -1,0 +1,92 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 0.8330856058340331,
+        "y": 6.716034869514282
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.0588958888654245,
+        "y": 6.716034869514282
+      },
+      "isLocked": true,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.187947304022381,
+        "y": 6.949129355224106
+      },
+      "prevControl": {
+        "x": 1.201271158152005,
+        "y": 6.7864327567029274
+      },
+      "nextControl": {
+        "x": 3.5573774075675924,
+        "y": 7.1749396382554975
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.488663846892911,
+        "y": 5.5214256302514375
+      },
+      "prevControl": {
+        "x": 1.7581793459948942,
+        "y": 5.543278238286734
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.0,
+      "rotationDegrees": -177.85909863367692,
+      "rotateFast": false
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "New Event Marker",
+      "waypointRelativePos": 1.0,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "StartPickingUpPiece"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 179.1815445383113,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": null,
+  "previewStartingState": {
+    "rotation": -118.55962047831981,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}

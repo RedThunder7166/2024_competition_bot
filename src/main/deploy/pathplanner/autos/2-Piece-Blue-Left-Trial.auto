@@ -2,49 +2,43 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.3644632694670795,
-      "y": 5.583800717150984
+      "x": 0.8330856058340331,
+      "y": 6.716034869514282
     },
-    "rotation": -179.3259631020155
+    "rotation": -121.45682335755524
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "B-A3-P1"
+            "name": "SequentialWooferShoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 4.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartPickingUpPiece"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "B-A3-P2.5"
+            "pathName": "2-Piece-Auton-Subwoofer-Blue-Left"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "B-A3-P3"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "B-A3-P4"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "B-A3-P5"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "B-A3-P6"
+            "name": "SequentialWooferShoot"
           }
         }
       ]

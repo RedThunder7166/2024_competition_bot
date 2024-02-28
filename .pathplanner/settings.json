@@ -4,6 +4,7 @@
   "holonomicMode": true,
   "pathFolders": [
     "New Folder",
+    "MainTestFolder",
     "testing"
   ],
   "autoFolders": [

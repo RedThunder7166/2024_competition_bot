@@ -85,6 +85,8 @@ private final SlewRateLimiter rotLimiter = new SlewRateLimiter(.5);
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final ClimberSubsystem m_climber = new ClimberSubsystem(drivetrain);
   private final TestAutoCommand m_TestAutoCommand = new TestAutoCommand(drivetrain);
+
+  
   private final InstantCommand m_startPickingUpPiece = new InstantCommand(() -> {
     m_intake.enableForward();
     m_indexer.enableForward();
@@ -95,6 +97,57 @@ private final SlewRateLimiter rotLimiter = new SlewRateLimiter(.5);
     m_indexer.disableForward();
     m_shooter.disableFeeder();
   }, m_intake, m_indexer, m_shooter);
+
+   
+  {
+    // ...
+    NamedCommands.registerCommand("StartPickingUpPiece", m_startPickingUpPiece);
+    NamedCommands.registerCommand("StopPickingUpPiece", m_stopPickingUpPiece);
+
+    NamedCommands.registerCommand("StartShooter", m_shooter.m_enableShooterCommand);
+    NamedCommands.registerCommand("StopShooter", m_shooter.m_disableShooterCommand);
+
+    NamedCommands.registerCommand("SequentialWooferShoot", new SequentialCommandGroup(
+      new InstantCommand(() -> {
+      AimLocation.setAimLocation(AimLocation.Subwoofer);
+    }, m_shooter, m_launcher),
+      new WaitCommand(2),
+      NamedCommands.getCommand("StartShooter"),
+      new WaitCommand(.4),
+      NamedCommands.getCommand("StartFeeder"),
+      new WaitCommand(.1),
+      NamedCommands.getCommand("StopShooter"),
+      NamedCommands.getCommand("StopFeeder")
+
+  ));
+
+    NamedCommands.registerCommand("StartFeeder", new InstantCommand(() -> {
+      m_shooter.enableFeeder();
+    }, m_shooter));
+    NamedCommands.registerCommand("StopFeeder", new InstantCommand(() -> {
+      m_shooter.disableFeeder();
+    }, m_shooter));
+
+    NamedCommands.registerCommand("StopShooterAndFeeder", new InstantCommand(() -> {
+      m_shooter.disableShooter();
+      m_shooter.disableFeeder();
+    }, m_shooter));
+
+
+
+    NamedCommands.registerCommand("AimFromSubwoofer", new InstantCommand(() -> {
+      AimLocation.setAimLocation(AimLocation.Subwoofer);
+    }, m_shooter, m_launcher));
+    NamedCommands.registerCommand("AimFromLoading", new InstantCommand(()-> {
+      AimLocation.setAimLocation(AimLocation.Loading);
+    }));
+    NamedCommands.registerCommand("AimFromAmp", new InstantCommand(()-> {
+      AimLocation.setAimLocation(AimLocation.Amp);
+    }));
+    NamedCommands.registerCommand("AimFromTrap", new InstantCommand(()-> {
+      AimLocation.setAimLocation(AimLocation.Trap);
+    }));
+  }
   
   // private final SequentialCommandGroup m_startPickingUpPiece = new SequentialCommandGroup(
   //   m_launcher.m_startWantingToLoad/*,
@@ -342,31 +395,7 @@ private final SlewRateLimiter rotLimiter = new SlewRateLimiter(.5);
     // }, m_launcher, m_shooter));
     // // TODO: MANUAL TESTING DELETE THIS
   }
-  
-  {
-  //   // ...
-  //   NamedCommands.registerCommand("StartPickingUpPiece", m_startPickingUpPiece);
-  //   NamedCommands.registerCommand("StopPickingUpPiece", m_stopPickingUpPiece);
-
-  //   NamedCommands.registerCommand("StartShooter", m_shooter.m_enableShooterCommand);
-  //   NamedCommands.registerCommand("StopShooter", m_shooter.m_disableShooterCommand);
-
-  //   NamedCommands.registerCommand("StartFeeder", new InstantCommand(() -> {
-  //     m_shooter.enableFeeder();
-  //   }, m_shooter));
-  //   NamedCommands.registerCommand("StopFeeder", new InstantCommand(() -> {
-  //     m_shooter.disableFeeder();
-  //   }, m_shooter));
-
-  //   NamedCommands.registerCommand("StopShooterAndFeeder", new InstantCommand(() -> {
-  //     m_shooter.disableShooter();
-  //     m_shooter.disableFeeder();
-  //   }, m_shooter));
-
-  //   NamedCommands.registerCommand("AimFromSubwoofer", new InstantCommand(() -> {
-  //     AimLocation.setAimLocation(AimLocation.Subwoofer);
-  //   }, m_shooter, m_launcher));
-  }
+ 
   {
 
     // Build an auto chooser. This will use Commands.none() as the default option.
@@ -407,7 +436,7 @@ private final SlewRateLimiter rotLimiter = new SlewRateLimiter(.5);
 
   public Command getAutonomousCommand() {
     // return autoChooser.getSelected();
-    return new PathPlannerAuto("testauto");
+    return autoChooser.getSelected();
     // return new TrackAprilTagCommand(drivetrain, m_visionSubsystem, drive, MaxAngularRate);
   }
 }
