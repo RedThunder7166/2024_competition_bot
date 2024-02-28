@@ -23,6 +23,7 @@ public class ClimberSubsystem extends SubsystemBase {
   private final CommandSwerveDrivetrain m_swerve;
 
   private DoubleSupplier m_manual_supplier;
+  private DoubleSupplier m_manual_right_supplier;
 
   private final double m_output = 0;
   private final DutyCycleOut m_leftRequest = new DutyCycleOut(m_output);
@@ -37,6 +38,9 @@ public class ClimberSubsystem extends SubsystemBase {
 
   public void configureManualMode(DoubleSupplier supplier) {
     m_manual_supplier = supplier;
+  }
+  public void configureRightManualMode(DoubleSupplier supplier) {
+    m_manual_right_supplier = supplier;
   }
 
   private double getRollDegrees() {
@@ -60,23 +64,27 @@ public class ClimberSubsystem extends SubsystemBase {
     }
   
 
+  private double applyDeadband(double num) {
+    if (Math.abs(num) < ClimberConstants.MANUAL_DEADBAND) {
+      return 0;
+    }
+    return num;
+  } 
+
   @Override
   public void periodic() {
-    // TODO: PUT THIS BACK ONCE THE CLIMBER IS WORKING
-    double left_output = m_manual_supplier.getAsDouble();
-    if (Math.abs(left_output) < ClimberConstants.MANUAL_DEADBAND) {
-      left_output = 0;
-    }
-    double right_output = left_output;
+    double left_output = applyDeadband(m_manual_supplier.getAsDouble());
+    // double right_output = left_output;
+    double right_output = applyDeadband(m_manual_right_supplier.getAsDouble());
 
-    double roll = getRollDegrees();
+    // double roll = getRollDegrees();
 
-    if (roll >= 5) {
-      // left_percent = (left_percent < 0) ? (left_percent + 0.5) : (left_percent - 0.5);
-      left_output /= 2;
-    } else if (roll <= -5) {
-      right_output /= 2;
-    }
+    // if (roll >= 5) {
+    //   // left_percent = (left_percent < 0) ? (left_percent + 0.5) : (left_percent - 0.5);
+    //   left_output /= 2;
+    // } else if (roll <= -5) {
+    //   right_output /= 2;
+    // }
 
     driveArms(left_output, right_output);
   }
