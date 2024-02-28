@@ -35,7 +35,7 @@ public class IndexerSubsystem extends SubsystemBase {
     config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 30;
+    config.CurrentLimits.SupplyCurrentLimit = 40;
 
     m_motor.getConfigurator().apply(config);
   }

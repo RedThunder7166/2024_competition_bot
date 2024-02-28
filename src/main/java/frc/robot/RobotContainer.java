@@ -107,19 +107,6 @@ private final SlewRateLimiter rotLimiter = new SlewRateLimiter(.5);
     NamedCommands.registerCommand("StartShooter", m_shooter.m_enableShooterCommand);
     NamedCommands.registerCommand("StopShooter", m_shooter.m_disableShooterCommand);
 
-    NamedCommands.registerCommand("SequentialWooferShoot", new SequentialCommandGroup(
-      new InstantCommand(() -> {
-      AimLocation.setAimLocation(AimLocation.Subwoofer);
-    }, m_shooter, m_launcher),
-      new WaitCommand(2),
-      NamedCommands.getCommand("StartShooter"),
-      new WaitCommand(.4),
-      NamedCommands.getCommand("StartFeeder"),
-      new WaitCommand(.1),
-      NamedCommands.getCommand("StopShooter"),
-      NamedCommands.getCommand("StopFeeder")
-
-  ));
 
     NamedCommands.registerCommand("StartFeeder", new InstantCommand(() -> {
       m_shooter.enableFeeder();
@@ -127,7 +114,12 @@ private final SlewRateLimiter rotLimiter = new SlewRateLimiter(.5);
     NamedCommands.registerCommand("StopFeeder", new InstantCommand(() -> {
       m_shooter.disableFeeder();
     }, m_shooter));
-
+     NamedCommands.registerCommand("StartFeederReverse", new InstantCommand(() -> {
+      m_shooter.enableFeederReverse();
+    }, m_shooter));
+     NamedCommands.registerCommand("StopFeederReverse", new InstantCommand(() -> {
+      m_shooter.disableFeederReverse();
+    }, m_shooter));
     NamedCommands.registerCommand("StopShooterAndFeeder", new InstantCommand(() -> {
       m_shooter.disableShooter();
       m_shooter.disableFeeder();
@@ -147,6 +139,21 @@ private final SlewRateLimiter rotLimiter = new SlewRateLimiter(.5);
     NamedCommands.registerCommand("AimFromTrap", new InstantCommand(()-> {
       AimLocation.setAimLocation(AimLocation.Trap);
     }));
+    
+  //   NamedCommands.registerCommand("SequentialWooferShoot", new SequentialCommandGroup(
+  //     new InstantCommand(() -> {
+  //     AimLocation.setAimLocation(AimLocation.Subwoofer);
+  //   }, m_shooter, m_launcher),
+  //     new WaitCommand(2),
+  //     NamedCommands.getCommand("StartShooter"),
+  //     new WaitCommand(.4),
+  //     NamedCommands.getCommand("StartFeeder"),
+  //     new WaitCommand(.1),
+  //     NamedCommands.getCommand("StopShooter"),
+  //     NamedCommands.getCommand("StopFeeder")
+
+  // ));
+
   }
   
   // private final SequentialCommandGroup m_startPickingUpPiece = new SequentialCommandGroup(

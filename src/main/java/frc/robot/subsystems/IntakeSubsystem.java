@@ -40,7 +40,7 @@ public class IntakeSubsystem extends SubsystemBase {
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 20;
+    config.CurrentLimits.SupplyCurrentLimit = 30;
 
     m_upperMotor.getConfigurator().apply(config);
     m_lowerMotor.getConfigurator().apply(config);
