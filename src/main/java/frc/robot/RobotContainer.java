@@ -300,6 +300,10 @@ private final SlewRateLimiter rotLimiter = new SlewRateLimiter(.5);
     }, m_shooter, m_launcher));
 
     m_climber.configureManualMode(() -> operator_joystick.getRightY());
+    m_climber.configureRightManualMode(
+      () -> operator_joystick.a().getAsBoolean() ? 0.3 :
+        (operator_joystick.b().getAsBoolean() ? -0.3 : 0)
+    );
 
     // // operator_joystick.x().whileFalse(new TrackAprilTagCommand(drivetrain, m_visionSubsystem, drive, MaxAngularRate));
     // driver_joystick.rightBumper().onTrue(new InstantCommand(() -> {
