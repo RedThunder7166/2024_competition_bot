@@ -41,6 +41,12 @@
             {
               "type": "named",
               "data": {
+                "name": "AimFromSubwoofer"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
                 "name": "StartShooter"
               }
             }
@@ -55,6 +61,12 @@
         "type": "sequential",
         "data": {
           "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "AimAtLoading"
+              }
+            },
             {
               "type": "named",
               "data": {

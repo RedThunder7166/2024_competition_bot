@@ -48,19 +48,6 @@ public class Constants {
         public static final double AIM_MOTOR_GEAR_RATIO = 125;
         public static final double AIM_MOTOR_SPROCKET_RATIO = 18;
 
-        // these are cancoder absolute position (cancoder.getAbsolutePosition())
-        public static enum AimPosition {
-            Loading(847.5),//.3767 // TODO: RECORD LOADING AIM CANCODER ABSOLUTEPOSITION
-            Amp(967),//.4301757
-            Trap(981),//0.43679151
-            Speaker(787);//.35
-
-            public final double position;
-            AimPosition(double pos) {
-                position = pos;
-            }
-        }
-
         public static final double MANUAL_AIM_DEADBAND = 0.25;
 
         // public static final double AIM_MOTOR_HIGHEST_ANGLE_POSITIONS = -109;
@@ -74,12 +61,13 @@ public class Constants {
         public static final int TOP_MOTOR_ID = 10;
         public static final int BOTTOM_MOTOR_ID = 9;
         public static final int FEEDER_MOTOR_ID = 11;
+        public static final int BREAK_BEAM_SENSOR_ID = 0;
 
         public static final double TARGET_SHOOTER_RPS = 80.0; // TODO: CHANGE THIS
         public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 90.0; // TODO: CHANGE THIS
         // public static final double TIME_FOR_SHOOTER_TO_GET_UP_TO_SPEED = 0.4; // TODO: CHANGE THIS
 
-        public static final double TARGET_FEEDER_RPS = 4.0; // TODO: CHANGE THIS
+        public static final double TARGET_FEEDER_RPS = 3.0; // TODO: CHANGE THIS
     }
     public static final class IndexerConstants {
         public static final int MOTOR_ID = 17;
@@ -103,5 +91,9 @@ public class Constants {
         // public static final double ACTUATOR_CANCODER_EXTENDED_POSITION = 0.0; // TODO: CHANGE THIS
 
         public static final int TARGET_VELOCITY_RPS = 80; // TODO: CHANGE THIS
-    } 
+    }
+
+    public static final class VisionConstants {
+        public static final double TARGET_SPEAKER_DISTANCE_METERS = 3.4;
+    }
 }

@@ -4,12 +4,18 @@
 
 package frc.robot;
 
+import java.util.Optional;
+
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest.SysIdSwerveRotation;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -24,9 +30,12 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.LauncherConstants;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.commands.TestAutoCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -37,7 +46,6 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.VisionSubsystemOLD;
 import frc.robot.subsystems.VisionSubsystemTEMPORARYDELETETHIS;
-
 public class RobotContainer {
   private double MaxSpeed = 6; // 6 meters per second desired top speed
   private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
@@ -47,26 +55,36 @@ public class RobotContainer {
   private final CommandXboxController driver_joystick = new CommandXboxController(ControllerConstants.DRIVER_PORT); // My joystick
   private final CommandXboxController operator_joystick = new CommandXboxController(ControllerConstants.OPERATOR_PORT);
   private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
+  
+
+/*Slew Rate limiting, Limits Acceleration of Directions */
+private final SlewRateLimiter xLimiter = new SlewRateLimiter(15);
+private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
+private final SlewRateLimiter rotLimiter = new SlewRateLimiter(.5);
+
+
+
+
 
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-      .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
-      
-                                                               // driving in open loop
+  .withDeadband(MaxSpeed * 0.08).withRotationalDeadband(MaxAngularRate * 0.08) // Add a 5% deadband //used to be 10%
+  .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
+  
+  // driving in open loop
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
   // private final VisionSubsystemOLD m_visionSubsystem = new VisionSubsystemOLD();
-  // private final VisionSubsystem m_vision = new VisionSubsystem(drivetrain);
-  private final VisionSubsystemTEMPORARYDELETETHIS m_vision = new VisionSubsystemTEMPORARYDELETETHIS();
+  private final VisionSubsystem m_vision = new VisionSubsystem(drivetrain);
+  // private final VisionSubsystemTEMPORARYDELETETHIS m_vision = new VisionSubsystemTEMPORARYDELETETHIS();
   // private final Shooter m_shooter = new Shooter(m_visionSubsystem);
   private final LauncherSubsystem m_launcher = new LauncherSubsystem(m_vision);
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
   private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_launcher);
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
-  // private final ClimberSubsystem m_climber = new ClimberSubsystem(drivetrain);
-
+  private final ClimberSubsystem m_climber = new ClimberSubsystem(drivetrain);
+  private final TestAutoCommand m_TestAutoCommand = new TestAutoCommand(drivetrain);
   private final InstantCommand m_startPickingUpPiece = new InstantCommand(() -> {
     m_intake.enableForward();
     m_indexer.enableForward();
@@ -77,7 +95,7 @@ public class RobotContainer {
     m_indexer.disableForward();
     m_shooter.disableFeeder();
   }, m_intake, m_indexer, m_shooter);
-
+  
   // private final SequentialCommandGroup m_startPickingUpPiece = new SequentialCommandGroup(
   //   m_launcher.m_startWantingToLoad/*,
   //   m_intake.m_deployAndStartCommand*/
@@ -86,20 +104,22 @@ public class RobotContainer {
   //   m_launcher.m_stopWantingToLoad/*,
   //   m_intake.m_retractAndStopCommand*/
   // );
-
-  private boolean wants_to_pickup_piece = false;
-
+  
   private boolean automatically_rotate = false;
   private void configureBindings() {
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(() -> drive.withVelocityX(-driver_joystick.getLeftY() * MaxSpeed) // Drive forward with
+        drivetrain.applyRequest(() -> {
+          final Optional<Double> turn_power = m_vision.calculateTurnPower();
+          return drive.withVelocityX(xLimiter.calculate(-driver_joystick.getLeftY()*MaxSpeed))
+          //  Math.pow(-driver_joystick.getLeftY() * MaxSpeed, 3)) // Drive forward with
                                                                                            // negative Y (forward)
-            .withVelocityY(-driver_joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(-driver_joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            .withVelocityY(yLimiter.calculate(-driver_joystick.getLeftX()*MaxSpeed))
+              //Math.pow(-driver_joystick.getLeftX() * MaxSpeed, 3)) // Drive left with negative X (left)
+            // .withRotationalRate(-driver_joystick.getRightX() * MaxAngularRate); // Drive counterclockwise with negative X (left)
             // use vision to rotate the robot when automatically_rotate is true; otherwise use joystick (see above)
-            // .withRotationalRate(automatically_rotate ? (m_visionSubsystem.calculateTurnPower() * MaxAngularRate) : -joystick.getRightX() * MaxAngularRate) // booyah!
-            // .withRotationalRate(((automatically_rotate && m_visionSubsystem.hasTarget(4)) ? m_visionSubsystem.calculateTurnPower() : -joystick.getRightX()) * MaxAngularRate)
-        ));
+            .withRotationalRate((automatically_rotate && turn_power.isPresent()) ? turn_power.get() : -driver_joystick.getRightX() * MaxAngularRate);
+        }
+      ));
     // drivetrain.setDefaultCommand(drivetrain.applyRequest(() -> brake));
 
     // m_shooter.setDefaultCommand(new RunCommand(() -> {
@@ -107,16 +127,37 @@ public class RobotContainer {
     //   // m_shooter.shoot();
     // }, m_shooter));
 
-    driver_joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-    driver_joystick.b().whileTrue(drivetrain.applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver_joystick.getLeftY(), -driver_joystick.getLeftX()))));
+    // PUT THESEB ACK
+    // driver_joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+    // driver_joystick.b().whileTrue(drivetrain.applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver_joystick.getLeftY(), -driver_joystick.getLeftX()))));
 
     // reset the field-centric heading on left bumper press
     driver_joystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
 
+    driver_joystick.back().onTrue(new InstantCommand(() -> {
+      automatically_rotate = !automatically_rotate;
+    }));
+
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
-    drivetrain.registerTelemetry(logger::telemeterize);
+    // drivetrain.registerTelemetry(logger::telemeterize);
+
+    
+    // driver_joystick.x().and(driver_joystick.pov(0)).whileTrue(drivetrain.runDriveQuasiTest(Direction.kForward));
+    // driver_joystick.x().and(driver_joystick.pov(180)).whileTrue(drivetrain.runDriveQuasiTest(Direction.kReverse));
+
+    // driver_joystick.y().and(driver_joystick.pov(0)).whileTrue(drivetrain.runDriveDynamTest(Direction.kForward));
+    // driver_joystick.y().and(driver_joystick.pov(180)).whileTrue(drivetrain.runDriveDynamTest(Direction.kReverse));
+
+    // driver_joystick.a().and(driver_joystick.pov(0)).whileTrue(drivetrain.runSteerQuasiTest(Direction.kForward));
+    // driver_joystick.a().and(driver_joystick.pov(180)).whileTrue(drivetrain.runSteerQuasiTest(Direction.kReverse));
+
+    // driver_joystick.b().and(driver_joystick.pov(0)).whileTrue(drivetrain.runSteerDynamTest(Direction.kForward));
+    // driver_joystick.b().and(driver_joystick.pov(180)).whileTrue(drivetrain.runSteerDynamTest(Direction.kReverse));
+
+    // Drivetrain needs to be placed against a sturdy wall and test stopped immediately upon wheel slip
+    // driver_joystick.back().and(driver_joystick.pov(0)).whileTrue(drivetrain.runDriveSlipTest());
 
     // TODO: my worry for this is that it might not let multiple commands use the shooter,
     // so the shooter feeder might need to be moved to either the intake subsystem or its own subsystem
@@ -183,13 +224,29 @@ public class RobotContainer {
     operator_joystick.start().onTrue(m_launcher.m_enableAimManualModeCommand);
     m_launcher.configureManualMode(() -> operator_joystick.getLeftY());
 
-    // these all turn off manual mode
-    operator_joystick.povUp().onTrue(m_launcher.m_aimAtLoadingPositionCommand);
-    operator_joystick.povRight().onTrue(m_launcher.m_aimAtAmpCommand);
-    operator_joystick.povDown().onTrue(m_launcher.m_aimAtTrapCommand);
-    operator_joystick.povLeft().onTrue(m_launcher.m_aimAtSpeakerCommand);
+    operator_joystick.povUp().onTrue(new InstantCommand(() -> {
+      m_launcher.disableManualMode();
+      AimLocation.setAimLocation(AimLocation.Loading);
+    }, m_shooter, m_launcher));
+    operator_joystick.povRight().onTrue(new InstantCommand(() -> {
+      m_launcher.disableManualMode();
+      AimLocation.setAimLocation(AimLocation.Amp);
+    }, m_shooter, m_launcher));
+    operator_joystick.povDown().onTrue(new InstantCommand(() -> {
+      m_launcher.disableManualMode();
+      AimLocation.setAimLocation(AimLocation.Trap);
+    }, m_shooter, m_launcher));
+    operator_joystick.povLeft().onTrue(new InstantCommand(() -> {
+      m_launcher.disableManualMode();
+      AimLocation.setAimLocation(AimLocation.Speaker);
+    }, m_shooter, m_launcher));
 
-    // m_climber.configureManualMode(() -> operator_joystick.getRightY());
+    operator_joystick.a().onTrue(new InstantCommand(() -> {
+      m_launcher.disableManualMode();
+      AimLocation.setAimLocation(AimLocation.Subwoofer);
+    }, m_shooter, m_launcher));
+
+    m_climber.configureManualMode(() -> operator_joystick.getRightY());
 
     // // operator_joystick.x().whileFalse(new TrackAprilTagCommand(drivetrain, m_visionSubsystem, drive, MaxAngularRate));
     // driver_joystick.rightBumper().onTrue(new InstantCommand(() -> {
@@ -285,9 +342,32 @@ public class RobotContainer {
     // }, m_launcher, m_shooter));
     // // TODO: MANUAL TESTING DELETE THIS
   }
-
+  
   {
-    // ...
+  //   // ...
+  //   NamedCommands.registerCommand("StartPickingUpPiece", m_startPickingUpPiece);
+  //   NamedCommands.registerCommand("StopPickingUpPiece", m_stopPickingUpPiece);
+
+  //   NamedCommands.registerCommand("StartShooter", m_shooter.m_enableShooterCommand);
+  //   NamedCommands.registerCommand("StopShooter", m_shooter.m_disableShooterCommand);
+
+  //   NamedCommands.registerCommand("StartFeeder", new InstantCommand(() -> {
+  //     m_shooter.enableFeeder();
+  //   }, m_shooter));
+  //   NamedCommands.registerCommand("StopFeeder", new InstantCommand(() -> {
+  //     m_shooter.disableFeeder();
+  //   }, m_shooter));
+
+  //   NamedCommands.registerCommand("StopShooterAndFeeder", new InstantCommand(() -> {
+  //     m_shooter.disableShooter();
+  //     m_shooter.disableFeeder();
+  //   }, m_shooter));
+
+  //   NamedCommands.registerCommand("AimFromSubwoofer", new InstantCommand(() -> {
+  //     AimLocation.setAimLocation(AimLocation.Subwoofer);
+  //   }, m_shooter, m_launcher));
+  }
+  {
 
     // Build an auto chooser. This will use Commands.none() as the default option.
     autoChooser = AutoBuilder.buildAutoChooser();
@@ -296,40 +376,38 @@ public class RobotContainer {
     // autoChooser = AutoBuilder.buildAutoChooser("My Default Auto");
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
+    autoChooser.addOption("Auton", m_TestAutoCommand);
   }
 
   public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
-
-    NamedCommands.registerCommand("StartPickingUpPiece", m_startPickingUpPiece);
-    NamedCommands.registerCommand("StopPickingUpPiece", m_stopPickingUpPiece);
-
-    NamedCommands.registerCommand("StartShooter", m_shooter.m_enableShooterCommand);
-    NamedCommands.registerCommand("StopShooter", m_shooter.m_disableShooterCommand);
-
+    
     // NamedCommands.registerCommand("WaitForShooter", new WaitCommand(ShooterConstants.TIME_FOR_SHOOTER_TO_GET_UP_TO_SPEED));
-
+    
     // NamedCommands.registerCommand("StartFeeder", new InstantCommand(() -> {
-    //   m_shooter.enableFeeder();
-    // }, m_shooter));
-    // NamedCommands.registerCommand("StopFeeder", new InstantCommand(() -> {
-    //   m_shooter.disableFeeder();
-    // }, m_shooter));
+      //   m_shooter.enableFeeder();
+      // }, m_shooter));
+      // NamedCommands.registerCommand("StopFeeder", new InstantCommand(() -> {
+        //   m_shooter.disableFeeder();
+        // }, m_shooter));
 
-    configureBindings();
-  }
+        configureBindings();
+      }
+      
+      public void teleopInit() {
+        m_launcher.teleopInit();
 
-  public void teleopInit() {
-    m_launcher.teleopInit();
-  }
+      }
   public void disabledInit() {
     m_indexer.disabledInit();
     m_intake.disabledInit();
     m_shooter.disabledInit();
   }
 
+
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
+    // return autoChooser.getSelected();
+    return new PathPlannerAuto("testauto");
     // return new TrackAprilTagCommand(drivetrain, m_visionSubsystem, drive, MaxAngularRate);
   }
 }

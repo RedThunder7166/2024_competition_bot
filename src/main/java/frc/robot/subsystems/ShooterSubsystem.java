@@ -14,48 +14,59 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.AimLocation;
 import frc.robot.Utils;
+// import frc.robot.Constants.LauncherConstants.AimPosition;
+// import frc.robot.Constants.ShooterConstants.AimSpeed;
 import frc.robot.Constants.ShooterConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
   private final TalonFX m_topMotor = new TalonFX(ShooterConstants.TOP_MOTOR_ID); // 13
   private final TalonFX m_bottomMotor = new TalonFX(ShooterConstants.BOTTOM_MOTOR_ID); // 14
   private final TalonFX m_feederMotor = new TalonFX(ShooterConstants.FEEDER_MOTOR_ID);
-
-  private final VelocityDutyCycle m_shooterRequest = new VelocityDutyCycle(ShooterConstants.TARGET_SHOOTER_RPS);
+  private final DigitalInput m_breakBeamSensor = new DigitalInput(ShooterConstants.BREAK_BEAM_SENSOR_ID);
+  
+  // private final DutyCycleOut m_shooterRequest = new DutyCycleOut(ShooterConstants.AimSpeed.Speaker.speed);
+  private final DutyCycleOut m_shooterRequest = new DutyCycleOut(AimLocation.getAimLocation().shooter_speed);
   private final VelocityDutyCycle m_shooterReverseRequest = new VelocityDutyCycle(-ShooterConstants.TARGET_SHOOTER_RPS);
-
-  private final VelocityDutyCycle m_feederRequest = new VelocityDutyCycle(ShooterConstants.TARGET_FEEDER_RPS);
+  
+  private final DutyCycleOut m_feederRequest = new DutyCycleOut(1);
+  // private final DutyCycleOut m_feederRequest = new DutyCycleOut(AimLocation.getAimLocation().feeder_speed);
   private final VelocityDutyCycle m_feederReverseRequest = new VelocityDutyCycle(-ShooterConstants.TARGET_FEEDER_RPS);
- 
+  
   private boolean m_shooterState = false;
   private boolean m_shooterReverseState = false;
-
+  
   private boolean m_feederState = false;
   private boolean m_feederReverseState = false;
-
+  
   private boolean m_shooterIsUpToSpeed = false;
-
+  
+  // private ShooterConstants.AimSpeed m_speed = ShooterConstants.AimSpeed.Speaker;
+  
   private final NetworkTable table = NetworkTableInstance.getDefault().getTable("Shooter info");
   private final DoublePublisher m_topRPMPublisher = table.getDoubleTopic("TopRPM").publish();
   private final DoublePublisher m_bottomRPMPublisher = table.getDoubleTopic("BottomRPM").publish();
-
+  private final BooleanPublisher m_breakBeamSensorPublisher = table.getBooleanTopic("BreakBeamSensor").publish();
+  
   // private final DoubleSubscriber m_targetRPMSubscriber = table.getDoubleTopic("TargetRPM").subscribe(4350);
 
   public ShooterSubsystem(){  
     TalonFXConfiguration top_configs = new TalonFXConfiguration();
     TalonFXConfiguration feeder_configs = new TalonFXConfiguration();
-
+    
     Slot0Configs slot0Configs = top_configs.Slot0;
     slot0Configs.kS = 0;
     slot0Configs.kA = 0.02;
@@ -71,11 +82,11 @@ public class ShooterSubsystem extends SubsystemBase {
     top_configs.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     feeder_configs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-    top_configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    top_configs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     feeder_configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     top_configs.CurrentLimits.SupplyCurrentLimitEnable = true;
-    top_configs.CurrentLimits.SupplyCurrentLimit = 40;
+    top_configs.CurrentLimits.SupplyCurrentLimit = 80;
 
     feeder_configs.CurrentLimits.SupplyCurrentLimitEnable = true;
     feeder_configs.CurrentLimits.SupplyCurrentLimit = 10;
@@ -95,11 +106,13 @@ public class ShooterSubsystem extends SubsystemBase {
     m_bottomRPMPublisher.set(Utils.secondToMinute(
       m_bottomMotor.getVelocity().getValueAsDouble()
     ));
+    m_breakBeamSensorPublisher.set(m_breakBeamSensor.get());
 
     m_shooterIsUpToSpeed = m_topMotor.getVelocity().getValueAsDouble() >= ShooterConstants.SHOOTER_UP_TO_SPEED_THRESHOLD;
 
     if (m_shooterState) {
-      m_topMotor.setControl(m_shooterRequest);
+      // m_topMotor.setControl(m_shooterRequest.withOutput(m_speed.speed));
+      m_topMotor.setControl(m_shooterRequest.withOutput(AimLocation.getAimLocation().shooter_speed));
     } else if (m_shooterReverseState) {
       m_topMotor.setControl(m_shooterReverseRequest);
     } else {
@@ -109,7 +122,9 @@ public class ShooterSubsystem extends SubsystemBase {
     if (m_feederReverseState) {
       m_feederMotor.setControl(m_feederReverseRequest);
     } else if (m_shooterIsUpToSpeed || m_feederState) {
+      // m_feederMotor.setControl(m_feederRequest.withOutput(m_speed.feeder_speed));
       m_feederMotor.setControl(m_feederRequest);
+      // m_feederMotor.setControl(m_feederRequest.withOutput(AimLocation.getAimLocation().feeder_speed));
     } else {
       m_feederMotor.disable();
     }
@@ -148,6 +163,10 @@ public class ShooterSubsystem extends SubsystemBase {
   //   m_feederState = false;
   // }, this);
 
+  public void disableShooter() {
+    m_shooterState = false;
+  }
+
   public void enableFeeder() {
     m_feederState = true;
   }
@@ -161,6 +180,19 @@ public class ShooterSubsystem extends SubsystemBase {
   public void disableFeederReverse() {
     m_feederReverseState = false;
   }
+
+  // public final InstantCommand m_speedLoadingPositionCommand = new InstantCommand(() -> {
+  //   m_speed = AimSpeed.Loading;
+  // }, this);
+  // public final InstantCommand m_speedAmpCommand = new InstantCommand(() -> {
+  //   m_speed = AimSpeed.Amp;
+  // }, this);
+  // public final InstantCommand m_speedTrapCommand = new InstantCommand(() -> {
+  //   m_speed = AimSpeed.Trap;
+  // }, this);
+  // public final InstantCommand m_speedSpeakerCommand = new InstantCommand(() -> {
+  //   m_speed = AimSpeed.Speaker;
+  // }, this);
 
   // public void manualRunDeleteMe(double value) {
   //   m_topMotor.setControl(new DutyCycleOut(value));

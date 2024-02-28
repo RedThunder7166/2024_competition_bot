@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 4.452194129613484,
-        "y": 4.6778198060900635
+        "x": 3.666640447744072,
+        "y": 4.97511042936904
       },
       "prevControl": {
-        "x": 4.895939881969854,
-        "y": 4.455946929911879
+        "x": 4.110386200100438,
+        "y": 4.753237553190855
       },
       "nextControl": null,
       "isLocked": false,
@@ -58,6 +58,12 @@
             {
               "type": "named",
               "data": {
+                "name": "AimAtSpeaker2"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
                 "name": "StartShooter"
               }
             }
@@ -74,7 +80,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 162.14968169778328,
+    "rotation": 165.06858282186246,
     "rotateFast": false
   },
   "reversed": false,

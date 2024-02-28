@@ -74,6 +74,12 @@
             {
               "type": "named",
               "data": {
+                "name": "AimAtSpeaker"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
                 "name": "StartShooter"
               }
             }

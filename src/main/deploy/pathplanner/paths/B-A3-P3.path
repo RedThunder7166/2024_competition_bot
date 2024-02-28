@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.45,
-        "y": 4.68
+        "x": 3.67,
+        "y": 4.98
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.5245796978080435,
-        "y": 4.4744363362600605
+        "x": 4.904954903077508,
+        "y": 4.698310727588625
       },
       "isLocked": false,
       "linkedName": null
@@ -55,6 +55,12 @@
         "type": "sequential",
         "data": {
           "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "AimAtLoading"
+              }
+            },
             {
               "type": "named",
               "data": {

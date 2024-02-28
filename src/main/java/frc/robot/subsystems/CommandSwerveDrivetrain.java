@@ -4,12 +4,22 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -17,18 +27,28 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.AllianceColor;
 import frc.robot.generated.TunerConstants;
+// import frc.robot.sysidutils.ModifiedSignalLogger;
+import frc.robot.sysidutils.SwerveVoltageRequest;
 
+import static edu.wpi.first.units.Units.*;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem
@@ -38,6 +58,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+
 
     private final SwerveRequest.ApplyChassisSpeeds autoRequest = new SwerveRequest.ApplyChassisSpeeds();
 
@@ -66,33 +87,33 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         //     TalonFXConfiguration config = new TalonFXConfiguration();
         //     module.getSteerMotor().getConfigurator().refresh(config);
 
-        //     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-        //     config.CurrentLimits.SupplyCurrentLimit = 30;
-        //     config.CurrentLimits.SupplyCurrentThreshold = 25;
-        //     config.CurrentLimits.SupplyTimeThreshold = 0.1;
+        //     // config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        //     // config.CurrentLimits.SupplyCurrentLimit = 30;
+        //     // config.CurrentLimits.SupplyCurrentThreshold = 25;
+        //     // config.CurrentLimits.SupplyTimeThreshold = 0.1;
 
-        //     // config.TorqueCurrent.PeakForwardTorqueCurrent = 19;
-        //     // config.TorqueCurrent.PeakReverseTorqueCurrent = -19;
+        //     // // config.TorqueCurrent.PeakForwardTorqueCurrent = 19;
+        //     // // config.TorqueCurrent.PeakReverseTorqueCurrent = -19;
 
-        //     module.getSteerMotor().getConfigurator().apply(config);
+        //     // module.getSteerMotor().getConfigurator().apply(config);
 
-        //     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-        //     config.CurrentLimits.SupplyCurrentLimit = 40;
-        //     config.CurrentLimits.SupplyCurrentThreshold = 60;
-        //     config.CurrentLimits.SupplyTimeThreshold = 10;
+        //     // config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        //     // config.CurrentLimits.SupplyCurrentLimit = 40;
+        //     // config.CurrentLimits.SupplyCurrentThreshold = 60;
+        //     // config.CurrentLimits.SupplyTimeThreshold = 10;
             
-        //     // config.TorqueCurrent.PeakForwardTorqueCurrent = 30;
-        //     // config.TorqueCurrent.PeakReverseTorqueCurrent = -30;
+        //     // // config.TorqueCurrent.PeakForwardTorqueCurrent = 30;
+        //     // // config.TorqueCurrent.PeakReverseTorqueCurrent = -30;
 
-        //     // config.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.1;
-        //     // config.OpenLoopRamps.TorqueOpenLoopRampPeriod = 0.1;
-        //     // config.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.1;
+        //     // // config.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.1;
+        //     // // config.OpenLoopRamps.TorqueOpenLoopRampPeriod = 0.1;
+        //     // // config.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.1;
 
-        //     // config.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.1;
-        //     // config.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.1;
-        //     // config.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.1;
+        //     // // config.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.1;
+        //     // // config.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.1;
+        //     // // config.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.1;
 
-        //     module.getDriveMotor().getConfigurator().apply(config);
+        //     // module.getDriveMotor().getConfigurator().apply(config);
         // }
     }
 
@@ -128,6 +149,15 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public ChassisSpeeds getCurrentRobotChassisSpeeds() {
         return m_kinematics.toChassisSpeeds(getState().ModuleStates);
+    }
+
+    public SwerveDriveKinematics getKinematics() {
+        return m_kinematics;
+    }
+    public void setModuleStates(SwerveModuleState[] speeds) {
+        for (int index = 0; index < 4; index++) {
+        Modules[index].apply(speeds[index], DriveRequestType.Velocity);
+        }
     }
 
     private void startSimThread() {

@@ -25,9 +25,10 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.AimLocation;
 import frc.robot.Utils;
 import frc.robot.Constants.LauncherConstants;
-import frc.robot.Constants.LauncherConstants.AimPosition;
+// import frc.robot.Constants.LauncherConstants.AimPosition;
 
 public class LauncherSubsystem extends SubsystemBase {
   private final TalonFX m_aimMotor = new TalonFX(LauncherConstants.AIM_MOTOR_ID);
@@ -55,16 +56,16 @@ public class LauncherSubsystem extends SubsystemBase {
   private final double m_aimMaxSpeed = 1.5;
 
   private boolean m_manualAimState = false;
-  private AimPosition m_aimTargetPosition = AimPosition.Loading;
+  // private AimPosition m_aimTargetPosition = AimPosition.Loading;
 
   // private final VisionSubsystem m_vision;
-  private final VisionSubsystemTEMPORARYDELETETHIS m_vision;
+  private final VisionSubsystem m_vision;
   private DoubleSupplier m_manual_aim_supplier;
 
   private final ShuffleboardTab m_shuffleBoardTab = Shuffleboard.getTab("Launcher");
   
   // public LauncherSubsystem(VisionSubsystem vision) {
-  public LauncherSubsystem(VisionSubsystemTEMPORARYDELETETHIS vision) {
+  public LauncherSubsystem(VisionSubsystem vision) {
     m_vision = vision;
 
     final TalonFXConfiguration aim_config = new TalonFXConfiguration();
@@ -108,7 +109,7 @@ public class LauncherSubsystem extends SubsystemBase {
     m_shuffleBoardTab.addDouble("Velocity", ()-> m_aimMotor.get() );
     m_shuffleBoardTab.addDouble("PID Error", () -> m_aimPIDController.getPositionError());
 
-    m_shuffleBoardTab.addString("Aim Position", () -> m_aimTargetPosition.toString());
+    m_shuffleBoardTab.addString("AimLocation", () -> AimLocation.getAimLocation().name);
   }
 
   public void configureManualMode(DoubleSupplier supplier) {
@@ -142,7 +143,7 @@ public class LauncherSubsystem extends SubsystemBase {
     } else {
       // m_aimMotor.setControl(m_aimRequest.withPosition(m_aimTargetPosition.position));
       double value = m_aimPIDController.calculate(
-          m_aimMotor.getPosition().getValueAsDouble(), m_aimTargetPosition.position
+          m_aimMotor.getPosition().getValueAsDouble(), AimLocation.getAimLocation().position
       ) * m_aimMaxSpeed;
       if (Math.abs(m_aimPIDController.getPositionError()) > 0.5) {
         m_aimMotor.setControl(new DutyCycleOut(value));
@@ -173,30 +174,33 @@ public class LauncherSubsystem extends SubsystemBase {
       return;
     }
 
-    m_aimMotor.setControl(m_aimManualRequest.withOutput(value));
+    m_aimMotor.setControl(m_aimManualRequest.withOutput(value/2));
   }
 
   public final InstantCommand m_enableAimManualModeCommand = new InstantCommand(() -> {
     m_manualAimState = true;
   }, this);
-
-  private void setAimTarget(AimPosition position) {
+  public void disableManualMode() {
     m_manualAimState = false;
-    m_aimTargetPosition = position;
   }
 
-  public final InstantCommand m_aimAtLoadingPositionCommand = new InstantCommand(() -> {
-    setAimTarget(AimPosition.Loading);
-  }, this);
-  public final InstantCommand m_aimAtAmpCommand = new InstantCommand(() -> {
-    setAimTarget(AimPosition.Amp);
-  }, this);
-  public final InstantCommand m_aimAtTrapCommand = new InstantCommand(() -> {
-    setAimTarget(AimPosition.Trap);
-  }, this);
-  public final InstantCommand m_aimAtSpeakerCommand = new InstantCommand(() -> {
-    setAimTarget(AimPosition.Speaker);
-  }, this);
+  // private void setAimTarget(AimPosition position) {
+  //   m_manualAimState = false;
+  //   m_aimTargetPosition = position;
+  // }
+
+  // public final InstantCommand m_aimAtLoadingPositionCommand = new InstantCommand(() -> {
+  //   setAimTarget(AimPosition.Loading);
+  // }, this);
+  // public final InstantCommand m_aimAtAmpCommand = new InstantCommand(() -> {
+  //   setAimTarget(AimPosition.Amp);
+  // }, this);
+  // public final InstantCommand m_aimAtTrapCommand = new InstantCommand(() -> {
+  //   setAimTarget(AimPosition.Trap);
+  // }, this);
+  // public final InstantCommand m_aimAtSpeakerCommand = new InstantCommand(() -> {
+  //   setAimTarget(AimPosition.Speaker);
+  // }, this);
     
   // public void setAimPosition(double position) {
   //   m_aimMotor.setControl(m_aimRequest.withPosition(
