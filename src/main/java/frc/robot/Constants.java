@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
@@ -8,6 +10,8 @@ public class Constants {
         public static final int DRIVER_PORT = 0;
         public static final int OPERATOR_PORT = 1;
     }
+    public static final NetworkTable IN_MATCH_INFORMATION_TAB = NetworkTableInstance.getDefault().getTable("InMatchInformation");
+
     public static final class AllianceColor {
         public static final Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
         public static final boolean is_red_alliance = alliance == Alliance.Red;
@@ -50,8 +54,8 @@ public class Constants {
 
         public static final double MANUAL_AIM_DEADBAND = 0.25;
 
-        // public static final double AIM_MOTOR_HIGHEST_ANGLE_POSITIONS = -109;
-        // public static final double AIM_MOTOR_LOWEST_ANGLE_POSITIONS = -436;
+        public static final double AIM_MOTOR_HIGHEST_POSITION = 215;
+        public static final double AIM_MOTOR_LOWEST_POSITION = 148;
 
         public static final int AIM_CANCODER_ID = 26;
         // public static final double AIM_CANCODER_LOADING_POSITION = 0; // TODO: CHANGE THIS
@@ -61,10 +65,10 @@ public class Constants {
         public static final int TOP_MOTOR_ID = 10;
         public static final int BOTTOM_MOTOR_ID = 9;
         public static final int FEEDER_MOTOR_ID = 11;
-        public static final int BREAK_BEAM_SENSOR_ID = 0;
+        public static final int EXIT_SENSOR_ID = 0; // FIXME: get sensor id of shooter exit allen bradley
 
-        public static final double TARGET_SHOOTER_RPS = 80.0; // TODO: CHANGE THIS
-        public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 90.0; // TODO: CHANGE THIS
+        public static final double TARGET_SHOOTER_RPS = 30.0; // TODO: CHANGE THIS 80
+        public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 40.0; // TODO: CHANGE THIS 40
         // public static final double TIME_FOR_SHOOTER_TO_GET_UP_TO_SPEED = 0.4; // TODO: CHANGE THIS
 
         public static final double TARGET_FEEDER_RPS = 3.0; // TODO: CHANGE THIS

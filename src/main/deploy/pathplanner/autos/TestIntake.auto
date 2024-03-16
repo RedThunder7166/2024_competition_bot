@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2774219692183837,
-      "y": 5.7690885213181256
+      "x": 2,
+      "y": 2
     },
-    "rotation": -118.45701659543747
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
@@ -14,42 +14,54 @@
         {
           "type": "named",
           "data": {
-            "name": "StartShooter"
+            "name": "StartPickingUpPiece"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "AimFromSubwoofer"
+            "name": "StopPickingUpPiece"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartPickingUpPiece"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StopPickingUpPiece"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartPickingUpPiece"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StartFeeder"
+            "waitTime": 0
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 2.0
+            "waitTime": 0
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "StopShooterAndFeeder"
+            "waitTime": 0
           }
         }
       ]
     }
   },
-  "folder": null,
+  "folder": "testing",
   "choreoAuto": false
 }

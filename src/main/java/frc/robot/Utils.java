@@ -1,18 +1,9 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants.LauncherConstants;
 
-import java.util.function.Consumer;
 
-import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.StatusCode;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.ParentDevice;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
-
-import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 
 public final class Utils {
     public static double EncoderUnitsToAngle(double EncoderUnits) {
@@ -36,5 +27,15 @@ public final class Utils {
      */
     public static double minuteToSecond(double minute) {
         return minute * 60;
+    }
+
+    // HIGH when not pressed, so negate
+    public static boolean isBumperSwitchDown(DigitalInput bumperSwitch) {
+        return !bumperSwitch.get();
+    }
+
+    // FIXME: double check allen bradley sensor state
+    public static boolean isAllenBradleyTripped(DigitalInput allenBradley) {
+        return !allenBradley.get();
     }
 }

@@ -4,15 +4,17 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimberConstants;
 
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class ClimberSubsystem extends SubsystemBase {
   private final TalonFX m_leftClimbMotor = new TalonFX(ClimberConstants.LEFT_CLIMB_MOTOR_ID);
@@ -31,9 +33,19 @@ public class ClimberSubsystem extends SubsystemBase {
 
   public ClimberSubsystem(CommandSwerveDrivetrain swerve) {
     m_swerve = swerve;
+       TalonFXConfiguration config = new TalonFXConfiguration();
+    // clockwise is true
+    // counterclockwise is false
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    config.MotorOutput.DutyCycleNeutralDeadband = ClimberConstants.MANUAL_DEADBAND;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    m_leftClimbMotor.getConfigurator().apply(config);
+    m_rightClimbMotor.getConfigurator().apply(config);
+
 
     m_leftClimbMotor.setInverted(false);
     m_rightClimbMotor.setInverted(true);
+    
   }
 
   public void configureManualMode(DoubleSupplier supplier) {
@@ -73,11 +85,11 @@ public class ClimberSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double left_output = applyDeadband(m_manual_supplier.getAsDouble());
-    // double right_output = left_output;
-    double right_output = applyDeadband(m_manual_right_supplier.getAsDouble());
+    double left_output = m_manual_supplier.getAsDouble();
+    // // double right_output = left_output;
+    double right_output = m_manual_right_supplier.getAsDouble();
 
-    // double roll = getRollDegrees();
+    double roll = getRollDegrees();
 
     // if (roll >= 5) {
     //   // left_percent = (left_percent < 0) ? (left_percent + 0.5) : (left_percent - 0.5);

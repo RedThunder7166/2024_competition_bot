@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 15.838543123403904,
-        "y": 4.217553350812114
+        "x": 0.8112329977987371,
+        "y": 4.3632374043807545
       },
       "prevControl": null,
       "nextControl": {
-        "x": 16.0643534064353,
-        "y": 4.217553350812114
+        "x": 1.801884562065486,
+        "y": 4.093721905278771
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 14.38898679039594,
-        "y": 4.042732486529747
+        "x": 2.5546808535847374,
+        "y": 4.094060543175387
       },
       "prevControl": {
-        "x": 14.935458385367884,
-        "y": 4.049161564117652
+        "x": 1.5546808535847374,
+        "y": 4.094060543175387
       },
       "nextControl": {
-        "x": 13.769829562729223,
-        "y": 4.0354482838513155
+        "x": 2.6546808535847375,
+        "y": 4.094060543175387
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 15.066417639490114,
-        "y": 5.60155185971419
+        "x": 0.8112329977987371,
+        "y": 4.3632374043807545
       },
       "prevControl": {
-        "x": 14.789617937709698,
-        "y": 5.5578466436435985
+        "x": 0.8789760280727413,
+        "y": 4.436796101006615
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,7 +47,12 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 1.0,
-      "rotationDegrees": 1.0758506207912746,
+      "rotationDegrees": 180.0,
+      "rotateFast": true
+    },
+    {
+      "waypointRelativePos": 0.3,
+      "rotationDegrees": 149.6739699732398,
       "rotateFast": false
     }
   ],
@@ -55,11 +60,18 @@
   "eventMarkers": [
     {
       "name": "New Event Marker",
-      "waypointRelativePos": 1.0,
+      "waypointRelativePos": 0.85,
       "command": {
         "type": "parallel",
         "data": {
-          "commands": []
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "StartPickingUpPiece"
+              }
+            }
+          ]
         }
       }
     }
@@ -72,13 +84,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -0.9166542563853035,
+    "rotation": 123.31063082456085,
     "rotateFast": false
   },
   "reversed": false,
   "folder": "2-piece-paths",
   "previewStartingState": {
-    "rotation": 60.89014444310881,
+    "rotation": 119.05460409907717,
     "velocity": 0
   },
   "useDefaultConstraints": true

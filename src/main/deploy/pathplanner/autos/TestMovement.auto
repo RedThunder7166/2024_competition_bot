@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 2.0,
-      "y": 7.0
+      "x": 0.8330856058340331,
+      "y": 6.716034869514282
     },
-    "rotation": 0.0
+    "rotation": -118.55139187296018
   },
   "command": {
     "type": "sequential",
@@ -14,7 +14,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Spin 360"
+            "pathName": "2-Piece-Auton-Subwoofer-Amp"
           }
         }
       ]

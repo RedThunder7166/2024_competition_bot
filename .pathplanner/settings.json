@@ -3,12 +3,14 @@
   "robotLength": 0.96,
   "holonomicMode": true,
   "pathFolders": [
-    "New Folder",
+    "2-piece-paths",
     "MainTestFolder",
+    "MoveAwayFromWoofer",
     "testing"
   ],
   "autoFolders": [
-    "New Folder",
+    "1-Piece",
+    "2-Piece",
     "testing"
   ],
   "defaultMaxVel": 3.0,

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 7.0
+        "x": 3.1785988682891295,
+        "y": 1.974018925855065
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.0,
-        "y": 7.0
+        "x": 3.564661610246024,
+        "y": 1.974018925855065
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.0,
-        "y": 7.0
+        "x": 3.62293523167348,
+        "y": 1.974018925855065
       },
       "prevControl": {
-        "x": 4.0,
-        "y": 7.0
+        "x": 3.722935231673479,
+        "y": 1.974018925855065
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,7 +33,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
@@ -43,10 +43,10 @@
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "MainTestFolder",
+  "folder": "MoveAwayFromWoofer",
   "previewStartingState": {
-    "rotation": 0,
+    "rotation": 0.05837743957113005,
     "velocity": 0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

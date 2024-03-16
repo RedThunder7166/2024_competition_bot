@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.8330856058340331,
-      "y": 6.716034869514282
+      "x": 0.8112329977987371,
+      "y": 4.3632374043807545
     },
-    "rotation": -121.45682335755524
+    "rotation": 121.7872531216648
   },
   "command": {
     "type": "sequential",
@@ -66,7 +66,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "2-Piece-Auton-Subwoofer-Blue-Left"
+                  "pathName": "2-Piece-Auton-Subwoofer-Non-Amp"
                 }
               },
               {
@@ -112,6 +112,54 @@
           "type": "named",
           "data": {
             "name": "StopShooterAndFeeder"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.2
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartPickingUpPiece"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StopPickingUpPiece"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.3
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartPickingUpPiece"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StopPickingUpPiece"
           }
         },
         {
@@ -189,6 +237,6 @@
       ]
     }
   },
-  "folder": null,
+  "folder": "2-Piece",
   "choreoAuto": false
 }

@@ -36,8 +36,9 @@ public class ShooterSubsystem extends SubsystemBase {
   private final TalonFX m_topMotor = new TalonFX(ShooterConstants.TOP_MOTOR_ID); // 13
   private final TalonFX m_bottomMotor = new TalonFX(ShooterConstants.BOTTOM_MOTOR_ID); // 14
   private final TalonFX m_feederMotor = new TalonFX(ShooterConstants.FEEDER_MOTOR_ID);
-  private final DigitalInput m_breakBeamSensor = new DigitalInput(ShooterConstants.BREAK_BEAM_SENSOR_ID);
   
+  private final DigitalInput m_exitSensor = new DigitalInput(ShooterConstants.EXIT_SENSOR_ID);
+
   // private final DutyCycleOut m_shooterRequest = new DutyCycleOut(ShooterConstants.AimSpeed.Speaker.speed);
   private final DutyCycleOut m_shooterRequest = new DutyCycleOut(AimLocation.getAimLocation().shooter_speed);
   private final VelocityDutyCycle m_shooterReverseRequest = new VelocityDutyCycle(-ShooterConstants.TARGET_SHOOTER_RPS);
@@ -49,6 +50,8 @@ public class ShooterSubsystem extends SubsystemBase {
   private boolean m_shooterState = false;
   private boolean m_shooterReverseState = false;
   
+  private boolean m_exitSensorIsTripped = false;
+
   private boolean m_feederState = false;
   private boolean m_feederReverseState = false;
   
@@ -59,7 +62,6 @@ public class ShooterSubsystem extends SubsystemBase {
   private final NetworkTable table = NetworkTableInstance.getDefault().getTable("Shooter info");
   private final DoublePublisher m_topRPMPublisher = table.getDoubleTopic("TopRPM").publish();
   private final DoublePublisher m_bottomRPMPublisher = table.getDoubleTopic("BottomRPM").publish();
-  private final BooleanPublisher m_breakBeamSensorPublisher = table.getBooleanTopic("BreakBeamSensor").publish();
   
   // private final DoubleSubscriber m_targetRPMSubscriber = table.getDoubleTopic("TargetRPM").subscribe(4350);
 
@@ -100,18 +102,22 @@ public class ShooterSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    m_topRPMPublisher.set(Utils.secondToMinute(
+    m_exitSensorIsTripped = Utils.isAllenBradleyTripped(m_exitSensor);
+    if (m_exitSensorIsTripped) {
+      AimLocation.setAimLocation(AimLocation.Loading);
+    }
+
+    m_topRPMPublisher.set((
       m_topMotor.getVelocity().getValueAsDouble()
     ));
-    m_bottomRPMPublisher.set(Utils.secondToMinute(
+    m_bottomRPMPublisher.set((
       m_bottomMotor.getVelocity().getValueAsDouble()
     ));
-    m_breakBeamSensorPublisher.set(m_breakBeamSensor.get());
 
-    m_shooterIsUpToSpeed = m_topMotor.getVelocity().getValueAsDouble() >= ShooterConstants.SHOOTER_UP_TO_SPEED_THRESHOLD;
+    // TODO: use this yes or no maybe idk fact check ok thanks
+    // m_shooterIsUpToSpeed = m_topMotor.getVelocity().getValueAsDouble() >= ShooterConstants.SHOOTER_UP_TO_SPEED_THRESHOLD;
 
     if (m_shooterState) {
-      // m_topMotor.setControl(m_shooterRequest.withOutput(m_speed.speed));
       m_topMotor.setControl(m_shooterRequest.withOutput(AimLocation.getAimLocation().shooter_speed));
     } else if (m_shooterReverseState) {
       m_topMotor.setControl(m_shooterReverseRequest);
@@ -122,7 +128,6 @@ public class ShooterSubsystem extends SubsystemBase {
     if (m_feederReverseState) {
       m_feederMotor.setControl(m_feederReverseRequest);
     } else if (m_shooterIsUpToSpeed || m_feederState) {
-      // m_feederMotor.setControl(m_feederRequest.withOutput(m_speed.feeder_speed));
       m_feederMotor.setControl(m_feederRequest);
       // m_feederMotor.setControl(m_feederRequest.withOutput(AimLocation.getAimLocation().feeder_speed));
     } else {

@@ -6,10 +6,6 @@ package frc.robot.commands;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -27,7 +23,6 @@ public class DriveFieldCentricCommand extends Command {
   public static final double TURN_kA = 0;
   public static final double TURN_kS = 0.05;
   public static final double TURN_kV = 0.1;
-  private final PIDController m_turnController = new PIDController(100, 0, 0.2); // TODO: tune
 
   public DriveFieldCentricCommand(CommandSwerveDrivetrain swerve, SwerveRequest.FieldCentric request,
     double distance_meters, double direction_radians, double rotation_radians
@@ -53,12 +48,7 @@ public class DriveFieldCentricCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // m_swerve.setControl(m_request.
-    //   .withRotationalRate(m_turnController.calculate(
-    //     m_swerve.getState().Pose.getRotation().getRadians(),
-    //     m_targetRotationRadians
-    //   ))
-    // );
+ 
   }
 
   // Called once the command ends or is interrupted.

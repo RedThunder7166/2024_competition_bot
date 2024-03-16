@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2774219692183837,
-      "y": 5.7690885213181256
+      "x": 1.4303902254654552,
+      "y": 5.4995730222161425
     },
-    "rotation": -118.45701659543747
+    "rotation": -179.21517539700815
   },
   "command": {
     "type": "sequential",
@@ -46,10 +46,16 @@
           "data": {
             "name": "StopShooterAndFeeder"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Move-From-Woofer-Out(M-long)"
+          }
         }
       ]
     }
   },
-  "folder": null,
+  "folder": "1-Piece",
   "choreoAuto": false
 }

@@ -1,6 +1,6 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2024.3.1"
+    id "edu.wpi.first.GradleRIO" version "2024.3.2"
 }
 
 java {
@@ -47,9 +47,16 @@ wpi.java.debugJni = false
 // Set this to true to enable desktop support.
 def includeDesktopSupport = true
 
+repositories {
+    mavenCentral()
+
+}
+
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
 // Also defines JUnit 5.
 dependencies {
+    implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+    
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 

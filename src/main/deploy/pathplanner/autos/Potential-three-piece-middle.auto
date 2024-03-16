@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 2.0,
-      "y": 7.0
+      "x": 1.4158218201085915,
+      "y": 5.52870983292987
     },
-    "rotation": 0.0
+    "rotation": 179.2701569359759
   },
   "command": {
     "type": "sequential",
@@ -14,12 +14,12 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Spin 360"
+            "pathName": "2-Piece-Auton-Subwoofer-Center"
           }
         }
       ]
     }
   },
-  "folder": "testing",
+  "folder": null,
   "choreoAuto": false
 }
