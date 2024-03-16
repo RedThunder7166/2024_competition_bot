@@ -7,11 +7,9 @@ package frc.robot.subsystems;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -26,16 +24,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.AimLocation;
 
 import frc.robot.Constants.LauncherConstants;
-// import frc.robot.Constants.LauncherConstants.AimPosition;
-
 public class LauncherSubsystem extends SubsystemBase {
   private final TalonFX m_aimMotor = new TalonFX(LauncherConstants.AIM_MOTOR_ID);
   private final CANcoder m_aimCANCoder = new CANcoder(LauncherConstants.AIM_CANCODER_ID);
 
-
-  // TODO: look into dynamic motion magic
-
-  private final MotionMagicDutyCycle m_aimRequest = new MotionMagicDutyCycle(0);
   private final DutyCycleOut m_aimManualRequest = new DutyCycleOut(0);
 
   private boolean m_isAtLoadingPosition = false;
@@ -48,10 +40,9 @@ public class LauncherSubsystem extends SubsystemBase {
   );
   private final double m_aimMaxSpeed = 1.5;
 
-  private boolean m_manualAimState = false;
+  private boolean m_manualAimEnabled = false;
   // private AimPosition m_aimTargetPosition = AimPosition.Loading;
 
-  // private final VisionSubsystem m_vision;
   private final VisionSubsystem m_vision;
   private DoubleSupplier m_left_stick_supplier;
   private DoubleSupplier m_right_stick_supplier;
@@ -78,7 +69,6 @@ public class LauncherSubsystem extends SubsystemBase {
     m_aimMotor.getConfigurator().apply(aim_config);
 
     m_shuffleBoardTab.addDouble("Aim Motor Position Degree", () -> m_aimMotor.getPosition().getValueAsDouble());
-    m_shuffleBoardTab.addDouble("Aim Motor CANCoder AbsolutePosition Degree", this::getAimCANCoderAbsolutePositionDegrees);
     m_shuffleBoardTab.addDouble("Aim Motor CANCoder AbsolutePosition", this::getAimCANCoderAbsolutePosition);
     m_shuffleBoardTab.addDouble("Velocity", ()-> m_aimMotor.get() );
     m_shuffleBoardTab.addDouble("PID Error", () -> m_aimPIDController.getPositionError());
@@ -91,24 +81,19 @@ public class LauncherSubsystem extends SubsystemBase {
     m_right_stick_supplier = right_supplier;
   }
 
-  public double getAimCANCoderAbsolutePositionDegrees() {
-    return Math.toDegrees(m_aimCANCoder.getAbsolutePosition().getValueAsDouble());
-  }
-    public double getAimCANCoderAbsolutePosition() {
+  private double getAimCANCoderAbsolutePosition() {
     return m_aimCANCoder.getAbsolutePosition().getValueAsDouble();
   }
 
   private final DutyCycleOut m_automaticControl = new DutyCycleOut(0);
   @Override
   public void periodic() {
-    // TODO: PUT THIS BACK (REMOVED FOR MANUAL TESTING) //TODO Figure out what this was supposed to do and if we already do it
     // double value = m_aimCANCoder.getAbsolutePosition().getValueAsDouble();
     // value = Math.abs(LauncherConstants.AIM_CANCODER_LOADING_POSITION - value);
     // m_isAtLoadingPosition = value <= LauncherConstants.ALLOWABLE_CANCODER_ERROR;
 
-    
-    m_aimMotor.setPosition(getAimCANCoderAbsolutePosition()*25*18);//125 to 25, & removed 1 5:1 gear of 3; 2 remain
-    if (m_manualAimState) {
+    m_aimMotor.setPosition(getAimCANCoderAbsolutePosition() * 25 * 18);//125 to 25, & removed 1 5:1 gear of 3; 2 remain
+    if (m_manualAimEnabled) {
       manualAim(m_left_stick_supplier.getAsDouble(), m_right_stick_supplier.getAsDouble());
     } else {
       final double current_position = m_aimMotor.getPosition().getValueAsDouble();
@@ -127,64 +112,24 @@ public class LauncherSubsystem extends SubsystemBase {
     }
   }
 
- 
-
   private void manualAim(double left_stick, double right_stick) {
     if (Math.abs(left_stick) < LauncherConstants.MANUAL_AIM_DEADBAND && Math.abs(right_stick) < LauncherConstants.MANUAL_AIM_DEADBAND) {
       m_aimMotor.disable();
-      return;
+      return; 
     }
 
     m_aimMotor.setControl(m_aimManualRequest.withOutput( (left_stick / 2) + (right_stick / 10)));
   }
 
   public final InstantCommand m_enableAimManualModeCommand = new InstantCommand(() -> {
-    m_manualAimState = true;
+    m_manualAimEnabled = true;
   }, this);
   public void disableManualMode() {
-    m_manualAimState = false;
+    m_manualAimEnabled = false;
   }
-
-  // private void setAimTarget(AimPosition position) {
-  //   m_manualAimState = false;
-  //   m_aimTargetPosition = position;
-  // }
-
-  // public final InstantCommand m_aimAtLoadingPositionCommand = new InstantCommand(() -> {
-  //   setAimTarget(AimPosition.Loading);
-  // }, this);
-  // public final InstantCommand m_aimAtAmpCommand = new InstantCommand(() -> {
-  //   setAimTarget(AimPosition.Amp);
-  // }, this);
-  // public final InstantCommand m_aimAtTrapCommand = new InstantCommand(() -> {
-  //   setAimTarget(AimPosition.Trap);
-  // }, this);
-  // public final InstantCommand m_aimAtSpeakerCommand = new InstantCommand(() -> {
-  //   setAimTarget(AimPosition.Speaker);
-  // }, this);
-    
-  // public void setAimPosition(double position) {
-  //   m_aimMotor.setControl(m_aimRequest.withPosition(
-  //     // Utils.EncoderUnitsToAngle(
-  //       position
-  //     // )
-  //   ));
-  // }
 
   public void teleopInit() {
-    // m_wantsToLoad = false;
+
   }
-
-
-
-  // public InstantCommand m_toggleWantingToLoad = new InstantCommand(() -> {
-  //   m_wantsToLoad = !m_wantsToLoad;
-  // }, this);
-  // public InstantCommand m_startWantingToLoad = new InstantCommand(() -> {
-  //   m_wantsToLoad = true;
-  // }, this);
-  // public InstantCommand m_stopWantingToLoad = new InstantCommand(() -> {
-  //   m_wantsToLoad = false;
-  // }, this);
 
 }

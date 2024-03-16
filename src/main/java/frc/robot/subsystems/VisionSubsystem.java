@@ -88,7 +88,7 @@ public class VisionSubsystem extends SubsystemBase {
     ),
     new Rotation3d(
       0,
-      Math.toRadians(10),
+      CAMERA_PITCH_RADIANS,
       0
     )
   );
@@ -107,9 +107,6 @@ public class VisionSubsystem extends SubsystemBase {
       0
     )
   );
-
-  // TODO: CHANGE THESE VALUES!!!!
-
 
   private PhotonPipelineResult m_frontResult;//, m_backResult;//, m_leftResult;//m_rightResult
 
@@ -245,19 +242,14 @@ public class VisionSubsystem extends SubsystemBase {
       final EstimatedRobotPose pose = optional_pose.get();
       m_photonPoseEstimatorToEstimatedRobotPoseMap.put(estimator, pose);
 
-      // TODO: which is better????
-      final Pose2d swerve_pose = m_swerve.getState().Pose;
+      // final Pose2d swerve_pose = m_swerve.getState().Pose;
       final Pose2d pose2d = pose.estimatedPose.toPose2d();
       visionpose = pose2d;
       m_estimatedPosePublisher.set(new double[] {visionpose.getX(),
         visionpose.getY(),
         visionpose.getRotation().getDegrees()}
       );
-      // if (swerve_pose.getTranslation().getDistance(pose2d.getTranslation()) > 1) {
-      //   // System.out.println("wowzers: " + swerve_pose.getTranslation().getDistance(pose2d.getTranslation()));
-      //   continue;
-      // }
-      // System.out.println("hi");
+      
       m_swerve.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds);
     //   m_swerve.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds, VISION_STDS);
     }

@@ -64,7 +64,7 @@ public class ClimberSubsystem extends SubsystemBase {
     // if (left_switch_is_down && left_output <= 0) {
     //   m_leftClimbMotor.set(0);
     // } else {
-      m_leftClimbMotor.setControl(m_leftRequest.withOutput(left_output));
+    m_leftClimbMotor.setControl(m_leftRequest.withOutput(left_output));
     
 
     // boolean right_switch_is_down = !m_rightArmInput.get();
@@ -72,16 +72,8 @@ public class ClimberSubsystem extends SubsystemBase {
     //   m_rightClimbMotor.set(0);
     // } else 
     
-      m_rightClimbMotor.setControl(m_rightRequest.withOutput(right_output));
-    }
-  
-
-  private double applyDeadband(double num) {
-    if (Math.abs(num) < ClimberConstants.MANUAL_DEADBAND) {
-      return 0;
-    }
-    return num;
-  } 
+    m_rightClimbMotor.setControl(m_rightRequest.withOutput(right_output));
+  }
 
   @Override
   public void periodic() {
@@ -89,7 +81,7 @@ public class ClimberSubsystem extends SubsystemBase {
     // // double right_output = left_output;
     double right_output = m_manual_right_supplier.getAsDouble();
 
-    double roll = getRollDegrees();
+    // double roll = getRollDegrees();
 
     // if (roll >= 5) {
     //   // left_percent = (left_percent < 0) ? (left_percent + 0.5) : (left_percent - 0.5);

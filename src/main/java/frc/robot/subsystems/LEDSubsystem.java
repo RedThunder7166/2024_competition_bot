@@ -10,11 +10,8 @@ import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
-import com.ctre.phoenix.led.CANdle.VBatOutputMode;
-import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.LEDConstants;
 
 public class LEDSubsystem extends SubsystemBase {  

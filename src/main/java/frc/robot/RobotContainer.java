@@ -59,7 +59,7 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
   private final VisionSubsystem m_vision = new VisionSubsystem(drivetrain, logger);
   private final LauncherSubsystem m_launcher = new LauncherSubsystem(m_vision);
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
-  private final IndexerSubsystem m_indexer = new IndexerSubsystem();
+  private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_shooter);
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final LEDSubsystem m_led = new LEDSubsystem(m_intake, m_shooter);
   
@@ -82,6 +82,8 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
 
     NamedCommands.registerCommand("StartShooter", m_shooter.m_enableShooterCommand);
     NamedCommands.registerCommand("StopShooter", m_shooter.m_disableShooterCommand);
+
+    //TODO Add the rest of the PathPlanner Named Commands
 
 
     NamedCommands.registerCommand("StartFeeder", new InstantCommand(() -> {
@@ -114,6 +116,9 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     }));
     NamedCommands.registerCommand("AimFromTrap", new InstantCommand(()-> {
       AimLocation.setAimLocation(AimLocation.Trap);
+    }));
+     NamedCommands.registerCommand("AutoAim", new InstantCommand(()-> {
+      AimLocation.setAimLocation(AimLocation.AutoTarget);
     }));
 
 
@@ -152,15 +157,14 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     }));
     
     operator_joystick.rightBumper().whileTrue(Commands.startEnd(() -> {
-    // m_intake.enableForward();
-    // m_indexer.enableForward();
-    m_shooter.enableFeeder();
-  }, () -> {
-    // m_intake.disableForward();
-    // m_indexer.disableForward();
+      m_intake.enableForward();
+      m_indexer.enableForward();
+      m_shooter.enableFeeder();
+    }, () -> {
+    m_intake.disableForward();
+    m_indexer.disableForward();
     m_shooter.disableFeeder();
   }, m_intake, m_indexer, m_shooter));
-
 
 
     driver_joystick.leftBumper().whileTrue(Commands.startEnd(() -> {
@@ -202,7 +206,7 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
 
     operator_joystick.povUp().onTrue(new InstantCommand(() -> {
       m_launcher.disableManualMode();
-      AimLocation.setAimLocation(AimLocation.Loading);
+      AimLocation.setAimLocation(AimLocation.Subwoofer);
     }, m_shooter, m_launcher));
     operator_joystick.povRight().onTrue(new InstantCommand(() -> {
       m_launcher.disableManualMode();
@@ -219,7 +223,7 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
 
     operator_joystick.a().onTrue(new InstantCommand(() -> {
       m_launcher.disableManualMode();
-      AimLocation.setAimLocation(AimLocation.Subwoofer);
+      AimLocation.setAimLocation(AimLocation.Loading);
     }, m_shooter, m_launcher));
 
     operator_joystick.b().onTrue(new InstantCommand(() -> {
