@@ -22,6 +22,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -58,9 +59,9 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
   private final VisionSubsystem m_vision = new VisionSubsystem(drivetrain, logger);
   private final LauncherSubsystem m_launcher = new LauncherSubsystem(m_vision);
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
-  private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_launcher);
+  private final IndexerSubsystem m_indexer = new IndexerSubsystem();
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
-
+  private final LEDSubsystem m_led = new LEDSubsystem(m_intake, m_shooter);
   
   private final InstantCommand m_startPickingUpPiece = new InstantCommand(() -> {
     m_intake.enableForward();

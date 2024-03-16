@@ -12,25 +12,31 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Utils;
 import frc.robot.Constants.IndexerConstants;
 
 
 
 public class IndexerSubsystem extends SubsystemBase {
   private final TalonFX m_motor = new TalonFX(IndexerConstants.MOTOR_ID);
-  private final VelocityDutyCycle m_request = new VelocityDutyCycle(IndexerConstants.TARGET_VELOCITY);
+  private static final double speed = 0.65;
+  private final DutyCycleOut m_forwardControl = new DutyCycleOut(speed);
+  private final DutyCycleOut m_reverseControl = new DutyCycleOut(-speed);
 
-  private final LauncherSubsystem m_launcher;
+  private final DigitalInput m_entranceSensor = new DigitalInput(IndexerConstants.ENTRANCE_SENSOR_ID);
+
   private boolean m_forwardState = false;
   private boolean m_reverseState = false;
+
+  private boolean m_entranceSensorIsTripped = false;
+
   private final ShuffleboardTab m_shuffleBoardTab = Shuffleboard.getTab("IndexerMotor");
 
-  public IndexerSubsystem(LauncherSubsystem launcher) {
-
-    m_launcher = launcher;
+  public IndexerSubsystem() {
     m_shuffleBoardTab.addDouble("MotorTemp", () -> m_motor.getDeviceTemp().getValueAsDouble());
 
     TalonFXConfiguration config = new TalonFXConfiguration();
@@ -46,17 +52,9 @@ public class IndexerSubsystem extends SubsystemBase {
     m_motor.getConfigurator().apply(config);
   }
 
-  private static final double speed = 0.65;
-  private final DutyCycleOut m_forwardControl = new DutyCycleOut(speed);
-  private final DutyCycleOut m_reverseControl = new DutyCycleOut(-speed);
-
   @Override
   public void periodic() {
-    // if (m_launcher.getIsAtLoadingPosition() && m_launcher.getWantsToLoad()) {
-    //   m_motor.setControl(m_request);
-    // } else {
-    //   m_motor.disable();
-    // }
+    m_entranceSensorIsTripped = Utils.isAllenBradleyTripped(m_entranceSensor);
 
     if (m_forwardState) {
       m_motor.setControl(m_forwardControl);

@@ -37,7 +37,9 @@ public class ShooterSubsystem extends SubsystemBase {
   private final TalonFX m_bottomMotor = new TalonFX(ShooterConstants.BOTTOM_MOTOR_ID); // 14
   private final TalonFX m_feederMotor = new TalonFX(ShooterConstants.FEEDER_MOTOR_ID);
   
-  private final DigitalInput m_exitSensor = new DigitalInput(ShooterConstants.EXIT_SENSOR_ID);
+  private final DigitalInput m_entranceSensor = new DigitalInput(ShooterConstants.ENTRANCE_SENSOR_ID);
+  private final DigitalInput m_wheelEntranceSensor = new DigitalInput(ShooterConstants.WHEEL_ENTRANCE_SENSOR_ID);
+  private final DigitalInput m_wheelExitSensor = new DigitalInput(ShooterConstants.WHEEL_EXIT_SENSOR_ID);
 
   // private final DutyCycleOut m_shooterRequest = new DutyCycleOut(ShooterConstants.AimSpeed.Speaker.speed);
   private final DutyCycleOut m_shooterRequest = new DutyCycleOut(AimLocation.getAimLocation().shooter_speed);
@@ -50,7 +52,9 @@ public class ShooterSubsystem extends SubsystemBase {
   private boolean m_shooterState = false;
   private boolean m_shooterReverseState = false;
   
-  private boolean m_exitSensorIsTripped = false;
+  private boolean m_entranceSensorIsTripped = false;
+  private boolean m_wheelEntranceSensorIsTripped = false;
+  private boolean m_wheelExitSensorIsTripped = false;
 
   private boolean m_feederState = false;
   private boolean m_feederReverseState = false;
@@ -102,8 +106,15 @@ public class ShooterSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    m_exitSensorIsTripped = Utils.isAllenBradleyTripped(m_exitSensor);
-    if (m_exitSensorIsTripped) {
+    m_entranceSensorIsTripped = Utils.isAllenBradleyTripped(m_entranceSensor);
+    m_wheelEntranceSensorIsTripped = Utils.isAllenBradleyTripped(m_wheelEntranceSensor);
+    m_wheelExitSensorIsTripped = Utils.isAllenBradleyTripped(m_wheelExitSensor);
+
+    if (m_entranceSensorIsTripped) {
+      m_feederState = false;
+      m_feederReverseState = false;
+    }
+    if (m_wheelExitSensorIsTripped) {
       AimLocation.setAimLocation(AimLocation.Loading);
     }
 
@@ -114,7 +125,7 @@ public class ShooterSubsystem extends SubsystemBase {
       m_bottomMotor.getVelocity().getValueAsDouble()
     ));
 
-    // TODO: use this yes or no maybe idk fact check ok thanks
+    // TODO: use this? yes or no maybe idk fact check ok thanks
     // m_shooterIsUpToSpeed = m_topMotor.getVelocity().getValueAsDouble() >= ShooterConstants.SHOOTER_UP_TO_SPEED_THRESHOLD;
 
     if (m_shooterState) {
@@ -138,6 +149,10 @@ public class ShooterSubsystem extends SubsystemBase {
   //   m_topMotor.disable();
   //   m_bottomMotor.disable();
   // }
+
+  public boolean getWheelExitSensorTripped() {
+    return m_wheelExitSensorIsTripped;
+  }
 
   public void disabledInit() {
     m_shooterState = false;

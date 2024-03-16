@@ -41,6 +41,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Telemetry;
 import frc.robot.Constants;
 import frc.robot.Constants.AllianceColor;
+import frc.robot.Constants.LauncherConstants;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
@@ -313,7 +314,7 @@ public class VisionSubsystem extends SubsystemBase {
         double position = distanceLaunchAngleCalculation(distance);
         m_equationOutput.set(position);
 
-        if (position <= Constants.LauncherConstants.AIM_MOTOR_LOWEST_POSITION || position >= Constants.LauncherConstants.AIM_MOTOR_HIGHEST_POSITION) {
+        if (position <= LauncherConstants.AIM_MOTOR_LOWEST_POSITION || position >= LauncherConstants.AIM_MOTOR_HIGHEST_POSITION) {
           m_autoTargetValidPublisher.set(false);
           return Optional.empty();
         }

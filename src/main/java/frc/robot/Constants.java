@@ -65,7 +65,11 @@ public class Constants {
         public static final int TOP_MOTOR_ID = 10;
         public static final int BOTTOM_MOTOR_ID = 9;
         public static final int FEEDER_MOTOR_ID = 11;
-        public static final int EXIT_SENSOR_ID = 0; // FIXME: get sensor id of shooter exit allen bradley
+
+        // FIXME: get shooter sensor ids
+        public static final int ENTRANCE_SENSOR_ID = 0;
+        public static final int WHEEL_ENTRANCE_SENSOR_ID = 0;
+        public static final int WHEEL_EXIT_SENSOR_ID = 0;
 
         public static final double TARGET_SHOOTER_RPS = 30.0; // TODO: CHANGE THIS 80
         public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 40.0; // TODO: CHANGE THIS 40
@@ -76,6 +80,9 @@ public class Constants {
     public static final class IndexerConstants {
         public static final int MOTOR_ID = 17;
         public static final int TARGET_VELOCITY = 80; // TODO: CHANGE THIS
+
+        // FIXME: get indexer sensor id
+        public static final int ENTRANCE_SENSOR_ID = 0;
     }
     public static final class ClimberConstants {
         public static final int LEFT_CLIMB_MOTOR_ID = 16;
@@ -90,11 +97,22 @@ public class Constants {
         public static final int LOWER_MOTOR_ID = 13;
         // public static final int ACTUATOR_CANCODER_ID = 25;
         public static final int UPPER_MOTOR_ID = 14;
+        // FIXME: get intake sensor ids
+        public static final int ENTRANCE_SENSOR_ID = 0;
+        public static final int EXIT_SENSOR_ID = 0;
 
         // public static final double ACTUATOR_CANCODER_HOME_POSITION = 0.0; // TODO: CHANGE THIS
         // public static final double ACTUATOR_CANCODER_EXTENDED_POSITION = 0.0; // TODO: CHANGE THIS
 
         public static final int TARGET_VELOCITY_RPS = 80; // TODO: CHANGE THIS
+    }
+
+    public static final class LEDConstants {
+        public static final int CANDLE_ID = 20;
+
+        // FIXME: get LED constants
+        public static final int START_INDEX = 0;
+        public static final int LED_COUNT = 0;
     }
 
     public static final class VisionConstants {
