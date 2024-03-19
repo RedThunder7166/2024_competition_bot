@@ -34,7 +34,6 @@ public final class Utils {
         return !bumperSwitch.get();
     }
 
-    // FIXME: double check allen bradley sensor state
     public static boolean isAllenBradleyTripped(DigitalInput allenBradley) {
         return !allenBradley.get();
     }

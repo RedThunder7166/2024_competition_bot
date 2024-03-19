@@ -68,8 +68,7 @@ public class VisionSubsystem extends SubsystemBase {
 //   private final PhotonCamera m_leftCamera = new PhotonCamera("left_cam");
   // private final PhotonCamera m_rightCamera = new PhotonCamera("right_cam");
   private final double ROBOT_CHASSIS_HEIGHT_OFF_GROUND_METERS = Units.inchesToMeters(1.5);
-  // FIXME:rename from front to left front
-  /*TODO: changed values, 
+  /*
               from 
     7.75
     -11.28
@@ -78,7 +77,6 @@ public class VisionSubsystem extends SubsystemBase {
     4
     11.25
     17.5
-
   */
   private final Transform3d m_frontRobotToCam = new Transform3d(
     new Translation3d(
@@ -291,13 +289,6 @@ public class VisionSubsystem extends SubsystemBase {
     }
     return Optional.empty();
   }
-
-  // private double distanceLaunchAngleCalculation(double distance) {//FIXME This is wrong now for some dumbass reason, find it at some PiT
-  //   return (100.622 / distance) - (-3.45926 * distance) + 113.535;
-  // }
-  // private double distanceLaunchAngleCalculation(double distance) {//TODO Failure, Remove from code 
-  //   return 12.3872 * ((1 / distance) - (distance)) + 192.237;
-  // }
 
   private double distanceLaunchAngleCalculation(double distance) {
     return (-42.4977/(1+Math.pow(Math.E, (-2.20952 * ( distance - 1.725))))+199.689);

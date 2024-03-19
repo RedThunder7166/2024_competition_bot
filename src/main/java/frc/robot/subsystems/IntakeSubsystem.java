@@ -25,8 +25,6 @@ public class IntakeSubsystem extends SubsystemBase {
   private final DigitalInput m_entranceSensor = new DigitalInput(IntakeConstants.ENTRANCE_SENSOR_ID);
   // private final DigitalInput m_exitSensor = new DigitalInput(IntakeConstants.EXIT_SENSOR_ID);
 
-  // private final VelocityDutyCycle m_request = new VelocityDutyCycle(IntakeConstants.TARGET_VELOCITY_RPS);
-
   private boolean m_forwardEnabled = false;
   private boolean m_reverseEnabled = false;
 
@@ -63,17 +61,15 @@ public class IntakeSubsystem extends SubsystemBase {
     // m_exitSensorIsTripped = Utils.isAllenBradleyTripped(m_exitSensor);
 
     if (m_forwardEnabled) {
-      // m_upperMotor.setControl(m_request.withVelocity(IntakeConstants.TARGET_VELOCITY_RPS));
       m_upperMotor.setControl(m_forwardControl);
     } else if (m_reverseEnabled) {
-      // m_upperMotor.setControl(m_request.withVelocity(-IntakeConstants.TARGET_VELOCITY_RPS));
       m_upperMotor.setControl(m_reverseControl);
     } else {
       m_upperMotor.disable();
     }
   }
 
-  public boolean getEntranceSensorTripped() { //TODO UnComment LightSensors
+  public boolean getEntranceSensorTripped() {
     return m_entranceSensorIsTripped;
   }
   public boolean getExitSensorTripped() {

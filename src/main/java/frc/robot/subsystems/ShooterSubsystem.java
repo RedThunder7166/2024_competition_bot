@@ -112,14 +112,11 @@ public class ShooterSubsystem extends SubsystemBase {
     m_wheelEntranceSensorIsTripped = Utils.isAllenBradleyTripped(m_wheelEntranceSensor);
     m_wheelExitSensorIsTripped = Utils.isAllenBradleyTripped(m_wheelExitSensor);
 
-    
+    // m_shooterIsUpToSpeed = m_topMotor.getVelocity().getValueAsDouble() >= ShooterConstants.SHOOTER_UP_TO_SPEED_THRESHOLD;
+
     final AimLocation aimLocation = AimLocation.getAimLocation();
-    
+
     boolean overrideShooterLogic = false;
-    boolean overrideFeederLogic = false;
-    
-    m_shooterIsUpToSpeed = m_topMotor.getVelocity().getValueAsDouble() >= ShooterConstants.SHOOTER_UP_TO_SPEED_THRESHOLD;
-    
     if (m_wheelExitSensorIsTripped) {
       if (aimLocation == AimLocation.Loading) {
         overrideShooterLogic = true;
@@ -127,11 +124,6 @@ public class ShooterSubsystem extends SubsystemBase {
       } else {
         m_aimToLoadingCommand.schedule();
       }
-    }
-
-    if (m_shooterIsUpToSpeed) {
-      overrideFeederLogic = true;
-      m_feederMotor.disable();
     }
 
     m_topRPMPublisher.set((
@@ -154,14 +146,12 @@ public class ShooterSubsystem extends SubsystemBase {
       }
     }
 
-    if (!overrideFeederLogic) {
-      if (m_feederReverseEnabled) {
-        m_feederMotor.setControl(m_feederReverseRequest);
-      } else if (m_feederEnabled) {
-        m_feederMotor.setControl(m_feederRequest);
-      } else {
-        m_feederMotor.disable();
-      }
+    if (m_feederReverseEnabled) {
+      m_feederMotor.setControl(m_feederReverseRequest);
+    } else if (m_feederEnabled) {
+      m_feederMotor.setControl(m_feederRequest);
+    } else {
+      m_feederMotor.disable();
     }
   }
 

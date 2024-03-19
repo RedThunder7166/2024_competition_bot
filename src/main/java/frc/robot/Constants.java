@@ -58,7 +58,6 @@ public class Constants {
         public static final double AIM_MOTOR_LOWEST_POSITION = 148;
 
         public static final int AIM_CANCODER_ID = 26;
-        // public static final double AIM_CANCODER_LOADING_POSITION = 0; // TODO: CHANGE THIS
         public static final double ALLOWABLE_CANCODER_ERROR = 0.5;
     }
     public static final class ShooterConstants {
@@ -68,45 +67,31 @@ public class Constants {
 
         public static final double AIM_TO_LOADING_DELAY_SECONDS = 0.05;
 
-        // FIXME: get shooter sensor ids
         public static final int WHEEL_ENTRANCE_SENSOR_ID = 0;
         public static final int WHEEL_EXIT_SENSOR_ID = 1;
 
-        public static final double TARGET_SHOOTER_RPS = 30.0; // TODO: CHANGE THIS 80
-        public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 70.0; // TODO: CHANGE THIS 40
-        // public static final double TIME_FOR_SHOOTER_TO_GET_UP_TO_SPEED = 0.4; // TODO: CHANGE THIS
+        public static final double TARGET_SHOOTER_RPS = 30.0;
+        // public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 70.0; // was 40
 
         public static final double TARGET_FEEDER_RPS = 10.0; // TODO: CHANGE THIS
     }
     public static final class IndexerConstants {
         public static final int MOTOR_ID = 17;
-        public static final int TARGET_VELOCITY = 80; // TODO: CHANGE THIS
+        // public static final int TARGET_VELOCITY = 80; 
 
-        // FIXME: get indexer sensor id
-        // public static final int ENTRANCE_SENSOR_ID = 0;
         public static final int SENSOR_ID = 2;
     }
     public static final class ClimberConstants {
         public static final int LEFT_CLIMB_MOTOR_ID = 7;
         public static final int RIGHT_CLIMB_MOTOR_ID = 15;
 
-        public static final int LEFT_ARM_LIMIT_SWITCH_ID = -100; // TODO: CHANGE THIS
-        public static final int RIGHT_ARM_LIMIT_SWITCH_ID = -100; // TODO: CHANGE THIS
-
         public static final double MANUAL_DEADBAND = 0.25;
     }
     public static final class IntakeConstants {
         public static final int LOWER_MOTOR_ID = 13;
-        // public static final int ACTUATOR_CANCODER_ID = 25;
         public static final int UPPER_MOTOR_ID = 14;
-        // FIXME: get intake sensor ids
+
         public static final int ENTRANCE_SENSOR_ID = 3;
-        // public static final int EXIT_SENSOR_ID = 0;
-
-        // public static final double ACTUATOR_CANCODER_HOME_POSITION = 0.0; // TODO: CHANGE THIS
-        // public static final double ACTUATOR_CANCODER_EXTENDED_POSITION = 0.0; // TODO: CHANGE THIS
-
-        public static final int TARGET_VELOCITY_RPS = 80; // TODO: CHANGE THIS
     }
 
     public static final class LEDConstants {

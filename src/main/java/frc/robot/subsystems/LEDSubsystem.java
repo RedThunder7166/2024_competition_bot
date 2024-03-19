@@ -7,6 +7,8 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.led.Animation;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdleConfiguration;
+import com.ctre.phoenix.led.ColorFlowAnimation;
+import com.ctre.phoenix.led.FireAnimation;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
@@ -36,22 +38,26 @@ public class LEDSubsystem extends SubsystemBase {
   private static StrobeAnimation strobeAnimation(RGB rgb, double speed) {
     return new StrobeAnimation(rgb.r , rgb.g, rgb.b, 0, speed, LEDConstants.LED_COUNT, LEDConstants.START_INDEX);
   }
+  private static ColorFlowAnimation colorFlowAnimation(RGB rgb, double speed, ColorFlowAnimation.Direction direction) {
+    return new ColorFlowAnimation(rgb.r, rgb.g, rgb.b, 0, speed, LEDConstants.LED_COUNT, direction, LEDConstants.START_INDEX);
+  }
 
-  private static final RGB yellow = new RGB(255, 255, 0);
   private static final RGB green = new RGB(0, 255, 0);
-  private static final RGB red = new RGB(255, 0, 0);
+  private static final RGB red = new RGB(230, 20, 20);
+  private static final RGB blue = new RGB(40, 40, 250);
+  private static final RGB yellow = new RGB(242, 187, 5);
 
   private static final double brightness = 1;
   private static final double speed = 0.5;
   private static enum Mode {
-    Default(yellow),
     Rainbow(new RainbowAnimation(brightness, speed, LEDConstants.LED_COUNT)),
     FlashYellow(strobeAnimation(yellow, speed)),
     FlashGreen(strobeAnimation(green, speed)),
     FlashRed(strobeAnimation(red, speed)),
     SolidYellow(yellow),
     SolidGreen(green),
-    SolidRed(red);
+    SolidRed(red),
+    BlueFlow(colorFlowAnimation(blue, speed, ColorFlowAnimation.Direction.Forward));
 
     public final boolean has_animation;
 
@@ -79,7 +85,7 @@ public class LEDSubsystem extends SubsystemBase {
       this.animation = animation;
     }
   }
-  private Mode m_mode = Mode.Default;
+  private Mode m_mode = Mode.SolidYellow;
 
   private final CANdle m_candle = new CANdle(LEDConstants.CANDLE_ID);
 
@@ -114,7 +120,7 @@ public class LEDSubsystem extends SubsystemBase {
     } else if (m_shooter.getWheelEntranceSensorTripped()) {
       m_mode = Mode.FlashYellow;
     } else {
-      m_mode = Mode.Default;
+      m_mode = Mode.SolidYellow;
     }
 
     if (m_mode.has_animation) {
