@@ -34,7 +34,7 @@ public class AimLocation {
     );
     public static final AimLocation AutoTarget = new AimLocation("AutoTarget",
         true,
-        0.7,
+        0.8,//TODO Bring back to .7 once the shooter wheels are moved back
         0
     );
     public static final AimLocation Amp = new AimLocation("Amp",

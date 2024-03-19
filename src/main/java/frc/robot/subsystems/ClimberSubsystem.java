@@ -94,7 +94,7 @@ public class ClimberSubsystem extends SubsystemBase {
   }
 
 
-//   public void setOutput(double output) {
-//     m_output = output;
-//   }
+  // public void setOutput(double output) {
+  //   m_output = output;
+  // }
 }

@@ -27,13 +27,13 @@ public class IndexerSubsystem extends SubsystemBase {
   private final DutyCycleOut m_reverseControl = new DutyCycleOut(-speed);
 
   // private final DigitalInput m_entranceSensor = new DigitalInput(IndexerConstants.ENTRANCE_SENSOR_ID);
-  private final DigitalInput m_exitSensor = new DigitalInput(IndexerConstants.EXIT_SENSOR_ID);
+  private final DigitalInput m_sensor = new DigitalInput(IndexerConstants.SENSOR_ID);
 
   private boolean m_forwardEnabled = false;
   private boolean m_reverseEnabled = false;
 
   // private boolean m_entranceSensorIsTripped = false;
-  private boolean m_exitSensorIsTripped = false;
+  private boolean m_sensorIsTripped = false;
 
   private final ShooterSubsystem m_shooter;
 
@@ -54,21 +54,17 @@ public class IndexerSubsystem extends SubsystemBase {
     config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 40;
+    config.CurrentLimits.SupplyCurrentLimit = 60;
 
     m_motor.getConfigurator().apply(config);
 
-    m_sensorTab.addBoolean("IndexerExitSensor", () -> m_exitSensorIsTripped);
+    m_sensorTab.addBoolean("IndexerSensor", () -> m_sensorIsTripped);
   }
 
   @Override
   public void periodic() {
     // m_entranceSensorIsTripped = Utils.isAllenBradleyTripped(m_entranceSensor);
-    m_exitSensorIsTripped = Utils.isAllenBradleyTripped(m_exitSensor);
-
-    if (m_exitSensorIsTripped) {
-      m_shooter.indexerExited();
-    }
+    m_sensorIsTripped = Utils.isAllenBradleyTripped(m_sensor);
 
     if (m_forwardEnabled) {
       m_motor.setControl(m_forwardControl);
@@ -77,6 +73,10 @@ public class IndexerSubsystem extends SubsystemBase {
     } else {
       m_motor.disable();
     }
+  }
+
+  public boolean getSensorTripped() {
+    return m_sensorIsTripped;
   }
 
   public void disabledInit() {

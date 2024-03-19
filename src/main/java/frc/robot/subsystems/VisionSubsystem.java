@@ -292,9 +292,17 @@ public class VisionSubsystem extends SubsystemBase {
     return Optional.empty();
   }
 
+  // private double distanceLaunchAngleCalculation(double distance) {//FIXME This is wrong now for some dumbass reason, find it at some PiT
+  //   return (100.622 / distance) - (-3.45926 * distance) + 113.535;
+  // }
+  // private double distanceLaunchAngleCalculation(double distance) {//TODO Failure, Remove from code 
+  //   return 12.3872 * ((1 / distance) - (distance)) + 192.237;
+  // }
+
   private double distanceLaunchAngleCalculation(double distance) {
-    return (100.622 / distance) - (-3.45926 * distance) + 113.535;
+    return (-42.4977/(1+Math.pow(Math.E, (-2.20952 * ( distance - 1.725))))+199.689);
   }
+
 
   public Optional<Double> calculateLauncherSpeakerAimPosition() {
     if (m_frontResult.hasTargets()) {

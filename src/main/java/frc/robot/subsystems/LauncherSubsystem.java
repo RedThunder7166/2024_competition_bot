@@ -45,7 +45,6 @@ public class LauncherSubsystem extends SubsystemBase {
 
   private final VisionSubsystem m_vision;
   private DoubleSupplier m_left_stick_supplier;
-  private DoubleSupplier m_right_stick_supplier;
 
   private final ShuffleboardTab m_shuffleBoardTab = Shuffleboard.getTab("Launcher");
   
@@ -76,9 +75,8 @@ public class LauncherSubsystem extends SubsystemBase {
     m_shuffleBoardTab.addString("AimLocation", () -> AimLocation.getAimLocation().name);
   }
 
-  public void configureManualMode(DoubleSupplier left_supplier, DoubleSupplier right_supplier) {
+  public void configureManualMode(DoubleSupplier left_supplier) {
     m_left_stick_supplier = left_supplier;
-    m_right_stick_supplier = right_supplier;
   }
 
   private double getAimCANCoderAbsolutePosition() {
@@ -94,7 +92,7 @@ public class LauncherSubsystem extends SubsystemBase {
 
     m_aimMotor.setPosition(getAimCANCoderAbsolutePosition() * 25 * 18);//125 to 25, & removed 1 5:1 gear of 3; 2 remain
     if (m_manualAimEnabled) {
-      manualAim(m_left_stick_supplier.getAsDouble(), m_right_stick_supplier.getAsDouble());
+      manualAim(m_left_stick_supplier.getAsDouble());
     } else {
       final double current_position = m_aimMotor.getPosition().getValueAsDouble();
       final AimLocation aim_location = AimLocation.getAimLocation();
@@ -112,13 +110,13 @@ public class LauncherSubsystem extends SubsystemBase {
     }
   }
 
-  private void manualAim(double left_stick, double right_stick) {
-    if (Math.abs(left_stick) < LauncherConstants.MANUAL_AIM_DEADBAND && Math.abs(right_stick) < LauncherConstants.MANUAL_AIM_DEADBAND) {
+  private void manualAim(double left_stick) {
+    if (Math.abs(left_stick) < LauncherConstants.MANUAL_AIM_DEADBAND) {
       m_aimMotor.disable();
       return; 
     }
 
-    m_aimMotor.setControl(m_aimManualRequest.withOutput( (left_stick / 2) + (right_stick / 10)));
+    m_aimMotor.setControl(m_aimManualRequest.withOutput((left_stick / 2)));
   }
 
   public final InstantCommand m_enableAimManualModeCommand = new InstantCommand(() -> {

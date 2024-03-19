@@ -12,6 +12,7 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -19,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -35,6 +37,8 @@ public class RobotContainer {
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final CommandXboxController driver_joystick = new CommandXboxController(ControllerConstants.DRIVER_PORT); // My joystick
   private final CommandXboxController operator_joystick = new CommandXboxController(ControllerConstants.OPERATOR_PORT);
+   private final XboxController joy = new XboxController(2);
+
   private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
   
 
@@ -57,11 +61,13 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
 
   /*Initialize Subsystems */
   private final VisionSubsystem m_vision = new VisionSubsystem(drivetrain, logger);
+  private final ClimberSubsystem m_climber = new ClimberSubsystem(drivetrain);
   private final LauncherSubsystem m_launcher = new LauncherSubsystem(m_vision);
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
   private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_shooter);
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
-  private final LEDSubsystem m_led = new LEDSubsystem(m_intake, m_shooter);
+  private final LEDSubsystem m_led = new LEDSubsystem(m_intake, m_indexer, m_shooter); 
+
   
   private final InstantCommand m_startPickingUpPiece = new InstantCommand(() -> {
     m_intake.enableForward();
@@ -124,8 +130,8 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
 
   }
 
-  private boolean is_operator_x_down = false;
-  private boolean is_operator_b_down = false;
+  private boolean climber_up = false;
+  private boolean climber_down = false;
 
 
   private boolean automatically_rotate = false;
@@ -157,15 +163,15 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     }));
     
     operator_joystick.rightBumper().whileTrue(Commands.startEnd(() -> {
+      m_shooter.enableFeeder();
       m_intake.enableForward();
       m_indexer.enableForward();
-      m_shooter.enableFeeder();
     }, () -> {
     m_intake.disableForward();
     m_indexer.disableForward();
     m_shooter.disableFeeder();
   }, m_intake, m_indexer, m_shooter));
-
+  
 
     driver_joystick.leftBumper().whileTrue(Commands.startEnd(() -> {
       m_indexer.enableReverse();
@@ -174,7 +180,6 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     }, m_indexer));
 
     
-
     driver_joystick.rightBumper().whileTrue(Commands.startEnd(() -> {
       m_indexer.enableForward();
     }, () -> {
@@ -195,14 +200,10 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     }, m_shooter));
 
    
-    // operator_joystick.rightBumper().whileTrue(Commands.startEnd(() -> {
-    //   m_shooter.enableFeeder();
-    // }, () -> {
-    //   m_shooter.disableFeeder();
-    // }, m_shooter));
+   
 
     operator_joystick.start().onTrue(m_launcher.m_enableAimManualModeCommand);
-    m_launcher.configureManualMode(operator_joystick::getLeftY, operator_joystick::getRightY);
+    m_launcher.configureManualMode(operator_joystick::getLeftY);
 
     operator_joystick.povUp().onTrue(new InstantCommand(() -> {
       m_launcher.disableManualMode();
@@ -231,25 +232,24 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
       AimLocation.setAimLocation(AimLocation.AutoTarget);
     }, m_shooter, m_launcher));
 
-    // m_climber.configureManualMode(() -> operator_joystick.getRightY()); //left arm
+    m_climber.configureManualMode(() -> operator_joystick.getRightY()); //left arm
 
-    // operator_joystick.x().whileTrue(Commands.startEnd(() -> {
-    //   is_operator_x_down = true;
-    // }, () -> {
-    //   is_operator_x_down = false;
-    // }, m_climber));
-    // operator_joystick.b().whileTrue(Commands.startEnd(() -> {
-    //   is_operator_b_down = true;
-    // }, () -> {
-    //   is_operator_b_down = false;
-    // }, m_climber));
+    operator_joystick.x().whileTrue(Commands.startEnd(() -> {
+      climber_up = true;
+    }, () -> {
+      climber_up = false;
+    }, m_climber));
+    operator_joystick.y().whileTrue(Commands.startEnd(() -> {
+      climber_down = true;
+    }, () -> {
+      climber_down = false;
+    }, m_climber));
 
-    // final double climber_right_manual_mode_speed = 1;
-    // m_climber.configureRightManualMode( //right arm
-    //   () -> is_operator_x_down ? climber_right_manual_mode_speed : 
-    //     (is_operator_b_down ? -climber_right_manual_mode_speed : 0)
-    // );
-
+    final double climber_right_manual_mode_speed = 1;
+    m_climber.configureRightManualMode( //right arm
+      () -> climber_up ? climber_right_manual_mode_speed : 
+        (climber_down ? -climber_right_manual_mode_speed : 0)
+    );
   }
  
   {
@@ -280,6 +280,9 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     m_shooter.disabledInit();
   }
 
+  public void autonomousExit() {
+    drivetrain.seedFieldRelative();
+  }
 
   public Command getAutonomousCommand() {
     // return autoChooser.getSelected();

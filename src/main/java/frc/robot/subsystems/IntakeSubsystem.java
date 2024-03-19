@@ -12,6 +12,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Utils;
 import frc.robot.Constants.IntakeConstants;
@@ -20,7 +22,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private final TalonFX m_upperMotor = new TalonFX(IntakeConstants.UPPER_MOTOR_ID);
   private final TalonFX m_lowerMotor = new TalonFX(IntakeConstants.LOWER_MOTOR_ID);
 
-  // private final DigitalInput m_entranceSensor = new DigitalInput(IntakeConstants.ENTRANCE_SENSOR_ID);
+  private final DigitalInput m_entranceSensor = new DigitalInput(IntakeConstants.ENTRANCE_SENSOR_ID);
   // private final DigitalInput m_exitSensor = new DigitalInput(IntakeConstants.EXIT_SENSOR_ID);
 
   // private final VelocityDutyCycle m_request = new VelocityDutyCycle(IntakeConstants.TARGET_VELOCITY_RPS);
@@ -30,28 +32,34 @@ public class IntakeSubsystem extends SubsystemBase {
 
   // private boolean m_entranceSensorIsTripped = false;
   private boolean m_exitSensorIsTripped = false;
-  
+  private boolean m_entranceSensorIsTripped = false;
+  private final ShuffleboardTab m_sensorTab = Shuffleboard.getTab("Sensors");
+
+
   public IntakeSubsystem() {
     // m_upperMotor.setNeutralMode(NeutralModeValue.Brake);
     TalonFXConfiguration config = new TalonFXConfiguration();
+    
     // clockwise is true
     // counterclockwise is false
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-
+    
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 30;
-
+    
     m_upperMotor.getConfigurator().apply(config);
     m_lowerMotor.getConfigurator().apply(config);
-
+    
     m_lowerMotor.setControl(new Follower(m_upperMotor.getDeviceID(), false));
+
+    m_sensorTab.addBoolean("IntakeEntranceSensor", () -> m_entranceSensorIsTripped);
   }
 
   private final DutyCycleOut m_forwardControl = new DutyCycleOut(0.2);
   private final DutyCycleOut m_reverseControl = new DutyCycleOut(-0.2);
   @Override
   public void periodic() {
-    // m_entranceSensorIsTripped = Utils.isAllenBradleyTripped(m_entranceSensor);
+    m_entranceSensorIsTripped = Utils.isAllenBradleyTripped(m_entranceSensor);
     // m_exitSensorIsTripped = Utils.isAllenBradleyTripped(m_exitSensor);
 
     if (m_forwardEnabled) {
@@ -65,8 +73,8 @@ public class IntakeSubsystem extends SubsystemBase {
     }
   }
 
-  public boolean getEntranceSensorTripped() {
-    return false;
+  public boolean getEntranceSensorTripped() { //TODO UnComment LightSensors
+    return m_entranceSensorIsTripped;
   }
   public boolean getExitSensorTripped() {
     return m_exitSensorIsTripped;
