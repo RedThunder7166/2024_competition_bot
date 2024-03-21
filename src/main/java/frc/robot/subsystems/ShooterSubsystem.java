@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
@@ -37,13 +38,13 @@ public class ShooterSubsystem extends SubsystemBase {
   private final DigitalInput m_wheelEntranceSensor = new DigitalInput(ShooterConstants.WHEEL_ENTRANCE_SENSOR_ID);
   private final DigitalInput m_wheelExitSensor = new DigitalInput(ShooterConstants.WHEEL_EXIT_SENSOR_ID);
 
-  // private final DutyCycleOut m_shooterRequest = new DutyCycleOut(ShooterConstants.AimSpeed.Speaker.speed);
-  private final DutyCycleOut m_shooterRequest = new DutyCycleOut(AimLocation.getAimLocation().shooter_speed);
+  // private final DutyCycleOut m_shooterRequest = new DutyCycleOut(AimLocation.getAimLocation().shooter_speed);
+  private final VelocityDutyCycle m_shooterRequest = new VelocityDutyCycle(AimLocation.getAimLocation().shooter_speed_rps);
   private final VelocityDutyCycle m_shooterReverseRequest = new VelocityDutyCycle(-ShooterConstants.TARGET_SHOOTER_RPS);
   
   // private final DutyCycleOut m_feederRequest = new DutyCycleOut(1);
   private final VelocityDutyCycle m_feederRequest = new VelocityDutyCycle(ShooterConstants.TARGET_FEEDER_RPS);
-  private final VelocityDutyCycle m_feederReverseRequest = new VelocityDutyCycle(-ShooterConstants.TARGET_FEEDER_RPS);
+  private final VelocityDutyCycle m_feederReverseRequest = new VelocityDutyCycle(-ShooterConstants.TARGET_FEEDER_RPS_BACKWARDS);
   
   private boolean m_shooterEnabled = false;
   private boolean m_shooterReverseEnabled = false;
@@ -63,6 +64,8 @@ public class ShooterSubsystem extends SubsystemBase {
     })
   );
 
+  
+
   private final ShuffleboardTab m_sensorTab = Shuffleboard.getTab("Sensors");
     
   private final NetworkTable table = NetworkTableInstance.getDefault().getTable("Shooter info");
@@ -73,15 +76,21 @@ public class ShooterSubsystem extends SubsystemBase {
     TalonFXConfiguration top_configs = new TalonFXConfiguration();
     TalonFXConfiguration feeder_configs = new TalonFXConfiguration();
     
-    Slot0Configs slot0Configs = top_configs.Slot0;
-    slot0Configs.kS = 0;
-    slot0Configs.kA = 0.02;
-    slot0Configs.kV = 0.52;
-    slot0Configs.kP = 0.05;
-    slot0Configs.kI = 0;
-    slot0Configs.kD = 0;
+    Slot0Configs shooterSlot0Configs = top_configs.Slot0;
+    shooterSlot0Configs.kS = 0.1;
+    shooterSlot0Configs.kA = 0;
+    shooterSlot0Configs.kV = .01;
+    shooterSlot0Configs.kP = 0.049;
+    shooterSlot0Configs.kI = 0;
+    shooterSlot0Configs.kD = 0;
 
-    feeder_configs.Slot0 = slot0Configs;
+    Slot0Configs feederSlot0Configs = feeder_configs.Slot0;
+    feederSlot0Configs.kS = 0;
+    feederSlot0Configs.kV = 0.52;
+    feederSlot0Configs.kP = 0.05;
+    feederSlot0Configs.kI = 0;
+    feederSlot0Configs.kD = 0;
+
 
     // clockwise is true
     // counterclockwise is false
@@ -95,7 +104,7 @@ public class ShooterSubsystem extends SubsystemBase {
     top_configs.CurrentLimits.SupplyCurrentLimit = 80;
 
     feeder_configs.CurrentLimits.SupplyCurrentLimitEnable = true;
-    feeder_configs.CurrentLimits.SupplyCurrentLimit = 30;
+    feeder_configs.CurrentLimits.SupplyCurrentLimit = 50;
 
     m_topMotor.getConfigurator().apply(top_configs);
     m_bottomMotor.getConfigurator().apply(top_configs);
@@ -117,14 +126,17 @@ public class ShooterSubsystem extends SubsystemBase {
     final AimLocation aimLocation = AimLocation.getAimLocation();
 
     boolean overrideShooterLogic = false;
-    if (m_wheelExitSensorIsTripped) {
+    if (DriverStation.isTeleopEnabled() && m_wheelExitSensorIsTripped) {
       if (aimLocation == AimLocation.Loading) {
         overrideShooterLogic = true;
         m_topMotor.setControl(m_shooterReverseRequest);
+      } else if (aimLocation == AimLocation.Amp) {
+         overrideShooterLogic = true;
+        m_topMotor.setControl(m_shooterRequest);
       } else {
         m_aimToLoadingCommand.schedule();
       }
-    }
+    }    
 
     m_topRPMPublisher.set((
       m_topMotor.getVelocity().getValueAsDouble()
@@ -138,7 +150,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     if (!overrideShooterLogic) {
       if (m_shooterEnabled) {
-        m_topMotor.setControl(m_shooterRequest.withOutput(aimLocation.shooter_speed));
+        m_topMotor.setControl(m_shooterRequest.withVelocity(aimLocation.shooter_speed_rps));
       } else if (m_shooterReverseEnabled) {
         m_topMotor.setControl(m_shooterReverseRequest);
       } else {

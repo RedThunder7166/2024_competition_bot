@@ -10,51 +10,51 @@ public class AimLocation {
     public final String name;
     public final boolean auto_target;
     public final double position;
-    public final double shooter_speed;
+    public final double shooter_speed_rps;
     public final double feeder_speed;
-    private AimLocation(String name_in, double position_in, double shooter_speed_in, double feeder_speed_in) {
+    private AimLocation(String name_in, double position_in, double shooter_speed_rps_in, double feeder_speed_in) {
         name = name_in;
         position = position_in;
         auto_target = false;
-        shooter_speed = shooter_speed_in;
+        shooter_speed_rps = shooter_speed_rps_in;
         feeder_speed = feeder_speed_in;
     }
-        private AimLocation(String name_in, boolean auto_target_in, double shooter_speed_in, double feeder_speed_in) {
+        private AimLocation(String name_in, boolean auto_target_in, double shooter_speed_rps_in, double feeder_speed_in) {
         name = name_in;
         position = 0;
         auto_target = auto_target_in;
-        shooter_speed = shooter_speed_in;
+        shooter_speed_rps = shooter_speed_rps_in;
         feeder_speed = feeder_speed_in;
     }
 
     public static final AimLocation Loading = new AimLocation("Loading",
         163.56, // 847.5
-        0.8, // this modified speaker speed
+        80, // this modified speaker speed
         0
     );
     public static final AimLocation AutoTarget = new AimLocation("AutoTarget",
         true,
-        0.8,//TODO Bring back to .7 once the shooter wheels are moved back
+        80,//TODO Bring back to .7 once the shooter wheels are moved back
         0
     );
     public static final AimLocation Amp = new AimLocation("Amp",
         203.6, // 1018
-        0.12,
+        14,
         0
     );
     public static final AimLocation Trap = new AimLocation("Trap",
         210, // 1050
-        0.8,
+        80,
         0
     );
     public static final AimLocation Speaker = new AimLocation("Speaker",
         153.4, // 817
-        Loading.shooter_speed,
+        Loading.shooter_speed_rps,
         0
     );
     public static final AimLocation Subwoofer = new AimLocation("Subwoofer",
         196.2, // 981
-        Loading.shooter_speed,
+        50,
         0
     );
 

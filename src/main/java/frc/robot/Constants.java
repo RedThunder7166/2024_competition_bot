@@ -65,7 +65,9 @@ public class Constants {
         public static final int BOTTOM_MOTOR_ID = 9;
         public static final int FEEDER_MOTOR_ID = 11;
 
-        public static final double AIM_TO_LOADING_DELAY_SECONDS = 0.05;
+        public static final double AIM_TO_LOADING_DELAY_SECONDS = 0.5;
+        public static final double AMP_TO_LOADING_DELAY_SECONDS = 1;
+
 
         public static final int WHEEL_ENTRANCE_SENSOR_ID = 0;
         public static final int WHEEL_EXIT_SENSOR_ID = 1;
@@ -73,7 +75,9 @@ public class Constants {
         public static final double TARGET_SHOOTER_RPS = 30.0;
         // public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 70.0; // was 40
 
-        public static final double TARGET_FEEDER_RPS = 10.0; // TODO: CHANGE THIS
+          public static final double TARGET_FEEDER_RPS_BACKWARDS = 2; // TODO: CHANGE THIS
+
+        public static final double TARGET_FEEDER_RPS = 10; // TODO: CHANGE THIS
     }
     public static final class IndexerConstants {
         public static final int MOTOR_ID = 17;
