@@ -248,7 +248,7 @@ public class VisionSubsystem extends SubsystemBase {
         visionpose.getRotation().getDegrees()}
       );
       
-      m_swerve.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds);
+      // m_swerve.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds);
     //   m_swerve.addVisionMeasurement(pose.estimatedPose.toPose2d(), pose.timestampSeconds, VISION_STDS);
     }
 
@@ -319,9 +319,9 @@ public class VisionSubsystem extends SubsystemBase {
   public Optional<Double> calculateTurnPower() {
     final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceColor.SUBWOOFER_CENTER, m_frontResult);
     if (target_optional.isPresent()) {
-      double value = turn_controller.calculate(target_optional.get().getYaw(), 0);
+      double value = turn_controller.calculate(target_optional.get().getYaw(), 14); //14
       // System.out.format("Value: %f | Error: %f\n", value, turn_controller.getPositionError());
-      if (Math.abs(turn_controller.getPositionError()) < 0.5) {
+      if (Math.abs(turn_controller.getPositionError()) < 0.4) {
         value = 0;
       }
       return Optional.of(value);
