@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 2,
-      "y": 2
+      "x": 1.1619786220635362,
+      "y": 6.683920394867817
     },
-    "rotation": 0
+    "rotation": -121.53479190518824
   },
   "command": {
     "type": "sequential",
@@ -14,49 +14,61 @@
         {
           "type": "named",
           "data": {
-            "name": "StartPickingUpPiece"
+            "name": "LineUp"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "StopPickingUpPiece"
+            "name": "AutoAim"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "StartPickingUpPiece"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StopPickingUpPiece"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StartPickingUpPiece"
+            "name": "StartFeederReverse"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0
+            "waitTime": 0.4
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StopFeederReverse"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartShooter"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartFeeder"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StopShooterAndFeeder"
           }
         }
       ]

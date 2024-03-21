@@ -9,9 +9,11 @@
     "testing"
   ],
   "autoFolders": [
-    "1-Piece",
-    "2-Piece",
-    "testing"
+    "Potential 4 piece",
+    "2-piece working",
+    "1-piece working",
+    "New Three piece stuff",
+    "Test"
   ],
   "defaultMaxVel": 3.0,
   "defaultMaxAccel": 2.0,

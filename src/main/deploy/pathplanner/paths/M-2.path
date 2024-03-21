@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.8653781531165547,
-        "y": 7.00011877397313
+        "x": 7.8,
+        "y": 4.1
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.62293523167348,
-        "y": 6.96369776058097
+        "x": 5.977570153338504,
+        "y": 3.855041223595961
       },
       "isLocked": false,
-      "linkedName": "EndSubwooferAmp"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.562597377191205,
-        "y": 6.8690031257613535
+        "x": 3.527723812204381,
+        "y": 5.140054964794614
       },
       "prevControl": {
-        "x": 4.662597377191204,
-        "y": 6.8690031257613535
+        "x": 5.718718464463955,
+        "y": 3.855041223595961
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,20 +33,17 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 2.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 179.62305952040285,
+    "rotation": 170.36246188706897,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "MoveAwayFromWoofer",
-  "previewStartingState": {
-    "rotation": -121.87046249620273,
-    "velocity": 0
-  },
-  "useDefaultConstraints": true
+  "folder": "New Folder",
+  "previewStartingState": null,
+  "useDefaultConstraints": false
 }

@@ -16,28 +16,12 @@
     },
     {
       "anchor": {
-        "x": 2.94102796869429,
-        "y": 7.015314136960538
-      },
-      "prevControl": {
-        "x": 2.1206716873382776,
-        "y": 6.98046837408106
-      },
-      "nextControl": {
-        "x": 3.726640643640841,
-        "y": 7.048684117307431
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
         "x": 2.8653781531165547,
         "y": 7.00011877397313
       },
       "prevControl": {
-        "x": 2.9274890360519406,
-        "y": 7.31655746764409
+        "x": 2.974641193293035,
+        "y": 7.014687179329994
       },
       "nextControl": null,
       "isLocked": false,
@@ -46,46 +30,28 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.85,
+      "waypointRelativePos": 0.45,
       "rotationDegrees": -177.85909863367692,
       "rotateFast": true
     },
     {
-      "waypointRelativePos": 0.25,
+      "waypointRelativePos": 0.15,
       "rotationDegrees": -126.67334326885725,
       "rotateFast": true
     },
     {
-      "waypointRelativePos": 1.05,
+      "waypointRelativePos": 0.55,
       "rotationDegrees": -177.5107499671602,
       "rotateFast": false
     },
     {
-      "waypointRelativePos": 1.65,
+      "waypointRelativePos": 0.85,
       "rotationDegrees": -159.59329421648667,
       "rotateFast": false
     }
   ],
   "constraintZones": [],
-  "eventMarkers": [
-    {
-      "name": "New Event Marker",
-      "waypointRelativePos": 0.35,
-      "command": {
-        "type": "parallel",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "StartPickingUpPiece"
-              }
-            }
-          ]
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 2.0,
@@ -94,11 +60,11 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -119.67113575730806,
+    "rotation": -144.940573033113,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "2-piece-paths",
+  "folder": null,
   "previewStartingState": {
     "rotation": -119.59862563627378,
     "velocity": 0

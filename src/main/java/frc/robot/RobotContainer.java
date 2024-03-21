@@ -16,7 +16,10 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.generated.TunerConstants;
@@ -31,7 +34,7 @@ import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
   private double MaxSpeed = 6; // 6 meters per second desired top speed
-  private double MaxAngularRate = 4 * Math.PI; //  1 rotation per second max angular velocity
+  private double MaxAngularRate = 3 * Math.PI; //  1 rotation per second max angular velocity
   private final SendableChooser<Command> autoChooser;
 
   /* Setting up bindings for necessary control of the swerve drive platform */
@@ -67,6 +70,7 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
   private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_shooter);
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final LEDSubsystem m_led = new LEDSubsystem(m_intake, m_indexer, m_shooter); 
+  
 
   
   private final InstantCommand m_startPickingUpPiece = new InstantCommand(() -> {
@@ -89,9 +93,6 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     NamedCommands.registerCommand("StartShooter", m_shooter.m_enableShooterCommand);
     NamedCommands.registerCommand("StopShooter", m_shooter.m_disableShooterCommand);
 
-    //TODO Add the rest of the PathPlanner Named Commands
-
-
     NamedCommands.registerCommand("StartFeeder", new InstantCommand(() -> {
       m_shooter.enableFeeder();
     }, m_shooter));
@@ -111,9 +112,12 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
 
 
 
+
+
+ 
     NamedCommands.registerCommand("AimFromSubwoofer", new InstantCommand(() -> {
       AimLocation.setAimLocation(AimLocation.Subwoofer);
-    }, m_shooter, m_launcher));
+    }));
     NamedCommands.registerCommand("AimFromLoading", new InstantCommand(()-> {
       AimLocation.setAimLocation(AimLocation.Loading);
     }));
@@ -127,7 +131,24 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
       AimLocation.setAimLocation(AimLocation.AutoTarget);
     }));
 
+   NamedCommands.registerCommand("LineUp", new ParallelRaceGroup(
+    drivetrain.applyRequest(() -> {
+      final Optional<Double> turn_power = m_vision.calculateTurnPower();
+            return drive.withVelocityX(0)
+                        .withVelocityY(0)
+              .withRotationalRate((turn_power.orElse(0d)));// Drive counterclockwise with negative X (left)
+    }), new WaitCommand(1)
+   ));
 
+   NamedCommands.registerCommand("PickUpPieceUntilSensor", new FunctionalCommand(() -> {
+    m_intake.enableForward();
+    m_indexer.enableForward();
+    m_shooter.enableFeeder();
+   }, () -> {}, (interrupt) -> {
+    m_intake.disableForward();
+    m_indexer.disableForward();
+    m_shooter.disableFeeder();
+   }, m_shooter::getWheelEntranceSensorTripped, m_intake, m_indexer, m_shooter));
   }
 
   private boolean climber_up = false;

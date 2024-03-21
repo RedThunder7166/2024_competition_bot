@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.8653781531165547,
-        "y": 7.00011877397313
+        "x": 7.355030926278069,
+        "y": 4.613106883871426
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.62293523167348,
-        "y": 6.96369776058097
+        "x": 7.373520332626251,
+        "y": 4.613106883871426
       },
       "isLocked": false,
-      "linkedName": "EndSubwooferAmp"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.562597377191205,
-        "y": 6.8690031257613535
+        "x": 7.90046841354944,
+        "y": 4.030690583903691
       },
       "prevControl": {
-        "x": 4.662597377191204,
-        "y": 6.8690031257613535
+        "x": 7.918957819897622,
+        "y": 4.030690583903691
       },
       "nextControl": null,
       "isLocked": false,
@@ -39,13 +39,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 179.62305952040285,
+    "rotation": 178.68308759420674,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "MoveAwayFromWoofer",
+  "folder": null,
   "previewStartingState": {
-    "rotation": -121.87046249620273,
+    "rotation": 180.0,
     "velocity": 0
   },
   "useDefaultConstraints": true

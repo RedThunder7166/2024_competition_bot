@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.4193825880793334,
-      "y": 5.523365877628853
+      "x": 0.9400900678310611,
+      "y": 6.617557229812152
     },
-    "rotation": 177.84033446574406
+    "rotation": -121.45682335755524
   },
   "command": {
     "type": "sequential",
@@ -26,7 +26,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.7
+            "waitTime": 0.5
           }
         },
         {
@@ -42,15 +42,9 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.1
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": "StopShooterAndFeeder"
+            "name": "StopShooter"
           }
         },
         {
@@ -64,15 +58,15 @@
           "data": {
             "commands": [
               {
-                "type": "path",
-                "data": {
-                  "pathName": "2-Piece-Auton-Subwoofer-Center"
-                }
-              },
-              {
                 "type": "named",
                 "data": {
                   "name": "PickUpPieceUntilSensor"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "PieceAmp"
                 }
               }
             ]
@@ -111,7 +105,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.2
+            "waitTime": 0.1
           }
         },
         {
@@ -157,95 +151,9 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "AimFromLoading"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "R-Grab-4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              }
-            ]
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "4-Shoot"
-          }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "StartFeederReverse"
-                }
-              },
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 0.2
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "StopFeederReverse"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AutoAim"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StartShooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StartFeeder"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StopShooterAndFeeder"
+            "pathName": "Move-From-Woofer-Out(A-Short)"
           }
         }
       ]
