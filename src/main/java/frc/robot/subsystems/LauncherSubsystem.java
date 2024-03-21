@@ -67,8 +67,8 @@ public class LauncherSubsystem extends SubsystemBase {
 
     m_aimMotor.getConfigurator().apply(aim_config);
 
-    m_shuffleBoardTab.addDouble("Aim Motor Position Degree", () -> m_aimMotor.getPosition().getValueAsDouble());
-    m_shuffleBoardTab.addDouble("Aim Motor CANCoder AbsolutePosition", this::getAimCANCoderAbsolutePosition);
+    m_shuffleBoardTab.addDouble("Aim Motor Position Degree", this::getPosition);
+    // m_shuffleBoardTab.addDouble("Aim Motor CANCoder AbsolutePosition", this::getAimCANCoderAbsolutePosition);
     m_shuffleBoardTab.addDouble("Velocity", ()-> m_aimMotor.get() );
     m_shuffleBoardTab.addDouble("PID Error", () -> m_aimPIDController.getPositionError());
 
@@ -79,8 +79,8 @@ public class LauncherSubsystem extends SubsystemBase {
     m_left_stick_supplier = left_supplier;
   }
 
-  private double getAimCANCoderAbsolutePosition() {
-    return m_aimCANCoder.getAbsolutePosition().getValueAsDouble();
+  private double getPosition() {
+    return m_aimCANCoder.getAbsolutePosition().getValueAsDouble() * 25 * 18;
   }
 
   private final DutyCycleOut m_automaticControl = new DutyCycleOut(0);
@@ -90,11 +90,10 @@ public class LauncherSubsystem extends SubsystemBase {
     // value = Math.abs(LauncherConstants.AIM_CANCODER_LOADING_POSITION - value);
     // m_isAtLoadingPosition = value <= LauncherConstants.ALLOWABLE_CANCODER_ERROR;
 
-    m_aimMotor.setPosition(getAimCANCoderAbsolutePosition() * 25 * 18);//125 to 25, & removed 1 5:1 gear of 3; 2 remain
     if (m_manualAimEnabled) {
       manualAim(m_left_stick_supplier.getAsDouble());
     } else {
-      final double current_position = m_aimMotor.getPosition().getValueAsDouble();
+      final double current_position = getPosition();
       final AimLocation aim_location = AimLocation.getAimLocation();
       final Optional<Double> auto_aim_optional = m_vision.calculateLauncherSpeakerAimPosition();
       double position = aim_location.auto_target ?
