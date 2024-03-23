@@ -13,6 +13,9 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -22,9 +25,11 @@ import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.ControllerConstants;
+import frc.robot.commands.PickUpPieceUntilSensorWithTimeout;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.DeflectorSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
@@ -70,8 +75,9 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
   private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_shooter);
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final LEDSubsystem m_led = new LEDSubsystem(m_intake, m_indexer, m_shooter); 
+  private final DeflectorSubsystem m_deflector = new DeflectorSubsystem();
   
-
+  private final ShuffleboardTab m_driverStationTab = Shuffleboard.getTab("DriverStation");
   
   private final InstantCommand m_startPickingUpPiece = new InstantCommand(() -> {
     m_intake.enableForward();
@@ -84,6 +90,18 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     m_shooter.disableFeeder();
   }, m_intake, m_indexer, m_shooter);
 
+    private final InstantCommand m_ReversePiece = new InstantCommand(() -> {
+    m_intake.enableReverse();
+    m_indexer.enableReverse();
+    m_shooter.enableFeederReverse();
+  }, m_intake, m_indexer, m_shooter);
+  private final InstantCommand m_StopReversePiece = new InstantCommand(() -> {
+    m_intake.disableReverse();
+    m_indexer.disableReverse();
+    m_shooter.disableFeederReverse();
+  }, m_intake, m_indexer, m_shooter);
+
+  private final SendableChooser<Alliance> m_allianceChooser = new SendableChooser<>();
    
   {
     // ...
@@ -93,6 +111,13 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     NamedCommands.registerCommand("StartShooter", m_shooter.m_enableShooterCommand);
     NamedCommands.registerCommand("StopShooter", m_shooter.m_disableShooterCommand);
 
+    NamedCommands.registerCommand("StartShooterReverse", m_shooter.m_enableShooterReverseCommand);
+    NamedCommands.registerCommand("StopShooterReverse", m_shooter.m_disableShooterReverseCommand);
+
+    NamedCommands.registerCommand("ReversePiece", m_ReversePiece);
+    NamedCommands.registerCommand("StopReversePiece",m_StopReversePiece );
+
+    
     NamedCommands.registerCommand("StartFeeder", new InstantCommand(() -> {
       m_shooter.enableFeeder();
     }, m_shooter));
@@ -149,6 +174,11 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     m_indexer.disableForward();
     m_shooter.disableFeeder();
    }, m_shooter::getWheelEntranceSensorTripped, m_intake, m_indexer, m_shooter));
+
+   final double timeoutSeconds = 2;
+   NamedCommands.registerCommand("PickUpPieceUntilSensorWithTimeout", 
+    new PickUpPieceUntilSensorWithTimeout(m_intake, m_indexer, m_shooter, timeoutSeconds)
+   );
   }
 
   private boolean climber_up = false;
@@ -170,18 +200,22 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
         }
       ));
     driver_joystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
-
-    driver_joystick.leftTrigger().whileTrue(Commands.startEnd(() -> {
-      m_intake.enableReverse();
-    }, () -> {
-      m_intake.disableReverse();
-    }, m_intake));
     
     driver_joystick.a().whileTrue(Commands.startEnd(() -> {
       automatically_rotate = true;
     }, () -> {
       automatically_rotate = false;
     }));
+    operator_joystick.x().whileTrue(Commands.startEnd(() -> {
+      climber_up = true;
+    }, () -> {
+      climber_up = false;
+    }, m_climber));
+    operator_joystick.y().whileTrue(Commands.startEnd(() -> {
+      climber_down = true;
+    }, () -> {
+      climber_down = false;
+    }, m_climber));
     
     operator_joystick.rightBumper().whileTrue(Commands.startEnd(() -> {
       m_shooter.enableFeeder();
@@ -192,21 +226,7 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     m_indexer.disableForward();
     m_shooter.disableFeeder();
   }, m_intake, m_indexer, m_shooter));
-  
-
-    driver_joystick.leftBumper().whileTrue(Commands.startEnd(() -> {
-      m_indexer.enableReverse();
-    }, () -> {
-      m_indexer.disableReverse();
-    }, m_indexer));
-
     
-    driver_joystick.rightBumper().whileTrue(Commands.startEnd(() -> {
-      m_indexer.enableForward();
-    }, () -> {
-      m_indexer.disableForward();
-    }, m_indexer));
-
     operator_joystick.leftTrigger().onTrue(m_shooter.m_enableShooterReverseCommand);
     operator_joystick.leftTrigger().onFalse(m_shooter.m_disableShooterReverseCommand);
 
@@ -216,9 +236,13 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
    
     operator_joystick.leftBumper().whileTrue(Commands.startEnd(() -> {
       m_shooter.enableFeederReverse();
+      m_intake.enableReverse();
+      m_indexer.enableReverse();
     }, () -> {
       m_shooter.disableFeederReverse();
-    }, m_shooter));
+      m_intake.disableReverse();
+      m_indexer.disableReverse();
+    }, m_shooter, m_intake, m_indexer));
 
    
    
@@ -255,16 +279,6 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
 
     m_climber.configureManualMode(() -> operator_joystick.getRightY()); //left arm
 
-    operator_joystick.x().whileTrue(Commands.startEnd(() -> {
-      climber_up = true;
-    }, () -> {
-      climber_up = false;
-    }, m_climber));
-    operator_joystick.y().whileTrue(Commands.startEnd(() -> {
-      climber_down = true;
-    }, () -> {
-      climber_down = false;
-    }, m_climber));
 
     final double climber_right_manual_mode_speed = 1;
     m_climber.configureRightManualMode( //right arm
@@ -277,24 +291,33 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
 
     // Build an auto chooser. This will use Commands.none() as the default option.
     autoChooser = AutoBuilder.buildAutoChooser();
-
+    
     // Another option that allows you to specify the default auto by its name
     // autoChooser = AutoBuilder.buildAutoChooser("My Default Auto");
-
+    
     SmartDashboard.putData("Auto Chooser", autoChooser);
+    m_driverStationTab.add(autoChooser);
   }
 
   public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
     
+    configureBindings();
 
-        configureBindings();
-      }
+    m_allianceChooser.onChange((Alliance a) -> {
+      ReallyDumbAllianceColor.setAlliance(a);
+    });
+
+    m_allianceChooser.addOption("Blue", Alliance.Blue);
+    m_allianceChooser.setDefaultOption("Red", Alliance.Red);
+
+    m_driverStationTab.add(m_allianceChooser);
+  }
       
-      public void teleopInit() {
-        m_launcher.teleopInit();
+  public void teleopInit() {
+    m_launcher.teleopInit();
+  }
 
-      }
   public void disabledInit() {
     m_indexer.disabledInit();
     m_intake.disabledInit();

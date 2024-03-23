@@ -2,15 +2,21 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.4193825880793334,
-      "y": 5.523365877628853
+      "x": 0.5405726633078191,
+      "y": 4.1097002902619115
     },
-    "rotation": 177.84033446574406
+    "rotation": 177.63375200854415
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2-Piece-Source-Start"
+          }
+        },
         {
           "type": "named",
           "data": {
@@ -20,25 +26,19 @@
         {
           "type": "named",
           "data": {
-            "name": "AimFromSubwoofer"
+            "name": "AutoAim"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.7
+            "waitTime": 0.5
           }
         },
         {
           "type": "named",
           "data": {
             "name": "StartFeeder"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.1
           }
         },
         {
@@ -64,30 +64,30 @@
           "data": {
             "commands": [
               {
-                "type": "path",
-                "data": {
-                  "pathName": "2-Piece-Auton-Subwoofer-Center"
-                }
-              },
-              {
                 "type": "named",
                 "data": {
                   "name": "PickUpPieceUntilSensor"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "2-Piece-Auton-Subwoofer-Non-Amp"
                 }
               }
             ]
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 0.5
+            "pathName": "SourceAim"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.2
+            "waitTime": 0.5
           }
         },
         {
@@ -109,15 +109,27 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "StartShooterReverse"
+          }
+        },
+        {
           "type": "wait",
           "data": {
-            "waitTime": 0.2
+            "waitTime": 0.1
           }
         },
         {
           "type": "named",
           "data": {
             "name": "StopFeederReverse"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StopShooterReverse"
           }
         },
         {
@@ -147,7 +159,19 @@
         {
           "type": "named",
           "data": {
+            "name": "StopPickingUpPiece"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "StopShooterAndFeeder"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Move-From-Woofer-Out(NA)"
           }
         }
       ]

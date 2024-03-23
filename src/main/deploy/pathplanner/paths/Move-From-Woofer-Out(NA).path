@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.1785988682891295,
-        "y": 1.974018925855065
+        "x": 2.25,
+        "y": 4.23
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.564661610246024,
-        "y": 1.974018925855065
+        "x": 1.485311803855129,
+        "y": 1.8867846654447118
       },
       "isLocked": false,
       "linkedName": null
@@ -45,7 +45,7 @@
   "reversed": false,
   "folder": "MoveAwayFromWoofer",
   "previewStartingState": {
-    "rotation": 0.05837743957113005,
+    "rotation": 139.2538364361193,
     "velocity": 0
   },
   "useDefaultConstraints": true

@@ -47,6 +47,7 @@ public class LauncherSubsystem extends SubsystemBase {
   private DoubleSupplier m_left_stick_supplier;
 
   private final ShuffleboardTab m_shuffleBoardTab = Shuffleboard.getTab("Launcher");
+  private final ShuffleboardTab m_driverStationTab = Shuffleboard.getTab("DriverStation");
   
   public LauncherSubsystem(VisionSubsystem vision) {
   // public LauncherSubsystem() {
@@ -73,6 +74,7 @@ public class LauncherSubsystem extends SubsystemBase {
     m_shuffleBoardTab.addDouble("PID Error", () -> m_aimPIDController.getPositionError());
 
     m_shuffleBoardTab.addString("AimLocation", () -> AimLocation.getAimLocation().name);
+    m_driverStationTab.addString("AimLocation", () -> AimLocation.getAimLocation().name);
   }
 
   public void configureManualMode(DoubleSupplier left_supplier) {

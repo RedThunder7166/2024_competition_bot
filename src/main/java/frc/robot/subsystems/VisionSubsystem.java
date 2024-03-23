@@ -37,10 +37,12 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Telemetry;
+import frc.robot.AllianceColor;
 import frc.robot.Constants;
-import frc.robot.Constants.AllianceColor;
 import frc.robot.Constants.LauncherConstants;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
@@ -125,6 +127,9 @@ public class VisionSubsystem extends SubsystemBase {
   private final Hashtable<PhotonPoseEstimator, EstimatedRobotPose> m_photonPoseEstimatorToEstimatedRobotPoseMap = new Hashtable<>();
 
   private final NetworkTable m_table = NetworkTableInstance.getDefault().getTable("Vision");
+
+  private final ShuffleboardTab m_driverStationTab = Shuffleboard.getTab("DriverStation");
+  private boolean m_hasValidTurnPowerOutput = false;
 
   private final DoublePublisher m_pitchPublisher = m_table.getDoubleTopic("Pitch").publish();
   private final DoublePublisher m_subwooferCenterTagDistancePublisher = m_table.getDoubleTopic("subwoofer_center_tag_distance").publish();
@@ -218,6 +223,8 @@ public class VisionSubsystem extends SubsystemBase {
     // m_photonPoseEstimators.add(m_backEstimator);
     // m_photonPoseEstimators.add(m_leftEstimator);
     // m_photonPoseEstimators.add(m_rightEstimator);
+
+    m_driverStationTab.addBoolean("Auto Turn Valid", () -> m_hasValidTurnPowerOutput);
   }
 
   @Override
@@ -255,7 +262,7 @@ public class VisionSubsystem extends SubsystemBase {
     m_telemetry.telemeterize(m_swerve.getState());
 
     if (m_frontResult.hasTargets()) {
-      Optional<PhotonTrackedTarget> subwoofer_center_tag = getTarget(AllianceColor.SUBWOOFER_CENTER, m_frontResult);
+      Optional<PhotonTrackedTarget> subwoofer_center_tag = getTarget(AllianceColor.RED_SUBWOOFER_CENTER, m_frontResult).or(() -> getTarget(AllianceColor.BLUE_SUBWOOFER_CENTER, m_frontResult));
       if (subwoofer_center_tag.isPresent()) {
         PhotonTrackedTarget target = subwoofer_center_tag.get();
         m_pitchPublisher.set(target.getPitch());
@@ -297,7 +304,7 @@ public class VisionSubsystem extends SubsystemBase {
 
   public Optional<Double> calculateLauncherSpeakerAimPosition() {
     if (m_frontResult.hasTargets()) {
-      final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceColor.SUBWOOFER_CENTER, m_frontResult);
+      final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceColor.RED_SUBWOOFER_CENTER, m_frontResult).or(() -> getTarget(AllianceColor.BLUE_SUBWOOFER_CENTER, m_frontResult));
       if (target_optional.isPresent()) {
         final double distance = calculateDistanceToTargetMeters(target_optional.get(), FRONT_CAMERA_HEIGHT_OFF_GROUND_METERS);
         m_DistanceTarget.set(distance);
@@ -317,16 +324,19 @@ public class VisionSubsystem extends SubsystemBase {
   }
 
   public Optional<Double> calculateTurnPower() {
-    final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceColor.SUBWOOFER_CENTER, m_frontResult);
+    final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceColor.RED_SUBWOOFER_CENTER, m_frontResult).or(() -> getTarget(AllianceColor.BLUE_SUBWOOFER_CENTER, m_frontResult));
     if (target_optional.isPresent()) {
       double value = turn_controller.calculate(target_optional.get().getYaw(), 14); //14
       // System.out.format("Value: %f | Error: %f\n", value, turn_controller.getPositionError());
       if (Math.abs(turn_controller.getPositionError()) < 0.4) {
         value = 0;
       }
+
+      m_hasValidTurnPowerOutput = true;
       return Optional.of(value);
     }
 
+    m_hasValidTurnPowerOutput = false;
     return Optional.empty();
   }
 }

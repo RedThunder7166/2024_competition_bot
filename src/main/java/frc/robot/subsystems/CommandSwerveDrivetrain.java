@@ -22,13 +22,13 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-
-import frc.robot.Constants.AllianceColor;
+import frc.robot.Constants;
+import frc.robot.ReallyDumbAllianceColor;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.sysidutils.ModifiedSignalLogger;
 //import frc.robot.sysidutils.SwerveVoltageRequest;
@@ -108,7 +108,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                                             driveBaseRadius,
                                             new ReplanningConfig()),
             () -> {
-              return AllianceColor.is_red_alliance;
+            //   return AllianceColor.allianceColor.is_red_alliance;
+                // return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Red;
+                return ReallyDumbAllianceColor.getAlliance() == DriverStation.Alliance.Red;
             },
             this); // Subsystem for requirements
     }

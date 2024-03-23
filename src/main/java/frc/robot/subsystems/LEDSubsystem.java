@@ -46,6 +46,7 @@ public class LEDSubsystem extends SubsystemBase {
   private static final RGB red = new RGB(230, 20, 20);
   private static final RGB blue = new RGB(40, 40, 250);
   private static final RGB yellow = new RGB(242, 187, 5);
+  private static final RGB orange = new RGB(250, 120, 0);
 
   private static final double brightness = 1;
   private static final double speed = 0.5;
@@ -57,7 +58,8 @@ public class LEDSubsystem extends SubsystemBase {
     SolidYellow(yellow),
     SolidGreen(green),
     SolidRed(red),
-    BlueFlow(colorFlowAnimation(blue, speed, ColorFlowAnimation.Direction.Forward));
+    BlueFlow(colorFlowAnimation(blue, speed, ColorFlowAnimation.Direction.Forward)),
+    FlashOrange(strobeAnimation(orange, speed));
 
     public final boolean has_animation;
 
@@ -111,7 +113,9 @@ public class LEDSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (m_intake.getEntranceSensorTripped()) {
+    if (m_shooter.isUpToSpeed()) {
+      m_mode = Mode.FlashOrange;
+    } else if (m_intake.getEntranceSensorTripped()) {
       m_mode = Mode.FlashGreen;
     } else if (m_indexer.getSensorTripped()) {
       m_mode = Mode.SolidGreen;
