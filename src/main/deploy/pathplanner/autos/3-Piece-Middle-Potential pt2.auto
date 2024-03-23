@@ -72,64 +72,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              },
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "race",
-                      "data": {
-                        "commands": [
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "PickUpPieceUntilSensor"
-                            }
-                          },
-                          {
-                            "type": "wait",
-                            "data": {
-                              "waitTime": 2.0
-                            }
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "StartFeederReverse"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.1
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "StopReversePiece"
-                      }
-                    },
-                    {
-                      "type": "sequential",
-                      "data": {
-                        "commands": [
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "PickUpPieceUntilSensor"
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  ]
+                  "name": "PickUpPieceUntilSensorWithTimeout"
                 }
               }
             ]
@@ -226,7 +169,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "PickUpPieceUntilSensor"
+                  "name": "PickUpPieceUntilSensorWithTimeout"
                 }
               }
             ]

@@ -75,7 +75,7 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
   private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_shooter);
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final LEDSubsystem m_led = new LEDSubsystem(m_intake, m_indexer, m_shooter); 
-  private final DeflectorSubsystem m_deflector = new DeflectorSubsystem();
+  private final DeflectorSubsystem m_deflector = new DeflectorSubsystem(m_shooter);
   
   private final ShuffleboardTab m_driverStationTab = Shuffleboard.getTab("DriverStation");
   
@@ -115,7 +115,7 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     NamedCommands.registerCommand("StopShooterReverse", m_shooter.m_disableShooterReverseCommand);
 
     NamedCommands.registerCommand("ReversePiece", m_ReversePiece);
-    NamedCommands.registerCommand("StopReversePiece",m_StopReversePiece );
+    NamedCommands.registerCommand("StopReversePiece", m_StopReversePiece);
 
     
     NamedCommands.registerCommand("StartFeeder", new InstantCommand(() -> {
@@ -175,9 +175,8 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     m_shooter.disableFeeder();
    }, m_shooter::getWheelEntranceSensorTripped, m_intake, m_indexer, m_shooter));
 
-   final double timeoutSeconds = 2;
    NamedCommands.registerCommand("PickUpPieceUntilSensorWithTimeout", 
-    new PickUpPieceUntilSensorWithTimeout(m_intake, m_indexer, m_shooter, timeoutSeconds)
+    new PickUpPieceUntilSensorWithTimeout(m_intake, m_indexer, m_shooter)
    );
   }
 

@@ -14,7 +14,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "2-Piece-Source-Start-Test"
+            "pathName": "2-Piece-Source-Start"
           }
         },
         {
@@ -66,7 +66,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "PickUpPieceUntilSensorWithTimeout"
+                  "name": "PickUpPieceUntilSensor"
                 }
               },
               {

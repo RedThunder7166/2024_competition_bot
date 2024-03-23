@@ -71,10 +71,10 @@ public class Constants {
     }
 
     public static final class DeflectorConstants {
-        // FIXME: get deflector constants
-        public static final int MOTOR_ID = 0;
+        public static final int MOTOR_ID = 18;
 
-        public static final double TARGET_AMPERES = 10;
+        public static final double TARGET_AMPERES = 15;
+        public static final double MAX_ABS_DUTY_CYCLE = 0.087;
     }
 
     public static final class VisionConstants {
