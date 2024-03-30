@@ -43,13 +43,13 @@ public class LauncherSubsystem extends SubsystemBase {
   private boolean m_manualAimEnabled = false;
   // private AimPosition m_aimTargetPosition = AimPosition.Loading;
 
-  private final VisionSubsystem m_vision;
+  private final VisionSubsystemLimelight m_vision;
   private DoubleSupplier m_left_stick_supplier;
 
   private final ShuffleboardTab m_shuffleBoardTab = Shuffleboard.getTab("Launcher");
   private final ShuffleboardTab m_driverStationTab = Shuffleboard.getTab("DriverStation");
   
-  public LauncherSubsystem(VisionSubsystem vision) {
+  public LauncherSubsystem(VisionSubsystemLimelight vision) {
   // public LauncherSubsystem() {
     m_vision = vision;
 

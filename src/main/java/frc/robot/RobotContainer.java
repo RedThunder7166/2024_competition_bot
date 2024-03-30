@@ -10,6 +10,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
@@ -35,7 +36,8 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.VisionSubsystemLimelight;
+import frc.robot.subsystems.VisionSubsystemPhoton;
 
 public class RobotContainer {
   private double MaxSpeed = 6; // 6 meters per second desired top speed
@@ -68,7 +70,8 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt(); //TODO Find a use in this for grabbing pieces
 
   /*Initialize Subsystems */
-  private final VisionSubsystem m_vision = new VisionSubsystem(drivetrain, logger);
+  // private final VisionSubsystemPhoton m_vision = new VisionSubsystemPhoton(drivetrain, logger);
+  private final VisionSubsystemLimelight m_vision = new VisionSubsystemLimelight();
   private final ClimberSubsystem m_climber = new ClimberSubsystem(drivetrain);
   private final LauncherSubsystem m_launcher = new LauncherSubsystem(m_vision);
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
@@ -129,6 +132,7 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     }, m_shooter));
      NamedCommands.registerCommand("StopFeederReverse", new InstantCommand(() -> {
       m_shooter.disableFeederReverse();
+      
     }, m_shooter));
     NamedCommands.registerCommand("StopShooterAndFeeder", new InstantCommand(() -> {
       m_shooter.disableShooter();
@@ -303,8 +307,9 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     
     configureBindings();
 
-    m_allianceChooser.onChange((Alliance a) -> {
-      ReallyDumbAllianceColor.setAlliance(a);
+    m_allianceChooser.onChange((Alliance alliance) -> {
+      ReallyDumbAllianceColor.setAlliance(alliance);
+      m_vision.setPriorityID(alliance == Alliance.Red ? 4 : 7);
     });
 
     m_allianceChooser.addOption("Blue", Alliance.Blue);

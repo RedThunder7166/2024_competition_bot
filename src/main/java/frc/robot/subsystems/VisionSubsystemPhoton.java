@@ -47,7 +47,7 @@ import frc.robot.Constants.LauncherConstants;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-public class VisionSubsystem extends SubsystemBase {
+public class VisionSubsystemPhoton extends SubsystemBase {
   private AprilTagFieldLayout m_aprilTagFieldLayout = null;
   private final Dictionary<Integer, AprilTag> m_aprilTags = new Hashtable<>();
 
@@ -146,7 +146,7 @@ public class VisionSubsystem extends SubsystemBase {
 
   private final SimpleRegression m_distanceLaunchAngleRegression = new SimpleRegression();
 
-  public VisionSubsystem(CommandSwerveDrivetrain swerve, Telemetry logger) {
+  public VisionSubsystemPhoton(CommandSwerveDrivetrain swerve, Telemetry logger) {
     m_telemetry = logger;
     try {
       // m_aprilTagFieldLayout = new AprilTagFieldLayout(AprilTagFields.k2024Crescendo.m_resourceFile);
@@ -326,7 +326,7 @@ public class VisionSubsystem extends SubsystemBase {
   public Optional<Double> calculateTurnPower() {
     final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceColor.RED_SUBWOOFER_CENTER, m_frontResult).or(() -> getTarget(AllianceColor.BLUE_SUBWOOFER_CENTER, m_frontResult));
     if (target_optional.isPresent()) {
-      double value = turn_controller.calculate(target_optional.get().getYaw(), 14); //14
+      double value = turn_controller.calculate(target_optional.get().getYaw(), 0); //14
       // System.out.format("Value: %f | Error: %f\n", value, turn_controller.getPositionError());
       if (Math.abs(turn_controller.getPositionError()) < 0.4) {
         value = 0;

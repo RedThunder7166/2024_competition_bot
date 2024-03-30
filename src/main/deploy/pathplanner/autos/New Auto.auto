@@ -1,0 +1,18 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.3489056177868008,
+      "y": 4.049075318675988
+    },
+    "rotation": 178.8426669318705
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": []
+    }
+  },
+  "folder": "Potential 4 piece",
+  "choreoAuto": false
+}
