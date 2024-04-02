@@ -19,6 +19,8 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.VecBuilder;
@@ -64,6 +66,8 @@ public class VisionSubsystemPhoton extends SubsystemBase {
   private double TURN_I = 0;
   private double TURN_D = 0;
   private final PIDController turn_controller = new PIDController(TURN_P, TURN_I, TURN_D);
+
+  private final PIDController ampTranslationController = new PIDController(0.15, 0, 0);
 
   private final PhotonCamera m_frontCamera = new PhotonCamera("back_camera");
   // private final PhotonCamera m_backCamera = new PhotonCamera("back_camera");
@@ -298,7 +302,13 @@ public class VisionSubsystemPhoton extends SubsystemBase {
   }
 
   private double distanceLaunchAngleCalculation(double distance) {
-    return (-42.4977/(1+Math.pow(Math.E, (-2.20952 * ( distance - 1.725))))+199.689);
+    // return (-42.4977/(1+Math.pow(Math.E, (-2.20952 * ( distance - 1.725))))+199.689);
+
+    final double m = -6.93887;
+    final double k = 6.87994;
+    final double x_zero = 1.92655;
+    final double b = 179.288;
+    return distance * (m / (1 + Math.pow(Math.E, -k * (distance - x_zero)))) + b;
   }
 
 
@@ -338,5 +348,36 @@ public class VisionSubsystemPhoton extends SubsystemBase {
 
     m_hasValidTurnPowerOutput = false;
     return Optional.empty();
+  }
+
+  public void setPriorityID(int a) {
+    // limelight uses this, but photon vision does not
+  }
+
+  // private static final double targetAmpArea = 
+  // public Optional<Double> calculateAmpTranslationX(int id) {
+  //   final Optional<PhotonTrackedTarget> target_optional = getTarget(id, m_frontResult);
+  //   if (target_optional.isPresent()) {
+  //     double value = turn_controller.calculate(target_optional.get().getArea(), 0);
+  //     if (Math.abs(turn_controller.getPositionError()) < 0.4) {
+  //       value = 0;
+  //     }
+
+  //     return Optional.of(value);
+  //   }
+
+  //   return Optional.empty();
+  // } 
+
+  public SwerveRequest.RobotCentric modifyAmpControl(SwerveRequest.RobotCentric drive, int id) {
+    // final double turnPower = calculateTurnPower().orElse(0d);
+    // final double xPower = calculateAmpTranslationX(id).orElse(0d);
+    // final double yPower = calculateAmpTranslationY(id).orElse(0d);
+    
+    // return drive
+    //   .withVelocityX(0)
+    //   .withVelocityY(0)
+    //   .withRotationalRate(turnPower);
+    return drive;
   }
 }

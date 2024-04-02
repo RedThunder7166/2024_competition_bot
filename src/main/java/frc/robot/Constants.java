@@ -34,13 +34,15 @@ public class Constants {
         public static final double AMP_TO_LOADING_DELAY_SECONDS = 1;
 
 
-        public static final int WHEEL_ENTRANCE_SENSOR_ID = 0;
+        public static final int Indexer_Sensor_ID = 2;
         public static final int WHEEL_EXIT_SENSOR_ID = 1;
+        public static final int FEEDER_SENSOR_ID = 0;
 
         public static final double TARGET_SHOOTER_RPS = 30.0;
         public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 78.0; // was 40
 
-          public static final double TARGET_FEEDER_RPS_BACKWARDS = 2; // TODO: CHANGE THIS
+        public static final double TARGET_FEEDER_RPS_BACKWARDS = 6; // TODO: CHANGE THIS
+        public static final double TARGET_FEEDER_RPS_SLOW_BACKWARDS = 2; // TODO: CHANGE THIS
 
         public static final double TARGET_FEEDER_RPS = 10; // TODO: CHANGE THIS
     }
@@ -48,7 +50,7 @@ public class Constants {
         public static final int MOTOR_ID = 17;
         // public static final int TARGET_VELOCITY = 80; 
 
-        public static final int SENSOR_ID = 2;
+        // public static final int SENSOR_ID = 2;
     }
     public static final class ClimberConstants {
         public static final int LEFT_CLIMB_MOTOR_ID = 7;
@@ -79,5 +81,6 @@ public class Constants {
 
     public static final class VisionConstants {
         public static final double TARGET_SPEAKER_DISTANCE_METERS = 3.4;
+        public static final double DISTANCE_BETWEEN_CAMERA_AND_FRONT_OF_ROBOT = 27.5;
     }
 }

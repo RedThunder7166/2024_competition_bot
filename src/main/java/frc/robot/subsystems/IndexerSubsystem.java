@@ -27,7 +27,6 @@ public class IndexerSubsystem extends SubsystemBase {
   private final DutyCycleOut m_reverseControl = new DutyCycleOut(-speed);
 
   // private final DigitalInput m_entranceSensor = new DigitalInput(IndexerConstants.ENTRANCE_SENSOR_ID);
-  private final DigitalInput m_sensor = new DigitalInput(IndexerConstants.SENSOR_ID);
 
   private boolean m_forwardEnabled = false;
   private boolean m_reverseEnabled = false;
@@ -64,7 +63,6 @@ public class IndexerSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // m_entranceSensorIsTripped = Utils.isAllenBradleyTripped(m_entranceSensor);
-    m_sensorIsTripped = Utils.isAllenBradleyTripped(m_sensor);
 
     if (m_forwardEnabled) {
       m_motor.setControl(m_forwardControl);

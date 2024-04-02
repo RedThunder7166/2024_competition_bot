@@ -4,17 +4,31 @@
 
 package frc.robot;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -43,6 +57,9 @@ public class RobotContainer {
   private double MaxSpeed = 6; // 6 meters per second desired top speed
   private double MaxAngularRate = 3 * Math.PI; //  1 rotation per second max angular velocity
   private final SendableChooser<Command> autoChooser;
+  private final SendableChooser<JSONObject> autoChooser2;
+
+  private Pose2d m_autoStartingPose;
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final CommandXboxController driver_joystick = new CommandXboxController(ControllerConstants.DRIVER_PORT); // My joystick
@@ -53,15 +70,18 @@ public class RobotContainer {
   
 
 /*Slew Rate limiting, Limits Acceleration of Directions */
-private final SlewRateLimiter xLimiter = new SlewRateLimiter(15);
+  private final SlewRateLimiter xLimiter = new SlewRateLimiter(15);
 
-private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
+  private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
 // private final SlewRateLimiter rotLimiter = new SlewRateLimiter(.5);
-
 
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+  .withDeadband(MaxSpeed * 0.12).withRotationalDeadband(MaxAngularRate * 0.12) // Add a 5% deadband //used to be 10%
+  .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
+
+  private final SwerveRequest.RobotCentric m_robotCentricControl = new SwerveRequest.RobotCentric()
   .withDeadband(MaxSpeed * 0.12).withRotationalDeadband(MaxAngularRate * 0.12) // Add a 5% deadband //used to be 10%
   .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
   
@@ -78,7 +98,7 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
   private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_shooter);
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final LEDSubsystem m_led = new LEDSubsystem(m_intake, m_indexer, m_shooter); 
-  private final DeflectorSubsystem m_deflector = new DeflectorSubsystem(m_shooter);
+  // private final DeflectorSubsystem m_deflector = new DeflectorSubsystem(m_shooter);
   
   private final ShuffleboardTab m_driverStationTab = Shuffleboard.getTab("DriverStation");
   
@@ -165,7 +185,7 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
       final Optional<Double> turn_power = m_vision.calculateTurnPower();
             return drive.withVelocityX(0)
                         .withVelocityY(0)
-              .withRotationalRate((turn_power.orElse(0d)));// Drive counterclockwise with negative X (left)
+              .withRotationalRate((turn_power.orElse(0d) * MaxAngularRate));// Drive counterclockwise with negative X (left)
     }), new WaitCommand(1)
    ));
 
@@ -199,7 +219,7 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
             .withVelocityY(yLimiter.calculate(((-driver_joystick.getLeftX()*MaxSpeed) )))
               //Math.pow(-driver_joystick.getLeftX() * MaxSpeed, 3)) // Drive left with negative X (left)
             // use vision to rotate the robot when automatically_rotate is true; otherwise use joystick (see above)
-            .withRotationalRate((automatically_rotate & turn_power.isPresent()) ? turn_power.get() : (-driver_joystick.getRightX() * MaxAngularRate));// Drive counterclockwise with negative X (left)
+            .withRotationalRate((automatically_rotate & turn_power.isPresent()) ? turn_power.get() * MaxAngularRate : (-driver_joystick.getRightX() * MaxAngularRate));// Drive counterclockwise with negative X (left)
         }
       ));
     driver_joystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
@@ -209,6 +229,17 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     }, () -> {
       automatically_rotate = false;
     }));
+
+    // driver_joystick.x().whileTrue(new FunctionalCommand(() -> {
+    //   m_vision.setPriorityID(ReallyDumbAllianceColor.getAlliance() == Alliance.Red ? AllianceColor.RED_AMP : AllianceColor.BLUE_AMP);
+    // }, () -> {
+    //   drivetrain.setControl(m_vision.modifyAmpControl(m_robotCentricControl, ReallyDumbAllianceColor.getAlliance() == Alliance.Red ? AllianceColor.RED_AMP : AllianceColor.BLUE_AMP));
+    // }, (interruped) -> {
+    //   setVisionPriorityIDToSubwooferCenter(ReallyDumbAllianceColor.getAlliance());
+    // }, () -> {
+    //   return false;
+    // }));
+
     operator_joystick.x().whileTrue(Commands.startEnd(() -> {
       climber_up = true;
     }, () -> {
@@ -255,11 +286,11 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
 
     operator_joystick.povUp().onTrue(new InstantCommand(() -> {
       m_launcher.disableManualMode();
-      AimLocation.setAimLocation(AimLocation.Subwoofer);
+      AimLocation.setAimLocation(AimLocation.Amp);
     }, m_shooter, m_launcher));
     operator_joystick.povRight().onTrue(new InstantCommand(() -> {
       m_launcher.disableManualMode();
-      AimLocation.setAimLocation(AimLocation.Amp);
+      AimLocation.setAimLocation(AimLocation.Subwoofer);
     }, m_shooter, m_launcher));
     operator_joystick.povDown().onTrue(new InstantCommand(() -> {
       m_launcher.disableManualMode();
@@ -299,23 +330,58 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
     // autoChooser = AutoBuilder.buildAutoChooser("My Default Auto");
     
     SmartDashboard.putData("Auto Chooser", autoChooser);
+
+    autoChooser2 = new SendableChooser<>();
+    List<String> autoNames = AutoBuilder.getAllAutoNames();
+
+    List<String> options = new ArrayList<>();
+
+    for (String autoName : autoNames) {
+        try (BufferedReader br =
+          new BufferedReader(
+              new FileReader(
+                  new File(
+                      Filesystem.getDeployDirectory(), "pathplanner/autos/" + autoName + ".auto")))) {
+        StringBuilder fileContentBuilder = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+          fileContentBuilder.append(line);
+        }
+
+        String fileContent = fileContentBuilder.toString();
+        JSONObject json = (JSONObject) new JSONParser().parse(fileContent);
+
+        autoChooser2.addOption(autoName, json);
+      } catch (Exception e) {
+        throw new RuntimeException(String.format("Error building auto: %s", autoName), e);
+      }
+    }
+
+    SmartDashboard.putData("Auto Chooser2", autoChooser2);
+
     m_driverStationTab.add(autoChooser);
+    m_driverStationTab.add(autoChooser2);
   }
 
   public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
-    
     configureBindings();
 
     m_allianceChooser.onChange((Alliance alliance) -> {
       ReallyDumbAllianceColor.setAlliance(alliance);
-      m_vision.setPriorityID(alliance == Alliance.Red ? 4 : 7);
+      setVisionPriorityIDToSubwooferCenter(alliance);
     });
+    ReallyDumbAllianceColor.setAlliance(Alliance.Red);
+    setVisionPriorityIDToSubwooferCenter(Alliance.Red);
 
     m_allianceChooser.addOption("Blue", Alliance.Blue);
     m_allianceChooser.setDefaultOption("Red", Alliance.Red);
 
     m_driverStationTab.add(m_allianceChooser);
+  }
+
+  public void setVisionPriorityIDToSubwooferCenter(Alliance alliance) {
+    m_vision.setPriorityID(alliance == Alliance.Red ? AllianceColor.RED_SUBWOOFER_CENTER : AllianceColor.BLUE_SUBWOOFER_CENTER);
   }
       
   public void teleopInit() {
@@ -325,11 +391,16 @@ private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
   public void disabledInit() {
     m_indexer.disabledInit();
     m_intake.disabledInit();
-    m_shooter.disabledInit();
+    // m_shooter.disabledInit();
+  }
+
+  public void autonomousInit() {
+    JSONObject asdfjlkasdf = autoChooser2.getSelected();
+    m_autoStartingPose = AutoBuilder.getStartingPoseFromJson((JSONObject) asdfjlkasdf.get("startingPose"));
   }
 
   public void autonomousExit() {
-    drivetrain.seedFieldRelative();
+    drivetrain.autoExit();
   }
 
   public Command getAutonomousCommand() {

@@ -16,7 +16,7 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
-
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -113,6 +113,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                 return ReallyDumbAllianceColor.getAlliance() == DriverStation.Alliance.Red;
             },
             this); // Subsystem for requirements
+    }
+
+    public void autoExit() {
+        m_fieldRelativeOffset = Rotation2d.fromDegrees(180);
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {

@@ -15,6 +15,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -35,8 +36,9 @@ public class ShooterSubsystem extends SubsystemBase {
   private final TalonFX m_bottomMotor = new TalonFX(ShooterConstants.BOTTOM_MOTOR_ID); // 14
   private final TalonFX m_feederMotor = new TalonFX(ShooterConstants.FEEDER_MOTOR_ID);
   
-  private final DigitalInput m_wheelEntranceSensor = new DigitalInput(ShooterConstants.WHEEL_ENTRANCE_SENSOR_ID);
+  private final DigitalInput m_FeederStopSensor = new DigitalInput(ShooterConstants.FEEDER_SENSOR_ID);
   private final DigitalInput m_wheelExitSensor = new DigitalInput(ShooterConstants.WHEEL_EXIT_SENSOR_ID);
+  private final DigitalInput m_Indexer = new DigitalInput(ShooterConstants.Indexer_Sensor_ID);
 
   // private final DutyCycleOut m_shooterRequest = new DutyCycleOut(AimLocation.getAimLocation().shooter_speed);
   private final VelocityDutyCycle m_shooterRequest = new VelocityDutyCycle(AimLocation.getAimLocation().shooter_speed_rps);
@@ -46,13 +48,13 @@ public class ShooterSubsystem extends SubsystemBase {
   // private final DutyCycleOut m_feederRequest = new DutyCycleOut(1);
   private final VelocityDutyCycle m_feederRequest = new VelocityDutyCycle(ShooterConstants.TARGET_FEEDER_RPS);
   private final VelocityDutyCycle m_feederReverseRequest = new VelocityDutyCycle(-ShooterConstants.TARGET_FEEDER_RPS_BACKWARDS);
-  
+  private final VelocityDutyCycle m_feederRequestSlowBack = new VelocityDutyCycle(-ShooterConstants.TARGET_FEEDER_RPS_SLOW_BACKWARDS);
   private boolean m_shooterEnabled = false;
   private boolean m_shooterReverseEnabled = false;
   
   private boolean m_wheelEntranceSensorIsTripped = false;
   private boolean m_wheelExitSensorIsTripped = false;
-
+  private boolean m_FeederStopIsTripped = false;
   private boolean m_feederEnabled = false;
   private boolean m_feederReverseEnabled = false;
   
@@ -70,7 +72,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private final ShuffleboardTab m_sensorTab = Shuffleboard.getTab("Sensors");
   private final ShuffleboardTab m_driverStationTab = Shuffleboard.getTab("DriverStation");
 
-    
+    private final ShuffleboardTab m_PID = Shuffleboard.getTab("PID");
   private final NetworkTable table = NetworkTableInstance.getDefault().getTable("Shooter info");
   private final DoublePublisher m_topRPMPublisher = table.getDoubleTopic("TopRPM").publish();
   private final DoublePublisher m_bottomRPMPublisher = table.getDoubleTopic("BottomRPM").publish();
@@ -80,17 +82,24 @@ public class ShooterSubsystem extends SubsystemBase {
     TalonFXConfiguration feeder_configs = new TalonFXConfiguration();
     
     Slot0Configs shooterSlot0Configs = top_configs.Slot0;
+    // shooterSlot0Configs.kS = 0.1;
+    // shooterSlot0Configs.kA = 0;
+    // shooterSlot0Configs.kV = .01 ;
+    // shooterSlot0Configs.kP = 0.049;
+    // shooterSlot0Configs.kI = 0;
+    // shooterSlot0Configs.kD = 0;
+
     shooterSlot0Configs.kS = 0.1;
     shooterSlot0Configs.kA = 0;
-    shooterSlot0Configs.kV = .01 ;
-    shooterSlot0Configs.kP = 0.049;
+    shooterSlot0Configs.kV = 0.009;
+    shooterSlot0Configs.kP = 0.04;
     shooterSlot0Configs.kI = 0;
     shooterSlot0Configs.kD = 0;
 
     Slot0Configs feederSlot0Configs = feeder_configs.Slot0;
-    feederSlot0Configs.kS = 0;
-    feederSlot0Configs.kV = 0.52;
-    feederSlot0Configs.kP = 0.05;
+    feederSlot0Configs.kS = 0.08;
+    feederSlot0Configs.kV = 0;
+    feederSlot0Configs.kP = .04;
     feederSlot0Configs.kI = 0;
     feederSlot0Configs.kD = 0;
 
@@ -101,7 +110,7 @@ public class ShooterSubsystem extends SubsystemBase {
     feeder_configs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     top_configs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    feeder_configs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    feeder_configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     top_configs.CurrentLimits.SupplyCurrentLimitEnable = true;
     top_configs.CurrentLimits.SupplyCurrentLimit = 80;
@@ -123,14 +132,16 @@ public class ShooterSubsystem extends SubsystemBase {
   
   @Override
   public void periodic() {
-    m_wheelEntranceSensorIsTripped = Utils.isAllenBradleyTripped(m_wheelEntranceSensor);
+    m_wheelEntranceSensorIsTripped = Utils.isAllenBradleyTripped(m_Indexer);//This needs to be renamed
     m_wheelExitSensorIsTripped = Utils.isAllenBradleyTripped(m_wheelExitSensor);
+    m_FeederStopIsTripped = Utils.isAllenBradleyTripped(m_FeederStopSensor);
 
     m_shooterIsUpToSpeed = m_topMotor.getVelocity().getValueAsDouble() >= ShooterConstants.SHOOTER_UP_TO_SPEED_THRESHOLD;
 
     final AimLocation aimLocation = AimLocation.getAimLocation();
 
     boolean overrideShooterLogic = false;
+
     if (DriverStation.isTeleopEnabled() && m_wheelExitSensorIsTripped) {
       if (aimLocation == AimLocation.Loading) {
         overrideShooterLogic = true;
@@ -167,13 +178,17 @@ public class ShooterSubsystem extends SubsystemBase {
         m_topMotor.disable();
       }
     }
-
-    if (m_feederReverseEnabled) {
-      m_feederMotor.setControl(m_feederReverseRequest);
-    } else if (m_feederEnabled) {
-      m_feederMotor.setControl(m_feederRequest);
+  
+    if (aimLocation == AimLocation.Loading && m_FeederStopIsTripped) {
+      m_feederMotor.setControl(m_feederRequestSlowBack);
     } else {
-      m_feederMotor.disable();
+      if (m_feederReverseEnabled) {
+        m_feederMotor.setControl(m_feederReverseRequest);
+      } else if (m_feederEnabled) {
+        m_feederMotor.setControl(m_feederRequest);
+      } else {
+        m_feederMotor.disable();
+      }
     }
   }
 

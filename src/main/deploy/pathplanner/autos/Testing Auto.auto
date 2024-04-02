@@ -2,110 +2,19 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.3842701845452563,
-      "y": 7.009594764455259
+      "x": 1.33374937489032,
+      "y": 5.5343871225311165
     },
-    "rotation": 180.0
+    "rotation": -56.309932473960465
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "StartPickingUpPiece"
-                }
-              }
-            ]
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "GetPiece1"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StopPickingUpPiece"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AimAtSpeaker1"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "LineUp"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AutoAim"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.25
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StartFeederReverse"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.1
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StartShooter"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StopFeederReverse"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StartFeeder"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StopShooterAndFeeder"
+            "pathName": "AvoidPiece"
           }
         }
       ]

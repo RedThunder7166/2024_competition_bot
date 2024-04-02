@@ -40,7 +40,7 @@ public class IntakeSubsystem extends SubsystemBase {
     
     // clockwise is true
     // counterclockwise is false
-    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 30;
@@ -53,8 +53,10 @@ public class IntakeSubsystem extends SubsystemBase {
     m_sensorTab.addBoolean("IntakeEntranceSensor", () -> m_entranceSensorIsTripped);
   }
 
-  private final DutyCycleOut m_forwardControl = new DutyCycleOut(0.2);
-  private final DutyCycleOut m_reverseControl = new DutyCycleOut(-0.2);
+  private static final double speed = 0.45;
+
+  private final DutyCycleOut m_forwardControl = new DutyCycleOut(speed);
+  private final DutyCycleOut m_reverseControl = new DutyCycleOut(-speed);
   @Override
   public void periodic() {
     m_entranceSensorIsTripped = Utils.isAllenBradleyTripped(m_entranceSensor);
