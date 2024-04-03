@@ -32,18 +32,18 @@
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 2.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 154.98310652189994,
+    "rotation": 136.51454714530004,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "2-piece-paths",
+  "folder": "Source-4-Piece",
   "previewStartingState": {
     "rotation": 179.62795471279665,
     "velocity": 0

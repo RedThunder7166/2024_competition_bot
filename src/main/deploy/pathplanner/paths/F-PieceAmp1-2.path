@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0300818980016335,
-        "y": 4.733288025134609
+        "x": 2.652342506884159,
+        "y": 6.76204279714607
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0393266011757247,
-        "y": 4.733288025134609
+        "x": 1.7418171720801618,
+        "y": 6.0409067319813055
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "AimAtSpeaker4Piece"
     },
     {
       "anchor": {
-        "x": 2.409114728139366,
-        "y": 4.058424693425964
+        "x": 2.8653781531165547,
+        "y": 5.594267657035758
       },
       "prevControl": {
-        "x": 2.409114728139366,
-        "y": 4.058424693425964
+        "x": 2.180663101343949,
+        "y": 5.616120265071054
       },
       "nextControl": null,
       "isLocked": false,
@@ -32,20 +32,20 @@
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 2.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0,
-    "rotateFast": false
+    "rotation": 179.22577983507188,
+    "rotateFast": true
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Front-4-Paths",
   "previewStartingState": {
-    "rotation": 179.27477570094072,
+    "rotation": -142.67812490129356,
     "velocity": 0
   },
   "useDefaultConstraints": true

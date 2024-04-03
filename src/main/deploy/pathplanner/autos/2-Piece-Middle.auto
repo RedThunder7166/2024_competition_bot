@@ -5,7 +5,7 @@
       "x": 1.4193825880793334,
       "y": 5.523365877628853
     },
-    "rotation": 177.84033446574406
+    "rotation": 179.49082651804622
   },
   "command": {
     "type": "sequential",
@@ -14,43 +14,13 @@
         {
           "type": "named",
           "data": {
-            "name": "StartShooter"
+            "name": "AutoAim"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "AimFromSubwoofer"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.7
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StartFeeder"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.1
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.1
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StopShooterAndFeeder"
+            "name": "Shoot"
           }
         },
         {
@@ -64,30 +34,18 @@
           "data": {
             "commands": [
               {
-                "type": "path",
-                "data": {
-                  "pathName": "2-Piece-Auton-Subwoofer-Center"
-                }
-              },
-              {
                 "type": "named",
                 "data": {
                   "name": "PickUpPieceUntilSensor"
                 }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "2-Piece-Auton-Subwoofer-Center"
+                }
               }
             ]
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.2
           }
         },
         {
@@ -97,57 +55,34 @@
           }
         },
         {
-          "type": "wait",
+          "type": "race",
           "data": {
-            "waitTime": 1.0
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "LineUp"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.25
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "StartFeederReverse"
+            "name": "Shoot"
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 0.2
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StopFeederReverse"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StartShooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StartFeeder"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StopShooterAndFeeder"
+            "pathName": "Move-From-Woofer-Out(M-long)"
           }
         }
       ]

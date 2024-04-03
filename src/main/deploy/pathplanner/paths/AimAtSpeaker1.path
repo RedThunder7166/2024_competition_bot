@@ -25,25 +25,25 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "AimAtSpeaker4Piece"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 2.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -142.03794076318476,
+    "rotation": -150.2390029694184,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Aiming",
   "previewStartingState": {
     "rotation": -178.5217273433112,
     "velocity": 0

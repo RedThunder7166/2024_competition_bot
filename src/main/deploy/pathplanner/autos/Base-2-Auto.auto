@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.9400900678310611,
-      "y": 6.617557229812152
+      "x": 1.3640618606832815,
+      "y": 5.625324579910002
     },
-    "rotation": -119.8661079234253
+    "rotation": -178.8982938847936
   },
   "command": {
     "type": "sequential",
@@ -14,7 +14,7 @@
         {
           "type": "named",
           "data": {
-            "name": "AutoAim"
+            "name": "AimFromSubwoofer"
           }
         },
         {
@@ -42,32 +42,39 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "2-Piece-Auton-Subwoofer-Amp"
+                  "pathName": "Base-1-Path"
                 }
               }
             ]
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "AutoAim"
-          }
-        },
-        {
-          "type": "race",
+          "type": "parallel",
           "data": {
             "commands": [
               {
                 "type": "named",
                 "data": {
-                  "name": "LineUp"
+                  "name": "AutoAim"
                 }
               },
               {
-                "type": "wait",
+                "type": "race",
                 "data": {
-                  "waitTime": 0.25
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "LineUp"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.4
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -78,10 +85,16 @@
           "data": {
             "name": "Shoot"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Base-1-Path"
+          }
         }
       ]
     }
   },
-  "folder": "2-piece working",
+  "folder": "Base-Autos",
   "choreoAuto": false
 }

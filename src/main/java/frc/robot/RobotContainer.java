@@ -4,31 +4,17 @@
 
 package frc.robot;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -37,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.ControllerConstants;
@@ -44,7 +31,6 @@ import frc.robot.commands.PickUpPieceUntilSensorWithTimeout;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.DeflectorSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
@@ -57,14 +43,10 @@ public class RobotContainer {
   private double MaxSpeed = 6; // 6 meters per second desired top speed
   private double MaxAngularRate = 3 * Math.PI; //  1 rotation per second max angular velocity
   private final SendableChooser<Command> autoChooser;
-  private final SendableChooser<JSONObject> autoChooser2;
-
-  private Pose2d m_autoStartingPose;
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final CommandXboxController driver_joystick = new CommandXboxController(ControllerConstants.DRIVER_PORT); // My joystick
   private final CommandXboxController operator_joystick = new CommandXboxController(ControllerConstants.OPERATOR_PORT);
-   private final XboxController joy = new XboxController(2);
 
   private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
   
@@ -83,7 +65,7 @@ public class RobotContainer {
 
   private final SwerveRequest.RobotCentric m_robotCentricControl = new SwerveRequest.RobotCentric()
   .withDeadband(MaxSpeed * 0.12).withRotationalDeadband(MaxAngularRate * 0.12) // Add a 5% deadband //used to be 10%
-  .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
+  .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
   
   /* */
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake(); //CHECKME this is wierd
@@ -159,7 +141,15 @@ public class RobotContainer {
       m_shooter.disableFeeder();
     }, m_shooter));
 
-
+    NamedCommands.registerCommand("Shoot", new SequentialCommandGroup(
+      new InstantCommand(m_shooter::enableShooter),
+      new WaitCommand(0.5), // TODO: to be decided
+      new InstantCommand(m_shooter::enableFeeder),
+      new WaitCommand(0.4),
+      new InstantCommand(m_shooter::disableShooter), 
+      new InstantCommand(m_shooter::disableFeeder),
+      new InstantCommand(()->AimLocation.setAimLocation(AimLocation.Loading))
+    ));
 
 
 
@@ -180,15 +170,16 @@ public class RobotContainer {
       AimLocation.setAimLocation(AimLocation.AutoTarget);
     }));
 
-   NamedCommands.registerCommand("LineUp", new ParallelRaceGroup(
-    drivetrain.applyRequest(() -> {
+    NamedCommands.registerCommand("LineUp", Commands.runEnd(() -> {
       final Optional<Double> turn_power = m_vision.calculateTurnPower();
-            return drive.withVelocityX(0)
-                        .withVelocityY(0)
-              .withRotationalRate((turn_power.orElse(0d) * MaxAngularRate));// Drive counterclockwise with negative X (left)
-    }), new WaitCommand(1)
-   ));
-
+      drivetrain.setControl(drive
+                          .withVelocityX(0)
+                          .withVelocityY(0)
+                          .withRotationalRate((turn_power.orElse(0d) * MaxAngularRate)));
+    }, () -> {
+      drivetrain.setControl(drive.withRotationalRate(0));
+    }));
+    
    NamedCommands.registerCommand("PickUpPieceUntilSensor", new FunctionalCommand(() -> {
     m_intake.enableForward();
     m_indexer.enableForward();
@@ -197,7 +188,7 @@ public class RobotContainer {
     m_intake.disableForward();
     m_indexer.disableForward();
     m_shooter.disableFeeder();
-   }, m_shooter::getWheelEntranceSensorTripped, m_intake, m_indexer, m_shooter));
+   }, m_shooter::getFeederStopTripped, m_intake, m_indexer, m_shooter));
 
    NamedCommands.registerCommand("PickUpPieceUntilSensorWithTimeout", 
     new PickUpPieceUntilSensorWithTimeout(m_intake, m_indexer, m_shooter)
@@ -209,6 +200,7 @@ public class RobotContainer {
 
 
   private boolean automatically_rotate = false;
+
   private void configureBindings() {
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
         drivetrain.applyRequest(() -> {
@@ -229,6 +221,11 @@ public class RobotContainer {
     }, () -> {
       automatically_rotate = false;
     }));
+
+    driver_joystick.b().whileTrue(drivetrain.applyRequest(() -> m_robotCentricControl
+      .withVelocityX(0.3 * MaxSpeed)
+      .withRotationalRate(-driver_joystick.getRightX() * MaxAngularRate)// Drive counterclockwise with negative X (left)
+    ));
 
     // driver_joystick.x().whileTrue(new FunctionalCommand(() -> {
     //   m_vision.setPriorityID(ReallyDumbAllianceColor.getAlliance() == Alliance.Red ? AllianceColor.RED_AMP : AllianceColor.BLUE_AMP);
@@ -331,36 +328,7 @@ public class RobotContainer {
     
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
-    autoChooser2 = new SendableChooser<>();
-    List<String> autoNames = AutoBuilder.getAllAutoNames();
-
-    List<String> options = new ArrayList<>();
-
-    for (String autoName : autoNames) {
-        try (BufferedReader br =
-          new BufferedReader(
-              new FileReader(
-                  new File(
-                      Filesystem.getDeployDirectory(), "pathplanner/autos/" + autoName + ".auto")))) {
-        StringBuilder fileContentBuilder = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null) {
-          fileContentBuilder.append(line);
-        }
-
-        String fileContent = fileContentBuilder.toString();
-        JSONObject json = (JSONObject) new JSONParser().parse(fileContent);
-
-        autoChooser2.addOption(autoName, json);
-      } catch (Exception e) {
-        throw new RuntimeException(String.format("Error building auto: %s", autoName), e);
-      }
-    }
-
-    SmartDashboard.putData("Auto Chooser2", autoChooser2);
-
     m_driverStationTab.add(autoChooser);
-    m_driverStationTab.add(autoChooser2);
   }
 
   public RobotContainer() {
@@ -395,8 +363,7 @@ public class RobotContainer {
   }
 
   public void autonomousInit() {
-    JSONObject asdfjlkasdf = autoChooser2.getSelected();
-    m_autoStartingPose = AutoBuilder.getStartingPoseFromJson((JSONObject) asdfjlkasdf.get("startingPose"));
+
   }
 
   public void autonomousExit() {

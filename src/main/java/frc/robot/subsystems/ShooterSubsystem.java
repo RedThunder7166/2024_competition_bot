@@ -203,6 +203,9 @@ public class ShooterSubsystem extends SubsystemBase {
   public boolean getWheelExitSensorTripped() {
     return m_wheelExitSensorIsTripped;
   }
+    public boolean getFeederStopTripped() {
+    return m_FeederStopIsTripped;
+  }
 
   public void disabledInit() {
     m_shooterEnabled = false;
@@ -225,6 +228,9 @@ public class ShooterSubsystem extends SubsystemBase {
     m_shooterReverseEnabled = false;
   }, this);
 
+  public void enableShooter() {
+    m_shooterEnabled = true;
+  }
   public void disableShooter() {
     m_shooterEnabled = false;
   }

@@ -3,21 +3,31 @@
   "robotLength": 0.96,
   "holonomicMode": true,
   "pathFolders": [
-    "2-piece-paths",
-    "MainTestFolder",
-    "MoveAwayFromWoofer",
-    "IDK",
-    "testing"
+    "2-Piece-Autos",
+    "Aiming",
+    "Base-Paths",
+    "CenterStage",
+    "Front-4-Paths",
+    "MoveFromWoofer",
+    "Series R",
+    "Source-4-Piece",
+    "Test",
+    "Trash"
   ],
   "autoFolders": [
-    "Potential 4 piece",
-    "2-piece working",
     "1-piece working",
+    "2-piece working",
+    "3-piece working",
+    "4-piece working",
+    "Base-Autos",
+    "5-piece working",
     "New Three piece stuff",
-    "Test"
+    "Potential 4 piece",
+    "Test",
+    "Working Autos"
   ],
-  "defaultMaxVel": 3.0,
-  "defaultMaxAccel": 2.0,
+  "defaultMaxVel": 4.0,
+  "defaultMaxAccel": 4.5,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
   "maxModuleSpeed": 4.5

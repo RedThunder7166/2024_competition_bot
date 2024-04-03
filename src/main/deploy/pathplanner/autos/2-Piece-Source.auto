@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.9400900678310611,
-      "y": 6.617557229812152
+      "x": 1.692447123440368,
+      "y": 5.797095332736786
     },
-    "rotation": -119.8661079234253
+    "rotation": 120.96375653207352
   },
   "command": {
     "type": "sequential",
@@ -42,10 +42,16 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "2-Piece-Auton-Subwoofer-Amp"
+                  "pathName": "2-Piece-Auton-Subwoofer-Non-Amp"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Aim-Source"
           }
         },
         {
@@ -77,6 +83,12 @@
           "type": "named",
           "data": {
             "name": "Shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Move-From-Woofer-Out(NA)"
           }
         }
       ]

@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2882806462008771,
-      "y": 6.575115801422806
+      "x": 1.439843075165686,
+      "y": 5.584907932186054
     },
-    "rotation": -118.45701659543747
+    "rotation": 179.06080905426435
   },
   "command": {
     "type": "sequential",
@@ -24,9 +24,22 @@
           }
         },
         {
-          "type": "wait",
+          "type": "race",
           "data": {
-            "waitTime": 3.0
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "LineUp"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 1.0
+                }
+              }
+            ]
           }
         },
         {
@@ -38,7 +51,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 2.0
+            "waitTime": 0.5
           }
         },
         {
@@ -46,10 +59,16 @@
           "data": {
             "name": "StopShooterAndFeeder"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Base-1-Path"
+          }
         }
       ]
     }
   },
-  "folder": "1-piece working",
+  "folder": "Base-Autos",
   "choreoAuto": false
 }

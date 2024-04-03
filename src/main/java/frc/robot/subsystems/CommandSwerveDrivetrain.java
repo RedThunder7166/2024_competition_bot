@@ -25,6 +25,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
@@ -87,7 +88,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
     // @Override
     public void seedFieldRelative() {
-        // TODO Auto-generated method stub
         super.seedFieldRelative();
     }
 
@@ -116,7 +116,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     public void autoExit() {
-        m_fieldRelativeOffset = Rotation2d.fromDegrees(180);
+        m_fieldRelativeOffset = Rotation2d.fromDegrees(ReallyDumbAllianceColor.getAlliance() == Alliance.Red ? 180 : 0);
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
