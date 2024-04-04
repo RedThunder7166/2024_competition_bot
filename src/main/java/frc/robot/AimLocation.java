@@ -44,8 +44,8 @@ public class AimLocation {
         0
     );
     public static final AimLocation Trap = new AimLocation("Trap",
-        210, // 1050
-        80,
+        205, // 1050
+        25,
         0
     );
     public static final AimLocation Speaker = new AimLocation("Speaker",

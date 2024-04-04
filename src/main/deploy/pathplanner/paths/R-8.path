@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.4449586308223192,
-        "y": 1.9958715338903614
+        "x": 5.46583850931677,
+        "y": 1.2674512660471637
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.187947304022383,
-        "y": 1.8574716830001532
+        "x": 7.228615557497309,
+        "y": 0.6337256330235824
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 8.211982919085626,
-        "y": 0.7939780919490858
+        "x": 8.48149841818761,
+        "y": 0.7721254839137894
       },
       "prevControl": {
-        "x": 7.4180048271365395,
-        "y": 0.7284202678431978
+        "x": 7.461710043207133,
+        "y": 0.7502728758784942
       },
       "nextControl": null,
       "isLocked": false,
@@ -39,13 +39,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 179.2151753970081,
-    "rotateFast": false
+    "rotation": -178.49256424122515,
+    "rotateFast": true
   },
   "reversed": false,
   "folder": "Series R",
   "previewStartingState": {
-    "rotation": 104.93141717813756,
+    "rotation": 174.0938588862295,
     "velocity": 0
   },
   "useDefaultConstraints": true

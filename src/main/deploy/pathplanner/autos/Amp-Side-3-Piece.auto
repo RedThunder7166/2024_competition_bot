@@ -2,19 +2,70 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.3794008067164314,
-      "y": 4.1097002902619115
+      "x": 1.4158218201085915,
+      "y": 6.963697760580969
     },
-    "rotation": -179.88683117468196
+    "rotation": 180.0
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "2-Piece-Source-Start"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "AutoAim"
+                }
+              },
+              {
+                "type": "race",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "LineUp"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.8
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "2-Piece-Amp-Second"
+                }
+              }
+            ]
           }
         },
         {
@@ -58,7 +109,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.3
+            "waitTime": 0.2
           }
         },
         {
@@ -74,7 +125,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "2-Piece-Source-Second"
+                  "pathName": "R-Grab-4"
                 }
               }
             ]
@@ -83,7 +134,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Aim-Source"
+            "pathName": "4-shoot"
           }
         },
         {
@@ -110,138 +161,6 @@
                       "type": "wait",
                       "data": {
                         "waitTime": 0.4
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.3
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Source4-8"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "SourceShootFar"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.4
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Source4-7"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "SourceShootFar"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.6
                       }
                     }
                   ]
@@ -259,6 +178,6 @@
       ]
     }
   },
-  "folder": "4-piece working",
+  "folder": "3-piece working",
   "choreoAuto": false
 }

@@ -15,11 +15,13 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.AllianceColor;
 import frc.robot.Constants.LauncherConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.LimelightHelpers;
@@ -39,9 +41,9 @@ public class VisionSubsystemLimelight extends SubsystemBase {
 
   private int m_priorityId = 0;
 
-  private static final double TURN_P = 0.011;
+  private static final double TURN_P = 0.015;
   private static final double TURN_I = 0;
-  private static final double TURN_D = 0.002;
+  private static final double TURN_D = 0.003;
   private final PIDController turnController = new PIDController(TURN_P, TURN_I, TURN_D);
 
   private final ShuffleboardTab m_driverStationTab = Shuffleboard.getTab("DriverStation");
@@ -78,6 +80,14 @@ public class VisionSubsystemLimelight extends SubsystemBase {
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("priorityid")
           .setNumber(id);
   }
+  
+  public void setVisionPriorityIDToSubwooferCenter(Alliance alliance) {
+    setPriorityID(alliance == Alliance.Red ? AllianceColor.RED_SUBWOOFER_CENTER : AllianceColor.BLUE_SUBWOOFER_CENTER);
+  }
+
+  public boolean seesAprilTag() {
+    return LimelightHelpers.getFiducialID("") != -1;
+  }
 
   public Optional<Double> calculateTurnPower() {
     if (LimelightHelpers.getFiducialID("") != -1) {
@@ -112,10 +122,14 @@ public class VisionSubsystemLimelight extends SubsystemBase {
   private double distanceLaunchAngleCalculation(double distance) {
     // return (-42.4977/(1+Math.pow(Math.E, (-2.20952 * ( distance - 1.725))))+199.689);
 
-    final double m = 249.295;
-    final double k = -1.61996;
-    final double x_zero = 0.0297632;
-    final double b = 151.212;
+    // final double m = 249.295;
+    // final double k = -1.61996;
+    // final double x_zero = 0.0297632;
+    // final double b = 151.212;
+    final double m = 3.2272* Math.pow(10, 13);
+    final double k = -1.43668;
+    final double x_zero = -18.0102;
+    final double b = 150.065;
     return distance * (m / (1 + Math.pow(Math.E, -k * (distance - x_zero)))) + b;
   }
     

@@ -24,8 +24,10 @@ public class ClimberSubsystem extends SubsystemBase {
 
   private final CommandSwerveDrivetrain m_swerve;
 
-  private DoubleSupplier m_manual_supplier;
+  private DoubleSupplier m_manual_left_supplier;
   private DoubleSupplier m_manual_right_supplier;
+
+  private boolean m_checksEnabled = false;
 
   private final double m_output = 0;
   private final DutyCycleOut m_leftRequest = new DutyCycleOut(m_output);
@@ -39,47 +41,58 @@ public class ClimberSubsystem extends SubsystemBase {
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     config.MotorOutput.DutyCycleNeutralDeadband = ClimberConstants.MANUAL_DEADBAND;
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimit = 10;
+
     m_leftClimbMotor.getConfigurator().apply(config);
     m_rightClimbMotor.getConfigurator().apply(config);
 
-
     m_leftClimbMotor.setInverted(false);
     m_rightClimbMotor.setInverted(true);
+
+    m_leftClimbMotor.setPosition(0);
+    m_rightClimbMotor.setPosition(0);
     
   }
 
-  public void configureManualMode(DoubleSupplier supplier) {
-    m_manual_supplier = supplier;
+  public void enableChecks() {
+    m_checksEnabled = true;
+  }
+  public void disableChecks() {
+    m_checksEnabled = false;
+  }
+
+  public void configureLeftManualMode(DoubleSupplier supplier) {
+    m_manual_left_supplier = supplier;
   }
   public void configureRightManualMode(DoubleSupplier supplier) {
     m_manual_right_supplier = supplier;
   }
 
-  private double getRollDegrees() {
-    return Math.toDegrees(m_swerve.getRotation3d().getX());
-  }
+  // private double getRollDegrees() {
+  //   return Math.toDegrees(m_swerve.getRotation3d().getX());
+  // }
 
   private void driveArms(double left_output, double right_output) {
-    // boolean left_switch_is_down = !m_leftArmInput.get();
-    // if (left_switch_is_down && left_output <= 0) {
-    //   m_leftClimbMotor.set(0);
-    // } else {
-    m_leftClimbMotor.setControl(m_leftRequest.withOutput(left_output));
+    if (m_checksEnabled && left_output < 0 && m_leftClimbMotor.getPosition().getValueAsDouble() <= ClimberConstants.LEFT_BOTTOM_POSITION) {
+      m_leftClimbMotor.disable();
+    } else {
+      m_leftClimbMotor.setControl(m_leftRequest.withOutput(left_output));
+    }
     
-
-    // boolean right_switch_is_down = !m_rightArmInput.get();
-    // if (right_switch_is_down && right_output <= 0) {
-    //   m_rightClimbMotor.set(0);
-    // } else 
-    
-    m_rightClimbMotor.setControl(m_rightRequest.withOutput(right_output));
+    if (m_checksEnabled && right_output < 0 && m_rightClimbMotor.getPosition().getValueAsDouble() <= ClimberConstants.RIGHT_BOTTOM_POSITION) {
+      m_rightClimbMotor.disable();
+    } else {
+      m_rightClimbMotor.setControl(m_rightRequest.withOutput(right_output));
+    }
   }
 
   @Override
   public void periodic() {
-    double left_output = m_manual_supplier.getAsDouble();
-    // // double right_output = left_output;
+    double left_output = m_manual_left_supplier.getAsDouble();
     double right_output = m_manual_right_supplier.getAsDouble();
+    // // double right_output = left_output;
 
     // double roll = getRollDegrees();
 

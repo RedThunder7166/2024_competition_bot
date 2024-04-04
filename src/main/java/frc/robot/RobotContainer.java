@@ -33,6 +33,7 @@ import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.JetEngineSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -76,10 +77,11 @@ public class RobotContainer {
   private final VisionSubsystemLimelight m_vision = new VisionSubsystemLimelight();
   private final ClimberSubsystem m_climber = new ClimberSubsystem(drivetrain);
   private final LauncherSubsystem m_launcher = new LauncherSubsystem(m_vision);
+  private final JetEngineSubsystem m_jetEngine = new JetEngineSubsystem();
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
   private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_shooter);
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
-  private final LEDSubsystem m_led = new LEDSubsystem(m_intake, m_indexer, m_shooter); 
+  private final LEDSubsystem m_led = new LEDSubsystem(m_intake, m_indexer, m_shooter, m_vision); 
   // private final DeflectorSubsystem m_deflector = new DeflectorSubsystem(m_shooter);
   
   private final ShuffleboardTab m_driverStationTab = Shuffleboard.getTab("DriverStation");
@@ -143,10 +145,12 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("Shoot", new SequentialCommandGroup(
       new InstantCommand(m_shooter::enableShooter),
+      new InstantCommand(m_indexer::enableForward),
       new WaitCommand(0.5), // TODO: to be decided
       new InstantCommand(m_shooter::enableFeeder),
       new WaitCommand(0.4),
-      new InstantCommand(m_shooter::disableShooter), 
+      new InstantCommand(m_shooter::disableShooter),
+      new InstantCommand(m_indexer::disableForward),
       new InstantCommand(m_shooter::disableFeeder),
       new InstantCommand(()->AimLocation.setAimLocation(AimLocation.Loading))
     ));
@@ -195,8 +199,11 @@ public class RobotContainer {
    );
   }
 
-  private boolean climber_up = false;
-  private boolean climber_down = false;
+  private boolean left_climber_up = false;
+  private boolean left_climber_down = false;
+
+  private boolean right_climber_up = false;
+  private boolean right_climber_down = false;
 
 
   private boolean automatically_rotate = false;
@@ -237,15 +244,48 @@ public class RobotContainer {
     //   return false;
     // }));
 
-    operator_joystick.x().whileTrue(Commands.startEnd(() -> {
-      climber_up = true;
+    
+    driver_joystick.leftTrigger().whileTrue(Commands.startEnd(() -> {
+      m_climber.disableChecks();
+      left_climber_up = true;
     }, () -> {
-      climber_up = false;
+      left_climber_up = false;
     }, m_climber));
-    operator_joystick.y().whileTrue(Commands.startEnd(() -> {
-      climber_down = true;
+    driver_joystick.leftBumper().whileTrue(Commands.startEnd(() -> {
+      m_climber.disableChecks();
+      left_climber_down = true;
     }, () -> {
-      climber_down = false;
+      left_climber_down = false;
+    }, m_climber));
+
+    driver_joystick.rightTrigger().whileTrue(Commands.startEnd(() -> {
+      m_climber.disableChecks();
+      right_climber_up = true;
+    }, () -> {
+      right_climber_up = false;
+    }, m_climber));
+    driver_joystick.rightBumper().whileTrue(Commands.startEnd(() -> {
+      m_climber.disableChecks();
+      right_climber_down = true;
+    }, () -> {
+      right_climber_down = false;
+    }, m_climber));
+
+    driver_joystick.y().whileTrue(Commands.startEnd(() -> {
+      m_climber.enableChecks();
+      left_climber_up = true;
+      right_climber_up = true;
+    }, () -> {
+      left_climber_up = false;
+      right_climber_up = false;
+    }, m_climber));
+    driver_joystick.x().whileTrue(Commands.startEnd(() -> {
+      m_climber.enableChecks();
+      left_climber_down = true;
+      right_climber_down = true;
+    }, () -> {
+      left_climber_down = false;
+      right_climber_down = false;
     }, m_climber));
     
     operator_joystick.rightBumper().whileTrue(Commands.startEnd(() -> {
@@ -308,14 +348,18 @@ public class RobotContainer {
       AimLocation.setAimLocation(AimLocation.AutoTarget);
     }, m_shooter, m_launcher));
 
-    m_climber.configureManualMode(() -> operator_joystick.getRightY()); //left arm
-
+    // m_climber.configureManualMode(() -> driver_joystick.getRightY()); //left arm
 
     final double climber_right_manual_mode_speed = 1;
-    m_climber.configureRightManualMode( //right arm
-      () -> climber_up ? climber_right_manual_mode_speed : 
-        (climber_down ? -climber_right_manual_mode_speed : 0)
+    m_climber.configureLeftManualMode( //right arm
+      () -> left_climber_up ? climber_right_manual_mode_speed : 
+        (left_climber_down ? -climber_right_manual_mode_speed : 0)
     );
+    m_climber.configureRightManualMode( //right arm
+      () -> right_climber_up ? climber_right_manual_mode_speed : 
+        (right_climber_down ? -climber_right_manual_mode_speed : 0)
+    );
+    
   }
  
   {
@@ -337,10 +381,10 @@ public class RobotContainer {
 
     m_allianceChooser.onChange((Alliance alliance) -> {
       ReallyDumbAllianceColor.setAlliance(alliance);
-      setVisionPriorityIDToSubwooferCenter(alliance);
+      m_vision.setVisionPriorityIDToSubwooferCenter(alliance);
     });
     ReallyDumbAllianceColor.setAlliance(Alliance.Red);
-    setVisionPriorityIDToSubwooferCenter(Alliance.Red);
+    m_vision.setVisionPriorityIDToSubwooferCenter(Alliance.Red);
 
     m_allianceChooser.addOption("Blue", Alliance.Blue);
     m_allianceChooser.setDefaultOption("Red", Alliance.Red);
@@ -348,9 +392,7 @@ public class RobotContainer {
     m_driverStationTab.add(m_allianceChooser);
   }
 
-  public void setVisionPriorityIDToSubwooferCenter(Alliance alliance) {
-    m_vision.setPriorityID(alliance == Alliance.Red ? AllianceColor.RED_SUBWOOFER_CENTER : AllianceColor.BLUE_SUBWOOFER_CENTER);
-  }
+
       
   public void teleopInit() {
     m_launcher.teleopInit();

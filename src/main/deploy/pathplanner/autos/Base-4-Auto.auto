@@ -30,19 +30,38 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "deadline",
           "data": {
             "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Base-1-Path"
+                }
+              },
               {
                 "type": "named",
                 "data": {
                   "name": "PickUpPieceUntilSensor"
                 }
-              },
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
               {
                 "type": "path",
                 "data": {
                   "pathName": "Base-1-Path"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
                 }
               }
             ]
@@ -87,19 +106,38 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "deadline",
           "data": {
             "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Base-1-Path"
+                }
+              },
               {
                 "type": "named",
                 "data": {
                   "name": "PickUpPieceUntilSensor"
                 }
-              },
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
               {
                 "type": "path",
                 "data": {
                   "pathName": "Base-1-Path"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
                 }
               }
             ]
@@ -144,19 +182,38 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "deadline",
           "data": {
             "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Base-1-Path"
+                }
+              },
               {
                 "type": "named",
                 "data": {
                   "name": "PickUpPieceUntilSensor"
                 }
-              },
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
               {
                 "type": "path",
                 "data": {
                   "pathName": "Base-1-Path"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
                 }
               }
             ]

@@ -57,6 +57,9 @@ public class Constants {
         public static final int RIGHT_CLIMB_MOTOR_ID = 15;
 
         public static final double MANUAL_DEADBAND = 0.25;
+
+        public static final double LEFT_BOTTOM_POSITION = 0;
+        public static final double RIGHT_BOTTOM_POSITION = 0;
     }
     public static final class IntakeConstants {
         public static final int LOWER_MOTOR_ID = 13;
@@ -70,6 +73,17 @@ public class Constants {
 
         public static final int START_INDEX = 0;
         public static final int LED_COUNT = 47;
+
+        public static final int COUNT_PER_GROUP = (int) Math.floor(LED_COUNT / 3);
+
+        public static final int GROUP_1_START = 0;
+        private static final int GROUP_1_END = COUNT_PER_GROUP;
+
+        public static final int GROUP_2_START = GROUP_1_END + 1;
+        private static final int GROUP_2_END = GROUP_2_START + GROUP_1_END;
+
+        public static final int GROUP_3_START = GROUP_2_END + 1;
+        private static final int GROUP_3_END = LED_COUNT;
     }
 
     public static final class DeflectorConstants {
@@ -82,5 +96,9 @@ public class Constants {
     public static final class VisionConstants {
         public static final double TARGET_SPEAKER_DISTANCE_METERS = 3.4;
         public static final double DISTANCE_BETWEEN_CAMERA_AND_FRONT_OF_ROBOT = 27.5;
+    }
+
+    public static final class JetEngineConstants {
+        public static final int MOTOR_ID = 27;
     }
 }

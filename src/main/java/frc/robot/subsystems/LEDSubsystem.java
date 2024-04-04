@@ -31,7 +31,7 @@ public class LEDSubsystem extends SubsystemBase {
       this.b = b;
     }
   }
-  
+
   private static SingleFadeAnimation singleFadeAnimation(RGB rgb, double speed) {
     return new SingleFadeAnimation(rgb.r, rgb.g, rgb.b, 0, speed, LEDConstants.LED_COUNT, LEDConstants.START_INDEX);
   }
@@ -43,10 +43,10 @@ public class LEDSubsystem extends SubsystemBase {
   }
 
   private static final RGB green = new RGB(0, 255, 0);
-  private static final RGB red = new RGB(230, 20, 20);
+  private static final RGB red = new RGB(230, 20, 8);
   private static final RGB blue = new RGB(40, 40, 250);
   private static final RGB yellow = new RGB(242, 187, 5);
-  private static final RGB orange = new RGB(250, 120, 0);
+  private static final RGB orange = new RGB(250, 90, 0);
 
   private static final double brightness = 1;
   private static final double speed = 0.5;
@@ -57,7 +57,9 @@ public class LEDSubsystem extends SubsystemBase {
     FlashRed(strobeAnimation(red, speed)),
     SolidYellow(yellow),
     SolidGreen(green),
+    SolidBlue(blue),
     SolidRed(red),
+    SolidOrange(orange),
     BlueFlow(colorFlowAnimation(blue, speed, ColorFlowAnimation.Direction.Forward)),
     FlashOrange(strobeAnimation(orange, speed));
 
@@ -69,12 +71,15 @@ public class LEDSubsystem extends SubsystemBase {
 
     public final Animation animation;
 
+    private int offset;
+
     Mode(int r, int g, int b) {
       this.has_animation = false;
       this.r = r;
       this.g = g;
       this.b = b;
       this.animation = null;
+      this.offset = 0;
     }
     Mode(RGB rgb) {
       this(rgb.r, rgb.g, rgb.b);
@@ -86,21 +91,50 @@ public class LEDSubsystem extends SubsystemBase {
       this.b = 0;
       this.animation = animation;
     }
+
+    private void updateAnimationOffset() {
+      if (has_animation) {
+        animation.setLedOffset(offset);
+      }
+    }
+
+    public Mode group1() {
+      offset = LEDConstants.GROUP_1_START;
+      updateAnimationOffset();
+
+      return this;
+    }
+    public Mode group2() {
+      offset = LEDConstants.GROUP_2_START;
+      updateAnimationOffset();
+
+      return this;
+    }
+    public Mode group3() {
+      offset = LEDConstants.GROUP_3_START;
+      updateAnimationOffset();
+
+      return this;
+    }
   }
-  private Mode m_mode = Mode.SolidYellow;
+  // private Mode m_mode = Mode.SolidYellow;
+  private Mode m_outerMode = Mode.SolidYellow;
+  private Mode m_innerMode = Mode.SolidYellow;
 
   private final CANdle m_candle = new CANdle(LEDConstants.CANDLE_ID);
 
   private final IntakeSubsystem m_intake;
   private final IndexerSubsystem m_indexer;
   private final ShooterSubsystem m_shooter;
+  private final VisionSubsystemLimelight m_vision;
 
   private final ShuffleboardTab m_shuffleBoardTab = Shuffleboard.getTab("LED");
 
-  public LEDSubsystem(IntakeSubsystem intake, IndexerSubsystem indexer, ShooterSubsystem shooter) {
+  public LEDSubsystem(IntakeSubsystem intake, IndexerSubsystem indexer, ShooterSubsystem shooter, VisionSubsystemLimelight vision) {
     m_intake = intake;
     m_indexer = indexer;
     m_shooter = shooter;
+    m_vision = vision;
 
     final CANdleConfiguration config = new CANdleConfiguration();
     config.disableWhenLOS = false; //Changed from False
@@ -108,31 +142,56 @@ public class LEDSubsystem extends SubsystemBase {
 
     m_candle.configAllSettings(config, 100);
 
-    m_shuffleBoardTab.addString("mode", () -> m_mode.name());
+    // m_shuffleBoardTab.addString("mode", () -> m_mode.name());
+    m_shuffleBoardTab.addString("inner mode", () -> m_innerMode.name());
+    m_shuffleBoardTab.addString("outer mode", () -> m_outerMode.name());
   }
 
   @Override
   public void periodic() {
     if (m_shooter.isUpToSpeed()) {
-      m_mode = Mode.FlashOrange;
+      m_outerMode = Mode.FlashOrange;
     } else if (m_intake.getEntranceSensorTripped()) {
-      m_mode = Mode.FlashGreen;
+      m_outerMode = Mode.FlashGreen;
     } else if (m_indexer.getSensorTripped()) {
-      m_mode = Mode.SolidGreen;
+      m_outerMode = Mode.SolidGreen;
     } else if (m_shooter.getWheelExitSensorTripped()) { 
-      m_mode = Mode.SolidRed;
+      m_outerMode = Mode.SolidRed;
     } else if (m_shooter.getWheelEntranceSensorTripped()) {
-      m_mode = Mode.FlashYellow;
+      m_outerMode = Mode.FlashYellow;
     } else {
-      m_mode = Mode.SolidYellow;
+      m_outerMode = Mode.SolidYellow;
     }
 
-    if (m_mode.has_animation) {
-      m_candle.animate(m_mode.animation);
+    if (m_vision.seesAprilTag()) {
+      // m_innerMode = Mode.BlueFlow;
+      m_innerMode = Mode.SolidBlue;
     } else {
-      m_candle.animate(null);
-      m_candle.setLEDs(m_mode.r, m_mode.g, m_mode.b,
-      0, LEDConstants.START_INDEX, LEDConstants.LED_COUNT
+      m_innerMode = Mode.SolidRed;
+    }
+
+    if (m_outerMode.has_animation) {
+      m_candle.animate(m_outerMode.group1().animation, 0);
+      m_candle.animate(m_outerMode.group3().animation, 2);
+    } else {
+      m_candle.animate(null, 0);
+      m_candle.animate(null, 2);
+
+      m_candle.setLEDs(m_outerMode.r, m_outerMode.g, m_outerMode.b,
+        0, LEDConstants.GROUP_1_START, LEDConstants.COUNT_PER_GROUP
+      );
+      m_candle.setLEDs(m_outerMode.r, m_outerMode.g, m_outerMode.b,
+        0, LEDConstants.GROUP_3_START, LEDConstants.COUNT_PER_GROUP
+      );
+    }
+
+    if (m_innerMode.has_animation) {
+      m_candle.animate(m_innerMode.group2().animation, 1);
+    } else {
+      m_candle.animate(null, 1);
+
+      m_candle.setLEDs(m_innerMode.r, m_innerMode.g, m_innerMode.b,
+        0, LEDConstants.GROUP_2_START, LEDConstants.COUNT_PER_GROUP
       );
     }
   }
