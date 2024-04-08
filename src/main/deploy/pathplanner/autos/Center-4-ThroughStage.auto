@@ -30,20 +30,20 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "parallel",
           "data": {
             "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
+                }
+              },
               {
                 "type": "path",
                 "data": {
                   "pathName": "F-PieceCenterStart"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
               }
             ]
           }
@@ -91,15 +91,15 @@
           "data": {
             "commands": [
               {
-                "type": "path",
-                "data": {
-                  "pathName": "F-PieceCenter1"
-                }
-              },
-              {
                 "type": "named",
                 "data": {
                   "name": "PickUpPieceUntilSensor"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "CenterThroughStage"
                 }
               }
             ]
@@ -144,41 +144,28 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "parallel",
           "data": {
             "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "F-Piece1-3"
-                }
-              },
               {
                 "type": "named",
                 "data": {
                   "name": "PickUpPieceUntilSensor"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "AimThroughStage"
                 }
               }
             ]
           }
         },
         {
-          "type": "deadline",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Aim-Source"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              }
-            ]
+            "pathName": "Aim-Source"
           }
         },
         {

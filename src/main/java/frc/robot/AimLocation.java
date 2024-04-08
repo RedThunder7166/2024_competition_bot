@@ -37,7 +37,7 @@ public class AimLocation {
         80,//TODO Bring back to .7 once the shooter wheels are moved back
         0
     );
-    public static final double amp_percent = 0.14;
+    public static final double amp_percent = 0.13;
     public static final AimLocation Amp = new AimLocation("Amp",
         200.2, // 203.6
         0, // 12

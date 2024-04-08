@@ -58,8 +58,8 @@ public class Constants {
 
         public static final double MANUAL_DEADBAND = 0.25;
 
-        public static final double LEFT_BOTTOM_POSITION = 0;
-        public static final double RIGHT_BOTTOM_POSITION = 0;
+        public static final double LEFT_TOP_POSITION = 274;
+        public static final double RIGHT_TOP_POSITION = 278;
     }
     public static final class IntakeConstants {
         public static final int LOWER_MOTOR_ID = 13;

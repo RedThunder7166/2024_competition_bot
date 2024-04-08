@@ -130,7 +130,7 @@ public class VisionSubsystemLimelight extends SubsystemBase {
     final double k = -1.43668;
     final double x_zero = -18.0102;
     final double b = 150.065;
-    return distance * (m / (1 + Math.pow(Math.E, -k * (distance - x_zero)))) + b;
+    return (distance * (m / (1 + Math.pow(Math.E, -k * (distance - x_zero)))) + b) + 2;
   }
     
   public Optional<Double> calculateLauncherSpeakerAimPosition() {

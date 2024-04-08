@@ -12,6 +12,7 @@ import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -22,20 +23,33 @@ public class ClimberSubsystem extends SubsystemBase {
   // private final DigitalInput m_rightArmInput = new DigitalInput(ClimberConstants.RIGHT_ARM_LIMIT_SWITCH_ID);
   // private final DigitalInput m_leftArmInput = new DigitalInput(ClimberConstants.LEFT_ARM_LIMIT_SWITCH_ID);
 
-  private final CommandSwerveDrivetrain m_swerve;
-
   private DoubleSupplier m_manual_left_supplier;
   private DoubleSupplier m_manual_right_supplier;
 
   private boolean m_checksEnabled = false;
 
-  private final double m_output = 0;
-  private final DutyCycleOut m_leftRequest = new DutyCycleOut(m_output);
-  private final DutyCycleOut m_rightRequest = new DutyCycleOut(m_output);
+  private final DutyCycleOut m_leftRequest = new DutyCycleOut(0);
+  private final DutyCycleOut m_rightRequest = new DutyCycleOut(0);
 
-  public ClimberSubsystem(CommandSwerveDrivetrain swerve) {
-    m_swerve = swerve;
-       TalonFXConfiguration config = new TalonFXConfiguration();
+  private final PositionDutyCycle m_positionRequest = new PositionDutyCycle(0);
+
+  private static enum Position {
+    Low(0, 0),
+    High(ClimberConstants.LEFT_TOP_POSITION, ClimberConstants.RIGHT_TOP_POSITION);
+
+    public final double left_position;
+    public final double right_position;
+
+    Position(double left_position, double right_position) {
+      this.left_position = left_position;
+      this.right_position = right_position;
+    }
+  }
+  private Position m_position = Position.Low;
+  private boolean m_positionBased = false;
+
+  public ClimberSubsystem() {
+    TalonFXConfiguration config = new TalonFXConfiguration();
     // clockwise is true
     // counterclockwise is false
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -44,6 +58,8 @@ public class ClimberSubsystem extends SubsystemBase {
 
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 10;
+
+    config.Slot0.kP = 0.01;
 
     m_leftClimbMotor.getConfigurator().apply(config);
     m_rightClimbMotor.getConfigurator().apply(config);
@@ -54,6 +70,22 @@ public class ClimberSubsystem extends SubsystemBase {
     m_leftClimbMotor.setPosition(0);
     m_rightClimbMotor.setPosition(0);
     
+  }
+
+  public void positionLow() {
+    enablePositionBased();
+    m_position = Position.Low;
+  }
+  public void positionHigh() {
+    enablePositionBased();
+    m_position = Position.High;
+  }
+
+  public void enablePositionBased() {
+    m_positionBased = true;
+  }
+  public void disablePositionBased() {
+    m_positionBased = false;
   }
 
   public void enableChecks() {
@@ -70,44 +102,30 @@ public class ClimberSubsystem extends SubsystemBase {
     m_manual_right_supplier = supplier;
   }
 
-  // private double getRollDegrees() {
-  //   return Math.toDegrees(m_swerve.getRotation3d().getX());
-  // }
-
   private void driveArms(double left_output, double right_output) {
-    if (m_checksEnabled && left_output < 0 && m_leftClimbMotor.getPosition().getValueAsDouble() <= ClimberConstants.LEFT_BOTTOM_POSITION) {
-      m_leftClimbMotor.disable();
-    } else {
+    // if (m_checksEnabled && left_output < 0 && m_leftClimbMotor.getPosition().getValueAsDouble() <= 0) {
+    //   m_leftClimbMotor.disable();
+    // } else {
       m_leftClimbMotor.setControl(m_leftRequest.withOutput(left_output));
-    }
+    // }
     
-    if (m_checksEnabled && right_output < 0 && m_rightClimbMotor.getPosition().getValueAsDouble() <= ClimberConstants.RIGHT_BOTTOM_POSITION) {
-      m_rightClimbMotor.disable();
-    } else {
+    // if (m_checksEnabled && right_output < 0 && m_rightClimbMotor.getPosition().getValueAsDouble() <= 0) {
+    //   m_rightClimbMotor.disable();
+    // } else {
       m_rightClimbMotor.setControl(m_rightRequest.withOutput(right_output));
-    }
+    // }
   }
 
   @Override
   public void periodic() {
-    double left_output = m_manual_left_supplier.getAsDouble();
-    double right_output = m_manual_right_supplier.getAsDouble();
-    // // double right_output = left_output;
+    // if (m_positionBased) {
+    //   m_leftClimbMotor.setControl(m_positionRequest.withPosition(m_position.left_position));
+    //   m_rightClimbMotor.setControl(m_positionRequest.withPosition(m_position.right_position));
+    // } else {
+      double left_output = m_manual_left_supplier.getAsDouble();
+      double right_output = m_manual_right_supplier.getAsDouble();
 
-    // double roll = getRollDegrees();
-
-    // if (roll >= 5) {
-    //   // left_percent = (left_percent < 0) ? (left_percent + 0.5) : (left_percent - 0.5);
-    //   left_output /= 2;
-    // } else if (roll <= -5) {
-    //   right_output /= 2;
+      driveArms(left_output, right_output);
     // }
-
-    driveArms(left_output, right_output);
   }
-
-
-  // public void setOutput(double output) {
-  //   m_output = output;
-  // }
 }

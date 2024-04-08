@@ -31,7 +31,8 @@ public class JetEngineSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (AimLocation.getAimLocation() == AimLocation.Trap) {
+    final AimLocation aimLocation = AimLocation.getAimLocation();
+    if (aimLocation == AimLocation.Trap /*|| aimLocation == AimLocation.Amp*/) {
       m_motor.set(TalonSRXControlMode.PercentOutput, 1);
     } else {
       m_motor.set(TalonSRXControlMode.PercentOutput, 0);

@@ -75,7 +75,7 @@ public class RobotContainer {
   /*Initialize Subsystems */
   // private final VisionSubsystemPhoton m_vision = new VisionSubsystemPhoton(drivetrain, logger);
   private final VisionSubsystemLimelight m_vision = new VisionSubsystemLimelight();
-  private final ClimberSubsystem m_climber = new ClimberSubsystem(drivetrain);
+  private final ClimberSubsystem m_climber = new ClimberSubsystem();
   private final LauncherSubsystem m_launcher = new LauncherSubsystem(m_vision);
   private final JetEngineSubsystem m_jetEngine = new JetEngineSubsystem();
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
@@ -148,7 +148,7 @@ public class RobotContainer {
       new InstantCommand(m_indexer::enableForward),
       new WaitCommand(0.5), // TODO: to be decided
       new InstantCommand(m_shooter::enableFeeder),
-      new WaitCommand(0.4),
+      new WaitCommand(0.6),
       new InstantCommand(m_shooter::disableShooter),
       new InstantCommand(m_indexer::disableForward),
       new InstantCommand(m_shooter::disableFeeder),
@@ -211,14 +211,22 @@ public class RobotContainer {
   private void configureBindings() {
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
         drivetrain.applyRequest(() -> {
+          final double multiplier = AimLocation.getAimLocation() == AimLocation.Trap ? 0.3 : 1;
+          final double speed = MaxSpeed * multiplier;
+          final double angular = MaxAngularRate * multiplier;
+
           final Optional<Double> turn_power = m_vision.calculateTurnPower();
-          return drive.withVelocityX(xLimiter.calculate(((-driver_joystick.getLeftY()*MaxSpeed))))
+          return drive.withVelocityX(xLimiter.calculate(((-driver_joystick.getLeftY() * speed))))
           //  Math.pow(-driver_joystick.getLeftY() * MaxSpeed, 3)) // Drive forward with
                                                                                            // negative Y (forward)
-            .withVelocityY(yLimiter.calculate(((-driver_joystick.getLeftX()*MaxSpeed) )))
+            .withVelocityY(yLimiter.calculate(((-driver_joystick.getLeftX() * speed) )))
               //Math.pow(-driver_joystick.getLeftX() * MaxSpeed, 3)) // Drive left with negative X (left)
             // use vision to rotate the robot when automatically_rotate is true; otherwise use joystick (see above)
-            .withRotationalRate((automatically_rotate & turn_power.isPresent()) ? turn_power.get() * MaxAngularRate : (-driver_joystick.getRightX() * MaxAngularRate));// Drive counterclockwise with negative X (left)
+            .withRotationalRate((
+              (automatically_rotate & turn_power.isPresent()) ? 
+                turn_power.get() : (-driver_joystick.getRightX())
+              ) * angular
+            );// Drive counterclockwise with negative X (left)
         }
       ));
     driver_joystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
@@ -245,33 +253,48 @@ public class RobotContainer {
     // }));
 
     
-    driver_joystick.leftTrigger().whileTrue(Commands.startEnd(() -> {
-      m_climber.disableChecks();
-      left_climber_up = true;
-    }, () -> {
-      left_climber_up = false;
-    }, m_climber));
-    driver_joystick.leftBumper().whileTrue(Commands.startEnd(() -> {
-      m_climber.disableChecks();
+    // driver_joystick.leftTrigger().whileTrue(Commands.startEnd(() -> {
+    //   m_climber.disablePositionBased();
+    //   m_climber.disableChecks();
+    //   left_climber_up = true;
+    // }, () -> {
+    //   left_climber_up = false;
+    // }, m_climber));
+    // driver_joystick.leftBumper().whileTrue(Commands.startEnd(() -> {
+    //   m_climber.disablePositionBased();
+    //   m_climber.disableChecks();
+    //   left_climber_down = true;
+    // }, () -> {
+    //   left_climber_down = false;
+    // }, m_climber));
+
+    // driver_joystick.rightTrigger().whileTrue(Commands.startEnd(() -> {
+    //   m_climber.disablePositionBased();
+    //   m_climber.disableChecks();
+    //   right_climber_up = true;
+    // }, () -> {
+    //   right_climber_up = false;
+    // }, m_climber));
+    // driver_joystick.rightBumper().whileTrue(Commands.startEnd(() -> {
+    //   m_climber.disablePositionBased();
+    //   m_climber.disableChecks();
+    //   right_climber_down = true;
+    // }, () -> {
+    //   right_climber_down = false;
+    // }, m_climber));
+
+    operator_joystick.back().whileTrue(Commands.startEnd(() -> {
       left_climber_down = true;
     }, () -> {
       left_climber_down = false;
-    }, m_climber));
-
-    driver_joystick.rightTrigger().whileTrue(Commands.startEnd(() -> {
-      m_climber.disableChecks();
-      right_climber_up = true;
-    }, () -> {
-      right_climber_up = false;
-    }, m_climber));
-    driver_joystick.rightBumper().whileTrue(Commands.startEnd(() -> {
-      m_climber.disableChecks();
+    }));
+    operator_joystick.start().whileTrue(Commands.startEnd(() -> {
       right_climber_down = true;
     }, () -> {
       right_climber_down = false;
-    }, m_climber));
+    }));
 
-    driver_joystick.y().whileTrue(Commands.startEnd(() -> {
+    operator_joystick.y().whileTrue(Commands.startEnd(() -> {
       m_climber.enableChecks();
       left_climber_up = true;
       right_climber_up = true;
@@ -279,7 +302,7 @@ public class RobotContainer {
       left_climber_up = false;
       right_climber_up = false;
     }, m_climber));
-    driver_joystick.x().whileTrue(Commands.startEnd(() -> {
+    operator_joystick.x().whileTrue(Commands.startEnd(() -> {
       m_climber.enableChecks();
       left_climber_down = true;
       right_climber_down = true;
@@ -287,16 +310,35 @@ public class RobotContainer {
       left_climber_down = false;
       right_climber_down = false;
     }, m_climber));
+
+    // driver_joystick.povUp().onTrue(new InstantCommand(() -> {
+    //   m_climber.positionHigh();
+    // }, m_climber));
+    // driver_joystick.povDown().onTrue(new InstantCommand(() -> {
+    //   m_climber.positionLow();
+    // }, m_climber));
+
+    // m_climber.configureManualMode(() -> driver_joystick.getRightY()); //left arm
+
+    final double climber_right_manual_mode_speed = 1;
+    m_climber.configureLeftManualMode( //right arm
+      () -> left_climber_up ? climber_right_manual_mode_speed : 
+        (left_climber_down ? -climber_right_manual_mode_speed : 0)
+    );
+    m_climber.configureRightManualMode( //right arm
+      () -> right_climber_up ? climber_right_manual_mode_speed : 
+        (right_climber_down ? -climber_right_manual_mode_speed : 0)
+    );
     
     operator_joystick.rightBumper().whileTrue(Commands.startEnd(() -> {
       m_shooter.enableFeeder();
       m_intake.enableForward();
       m_indexer.enableForward();
     }, () -> {
-    m_intake.disableForward();
-    m_indexer.disableForward();
-    m_shooter.disableFeeder();
-  }, m_intake, m_indexer, m_shooter));
+      m_intake.disableForward();
+      m_indexer.disableForward();
+      m_shooter.disableFeeder();
+    }, m_intake, m_indexer, m_shooter));
     
     operator_joystick.leftTrigger().onTrue(m_shooter.m_enableShooterReverseCommand);
     operator_joystick.leftTrigger().onFalse(m_shooter.m_disableShooterReverseCommand);
@@ -316,9 +358,7 @@ public class RobotContainer {
     }, m_shooter, m_intake, m_indexer));
 
    
-   
-
-    operator_joystick.start().onTrue(m_launcher.m_enableAimManualModeCommand);
+    operator_joystick.povLeft().onTrue(m_launcher.m_enableAimManualModeCommand);
     m_launcher.configureManualMode(operator_joystick::getLeftY);
 
     operator_joystick.povUp().onTrue(new InstantCommand(() -> {
@@ -333,10 +373,10 @@ public class RobotContainer {
       m_launcher.disableManualMode();
       AimLocation.setAimLocation(AimLocation.Trap);
     }, m_shooter, m_launcher));
-    operator_joystick.povLeft().onTrue(new InstantCommand(() -> {
-      m_launcher.disableManualMode();
-      AimLocation.setAimLocation(AimLocation.Speaker);
-    }, m_shooter, m_launcher));
+    // operator_joystick.povLeft().onTrue(new InstantCommand(() -> {
+    //   m_launcher.disableManualMode();
+    //   AimLocation.setAimLocation(AimLocation.Speaker);
+    // }, m_shooter, m_launcher));
 
     operator_joystick.a().onTrue(new InstantCommand(() -> {
       m_launcher.disableManualMode();
@@ -347,19 +387,6 @@ public class RobotContainer {
       m_launcher.disableManualMode();
       AimLocation.setAimLocation(AimLocation.AutoTarget);
     }, m_shooter, m_launcher));
-
-    // m_climber.configureManualMode(() -> driver_joystick.getRightY()); //left arm
-
-    final double climber_right_manual_mode_speed = 1;
-    m_climber.configureLeftManualMode( //right arm
-      () -> left_climber_up ? climber_right_manual_mode_speed : 
-        (left_climber_down ? -climber_right_manual_mode_speed : 0)
-    );
-    m_climber.configureRightManualMode( //right arm
-      () -> right_climber_up ? climber_right_manual_mode_speed : 
-        (right_climber_down ? -climber_right_manual_mode_speed : 0)
-    );
-    
   }
  
   {
