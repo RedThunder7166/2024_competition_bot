@@ -6,11 +6,23 @@ package frc.robot.subsystems;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Optional;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -20,11 +32,14 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.AllianceColor;
 import frc.robot.Constants.LauncherConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.LimelightHelpers;
+import frc.robot.ReallyDumbAllianceColor;
 
 public class VisionSubsystemLimelight extends SubsystemBase {
   private AprilTagFieldLayout m_aprilTagFieldLayout = null;
@@ -46,6 +61,8 @@ public class VisionSubsystemLimelight extends SubsystemBase {
   private static final double TURN_D = 0.003;
   private final PIDController turnController = new PIDController(TURN_P, TURN_I, TURN_D);
 
+  private final CommandSwerveDrivetrain m_swerve;
+
   private final ShuffleboardTab m_driverStationTab = Shuffleboard.getTab("DriverStation");
   private boolean m_hasValidTurnPowerOutput = false;
 
@@ -53,7 +70,9 @@ public class VisionSubsystemLimelight extends SubsystemBase {
   // private final GenericEntry m_turnIEntry = m_driverStationTab.add("TurnI", 0).getEntry();
   // private final GenericEntry m_turnDEntry = m_driverStationTab.add("TurnD", 0).getEntry();
 
-  public VisionSubsystemLimelight() {
+  public VisionSubsystemLimelight(CommandSwerveDrivetrain swerve) {
+    m_swerve = swerve;
+
     m_driverStationTab.addBoolean("Auto Turn Valid", () -> m_hasValidTurnPowerOutput);
 
     try {
@@ -73,6 +92,19 @@ public class VisionSubsystemLimelight extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
+    LimelightHelpers.SetRobotOrientation(
+      "",
+      m_swerve.getState().Pose.getRotation().getDegrees(),
+      0, 0, 0, 0, 0
+    );
+    LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
+    if(Math.abs(m_swerve.getPigeon2().getRate()) <= 720 && mt2.tagCount > 0) {
+      m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(.6,.6,9999999));
+      m_swerve.addVisionMeasurement(
+        mt2.pose,
+        mt2.timestampSeconds);
+    }
   }
 
   public void setPriorityID(int id) {
@@ -155,5 +187,67 @@ public class VisionSubsystemLimelight extends SubsystemBase {
       return Optional.of(position);
     }
     return Optional.empty();
+  }
+
+  private Command ampPathCommand;
+
+  public static final class TagPathCommand extends Command{
+    private final int m_tag;
+    private final VisionSubsystemLimelight m_vision;
+    private boolean m_hasSeenTag = false;
+    private Command m_pathCommand;
+
+    public TagPathCommand(VisionSubsystemLimelight vision, int tag) {
+      m_vision = vision;
+      m_tag = tag;
+    }
+
+    @Override
+    public void initialize() {
+      m_hasSeenTag = false;
+      m_vision.setPriorityID(m_tag);
+    }
+
+    @Override
+    public void execute() {
+      if (m_hasSeenTag) {
+        // TODO: make this a transform3d that you add to plus that you give to the constructor
+        final double degreeOffset = 180;    // FIXME: this needs to either be 0 or 180. might depend on color
+        double translationOffset = 1;       // FIXME: in meters, this is how far our desired pose is from the amp tag
+        translationOffset *= -1;            // FIXME: if this is dependant on color, then it depends on color; otherwise, it either will need to be here or not
+
+        final List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(
+          m_vision.m_aprilTags.get(m_tag).pose.plus(new Transform3d(translationOffset, 0, 0, new Rotation3d(0,0,0))).toPose2d()
+          .rotateBy(Rotation2d.fromDegrees(degreeOffset))
+        );
+
+        m_pathCommand = AutoBuilder.followPath(new PathPlannerPath(
+          bezierPoints,
+          new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI),
+          new GoalEndState(0.0, Rotation2d.fromDegrees(-90))
+        ));
+        m_pathCommand.schedule();
+      } else {
+        m_hasSeenTag = m_vision.seesAprilTag();
+      }
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+      if (m_pathCommand.isScheduled()) {
+        m_pathCommand.cancel();
+      }
+    }
+
+    @Override
+    public boolean isFinished() {
+      return m_pathCommand.isFinished();
+    }
+  }
+
+  public Command getAmpPathCommand() {
+    final int tag = ReallyDumbAllianceColor.getAlliance() == Alliance.Red ? AllianceColor.RED_AMP : AllianceColor.BLUE_AMP;
+
+    return new TagPathCommand(this, tag);
   }
 }

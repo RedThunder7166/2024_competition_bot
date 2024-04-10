@@ -38,7 +38,6 @@ public class ShooterSubsystem extends SubsystemBase {
   
   private final DigitalInput m_FeederStopSensor = new DigitalInput(ShooterConstants.FEEDER_SENSOR_ID);
   private final DigitalInput m_wheelExitSensor = new DigitalInput(ShooterConstants.WHEEL_EXIT_SENSOR_ID);
-  private final DigitalInput m_Indexer = new DigitalInput(ShooterConstants.Indexer_Sensor_ID);
 
   // private final DutyCycleOut m_shooterRequest = new DutyCycleOut(AimLocation.getAimLocation().shooter_speed);
   private final VelocityDutyCycle m_shooterRequest = new VelocityDutyCycle(AimLocation.getAimLocation().shooter_speed_rps);
@@ -52,9 +51,9 @@ public class ShooterSubsystem extends SubsystemBase {
   private boolean m_shooterEnabled = false;
   private boolean m_shooterReverseEnabled = false;
   
-  private boolean m_wheelEntranceSensorIsTripped = false;
   private boolean m_wheelExitSensorIsTripped = false;
   private boolean m_FeederStopIsTripped = false;
+
   private boolean m_feederEnabled = false;
   private boolean m_feederReverseEnabled = false;
   
@@ -124,15 +123,14 @@ public class ShooterSubsystem extends SubsystemBase {
 
     m_bottomMotor.setControl(new Follower(m_topMotor.getDeviceID(), false));
 
-    m_sensorTab.addBoolean("ShooterWheelEntrance", () -> m_wheelEntranceSensorIsTripped);
     m_sensorTab.addBoolean("ShooterWheelExit", () -> m_wheelExitSensorIsTripped);
+    m_sensorTab.addBoolean("ShooterFeederStop", this::getFeederStopTripped);
 
     m_driverStationTab.addBoolean("Shooter Up To Speed", this::isUpToSpeed);
   }
   
   @Override
   public void periodic() {
-    m_wheelEntranceSensorIsTripped = Utils.isAllenBradleyTripped(m_Indexer);//This needs to be renamed
     m_wheelExitSensorIsTripped = Utils.isAllenBradleyTripped(m_wheelExitSensor);
     m_FeederStopIsTripped = Utils.isAllenBradleyTripped(m_FeederStopSensor);
 
@@ -179,7 +177,7 @@ public class ShooterSubsystem extends SubsystemBase {
       }
     }
   
-    if (aimLocation == AimLocation.Loading && m_FeederStopIsTripped) {
+    if (DriverStation.isTeleop() && aimLocation == AimLocation.Loading && m_FeederStopIsTripped) {
       m_feederMotor.setControl(m_feederRequestSlowBack);
     } else {
       if (m_feederReverseEnabled) {
@@ -196,14 +194,10 @@ public class ShooterSubsystem extends SubsystemBase {
     return m_shooterIsUpToSpeed;
   }
 
-  public boolean getWheelEntranceSensorTripped() {
-    return m_wheelEntranceSensorIsTripped;
-  }
-
   public boolean getWheelExitSensorTripped() {
     return m_wheelExitSensorIsTripped;
   }
-    public boolean getFeederStopTripped() {
+  public boolean getFeederStopTripped() {
     return m_FeederStopIsTripped;
   }
 

@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.AimLocation;
 import frc.robot.Utils;
 import frc.robot.Constants.IndexerConstants;
 
@@ -26,12 +27,11 @@ public class IndexerSubsystem extends SubsystemBase {
   private final DutyCycleOut m_forwardControl = new DutyCycleOut(speed);
   private final DutyCycleOut m_reverseControl = new DutyCycleOut(-speed);
 
-  // private final DigitalInput m_entranceSensor = new DigitalInput(IndexerConstants.ENTRANCE_SENSOR_ID);
+  private final DigitalInput m_sensor = new DigitalInput(IndexerConstants.SENSOR_ID);
 
   private boolean m_forwardEnabled = false;
   private boolean m_reverseEnabled = false;
 
-  // private boolean m_entranceSensorIsTripped = false;
   private boolean m_sensorIsTripped = false;
 
   private final ShooterSubsystem m_shooter;
@@ -62,10 +62,15 @@ public class IndexerSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // m_entranceSensorIsTripped = Utils.isAllenBradleyTripped(m_entranceSensor);
+    m_sensorIsTripped = Utils.isAllenBradleyTripped(m_sensor);
 
     if (m_forwardEnabled) {
-      m_motor.setControl(m_forwardControl);
+      // ANY CHANGES BELOW NEED TO BE REFLECTED IN THE SUBSEQUENT INTAKE LOGIC
+      if (AimLocation.getAimLocation() != AimLocation.Loading && m_sensorIsTripped) {
+        m_motor.disable();
+      } else {
+        m_motor.setControl(m_forwardControl);
+      }
     } else if (m_reverseEnabled) {
       m_motor.setControl(m_reverseControl);
     } else {

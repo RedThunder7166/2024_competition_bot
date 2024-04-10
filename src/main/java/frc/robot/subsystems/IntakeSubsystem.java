@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Utils;
+import frc.robot.AimLocation;
 import frc.robot.Constants.IntakeConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
@@ -33,8 +34,10 @@ public class IntakeSubsystem extends SubsystemBase {
   private boolean m_entranceSensorIsTripped = false;
   private final ShuffleboardTab m_sensorTab = Shuffleboard.getTab("Sensors");
 
+  private final IndexerSubsystem m_indexer;
 
-  public IntakeSubsystem() {
+  public IntakeSubsystem(IndexerSubsystem indexer) {
+    m_indexer = indexer;
     // m_upperMotor.setNeutralMode(NeutralModeValue.Brake);
     TalonFXConfiguration config = new TalonFXConfiguration();
     
@@ -63,7 +66,12 @@ public class IntakeSubsystem extends SubsystemBase {
     // m_exitSensorIsTripped = Utils.isAllenBradleyTripped(m_exitSensor);
 
     if (m_forwardEnabled) {
-      m_upperMotor.setControl(m_forwardControl);
+      // ANY CHANGES BELOW NEED TO BE REFLECTED IN THE SUBSEQUENT INDEXER LOGIC
+      if (AimLocation.getAimLocation() != AimLocation.Loading && m_indexer.getSensorTripped()) {
+        m_upperMotor.disable();
+      } else {
+        m_upperMotor.setControl(m_forwardControl);
+      }
     } else if (m_reverseEnabled) {
       m_upperMotor.setControl(m_reverseControl);
     } else {

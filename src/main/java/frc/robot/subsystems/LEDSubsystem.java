@@ -153,11 +153,9 @@ public class LEDSubsystem extends SubsystemBase {
       m_outerMode = Mode.FlashOrange;
     } else if (m_intake.getEntranceSensorTripped()) {
       m_outerMode = Mode.FlashGreen;
-    } else if (m_indexer.getSensorTripped()) {
-      m_outerMode = Mode.SolidGreen;
     } else if (m_shooter.getWheelExitSensorTripped()) { 
       m_outerMode = Mode.SolidRed;
-    } else if (m_shooter.getWheelEntranceSensorTripped()) {
+    } else if (m_indexer.getSensorTripped()) {
       m_outerMode = Mode.FlashYellow;
     } else {
       m_outerMode = Mode.SolidYellow;

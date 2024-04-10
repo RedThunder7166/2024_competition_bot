@@ -11,7 +11,7 @@ import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
-public class PickUpPieceUntilSensorWithTimeout extends Command {
+public class CheckSensor extends Command {
   private final IntakeSubsystem m_intake;
   private final IndexerSubsystem m_indexer;
   private final ShooterSubsystem m_shooter;
@@ -24,7 +24,7 @@ public class PickUpPieceUntilSensorWithTimeout extends Command {
   private static final double END_TIME = FORWARD_START_TIME + FORWARD_STOP_TIME;
 
   private final Timer m_timer = new Timer();
-  public PickUpPieceUntilSensorWithTimeout(IntakeSubsystem intake, IndexerSubsystem indexer, ShooterSubsystem shooter) {
+  public CheckSensor(IntakeSubsystem intake, IndexerSubsystem indexer, ShooterSubsystem shooter) {
     m_intake = intake;
     m_indexer = indexer;
     m_shooter = shooter;

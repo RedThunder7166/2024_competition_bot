@@ -4,13 +4,21 @@
 
 package frc.robot;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
@@ -39,6 +47,7 @@ import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystemLimelight;
 import frc.robot.subsystems.VisionSubsystemPhoton;
+import us.hebi.quickbuf.Utf8String;
 
 public class RobotContainer {
   private double MaxSpeed = 6; // 6 meters per second desired top speed
@@ -49,13 +58,12 @@ public class RobotContainer {
   private final CommandXboxController driver_joystick = new CommandXboxController(ControllerConstants.DRIVER_PORT); // My joystick
   private final CommandXboxController operator_joystick = new CommandXboxController(ControllerConstants.OPERATOR_PORT);
 
-  private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
+  private final CommandSwerveDrivetrain m_swerve = TunerConstants.DriveTrain; // My drivetrain
   
 
 /*Slew Rate limiting, Limits Acceleration of Directions */
-  private final SlewRateLimiter xLimiter = new SlewRateLimiter(15);
-
-  private final SlewRateLimiter yLimiter = new SlewRateLimiter(15);
+  private final SlewRateLimiter xLimiter = new SlewRateLimiter(20); // 15
+  private final SlewRateLimiter yLimiter = new SlewRateLimiter(20);
 // private final SlewRateLimiter rotLimiter = new SlewRateLimiter(.5);
 
   private final Telemetry logger = new Telemetry(MaxSpeed);
@@ -74,13 +82,13 @@ public class RobotContainer {
 
   /*Initialize Subsystems */
   // private final VisionSubsystemPhoton m_vision = new VisionSubsystemPhoton(drivetrain, logger);
-  private final VisionSubsystemLimelight m_vision = new VisionSubsystemLimelight();
+  private final VisionSubsystemLimelight m_vision = new VisionSubsystemLimelight(m_swerve);
   private final ClimberSubsystem m_climber = new ClimberSubsystem();
   private final LauncherSubsystem m_launcher = new LauncherSubsystem(m_vision);
   private final JetEngineSubsystem m_jetEngine = new JetEngineSubsystem();
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
   private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_shooter);
-  private final IntakeSubsystem m_intake = new IntakeSubsystem();
+  private final IntakeSubsystem m_intake = new IntakeSubsystem(m_indexer);
   private final LEDSubsystem m_led = new LEDSubsystem(m_intake, m_indexer, m_shooter, m_vision); 
   // private final DeflectorSubsystem m_deflector = new DeflectorSubsystem(m_shooter);
   
@@ -109,6 +117,23 @@ public class RobotContainer {
   }, m_intake, m_indexer, m_shooter);
 
   private final SendableChooser<Alliance> m_allianceChooser = new SendableChooser<>();
+
+  
+  private final BooleanSupplier shouldStopShooterPrep = () -> 
+    !m_shooter.getFeederStopTripped() && AimLocation.getAimLocation() != AimLocation.AutoTarget;
+
+  private Command getShooterPrep() {
+    return new FunctionalCommand(() -> {
+      // System.out.println("init " + m_shooter.getFeederStopTripped() + " " + AimLocation.getAimLocation().name);
+      if (!shouldStopShooterPrep.getAsBoolean()){
+        System.out.println("passed check");
+        m_shooter.enableFeederReverse();
+      }
+    }, () -> {}, (interupt) -> {
+      System.out.println("end");
+      m_shooter.disableFeederReverse();
+    }, shouldStopShooterPrep::getAsBoolean);
+  }
    
   {
     // ...
@@ -146,42 +171,55 @@ public class RobotContainer {
     NamedCommands.registerCommand("Shoot", new SequentialCommandGroup(
       new InstantCommand(m_shooter::enableShooter),
       new InstantCommand(m_indexer::enableForward),
-      new WaitCommand(0.5), // TODO: to be decided
+      new WaitCommand(0.6), // TODO: to be decided
       new InstantCommand(m_shooter::enableFeeder),
-      new WaitCommand(0.6),
+      new WaitCommand(0.5),
       new InstantCommand(m_shooter::disableShooter),
       new InstantCommand(m_indexer::disableForward),
       new InstantCommand(m_shooter::disableFeeder),
-      new InstantCommand(()->AimLocation.setAimLocation(AimLocation.Loading))
+      new InstantCommand(() -> AimLocation.setAimLocation(AimLocation.Loading))
     ));
-
-
-
  
-    NamedCommands.registerCommand("AimFromSubwoofer", new InstantCommand(() -> {
+    NamedCommands.registerCommand("AimFromSubwoofer", getShooterPrep().andThen(new InstantCommand(() -> {
       AimLocation.setAimLocation(AimLocation.Subwoofer);
-    }));
+    })));
     NamedCommands.registerCommand("AimFromLoading", new InstantCommand(()-> {
       AimLocation.setAimLocation(AimLocation.Loading);
     }));
-    NamedCommands.registerCommand("AimFromAmp", new InstantCommand(()-> {
+    NamedCommands.registerCommand("AimFromAmp", getShooterPrep().andThen(new InstantCommand(() -> {
       AimLocation.setAimLocation(AimLocation.Amp);
-    }));
-    NamedCommands.registerCommand("AimFromTrap", new InstantCommand(()-> {
+    })));
+    NamedCommands.registerCommand("AimFromTrap", getShooterPrep().andThen(new InstantCommand(() -> {
       AimLocation.setAimLocation(AimLocation.Trap);
-    }));
-     NamedCommands.registerCommand("AutoAim", new InstantCommand(()-> {
+    })));
+     NamedCommands.registerCommand("AutoAim", getShooterPrep().andThen(new InstantCommand(() -> {
       AimLocation.setAimLocation(AimLocation.AutoTarget);
-    }));
+    })));
+
+    // NamedCommands.registerCommand("AimFromSubwoofer", new InstantCommand(() -> {
+    //   AimLocation.setAimLocation(AimLocation.Subwoofer);
+    // }));
+    // NamedCommands.registerCommand("AimFromLoading", new InstantCommand(()-> {
+    //   AimLocation.setAimLocation(AimLocation.Loading);
+    // }));
+    // NamedCommands.registerCommand("AimFromAmp", new InstantCommand(() -> {
+    //   AimLocation.setAimLocation(AimLocation.Amp);
+    // }));
+    // NamedCommands.registerCommand("AimFromTrap", new InstantCommand(() -> {
+    //   AimLocation.setAimLocation(AimLocation.Trap);
+    // }));
+    //  NamedCommands.registerCommand("AutoAim", new InstantCommand(() -> {
+    //   AimLocation.setAimLocation(AimLocation.AutoTarget);
+    // }));
 
     NamedCommands.registerCommand("LineUp", Commands.runEnd(() -> {
       final Optional<Double> turn_power = m_vision.calculateTurnPower();
-      drivetrain.setControl(drive
+      m_swerve.setControl(drive
                           .withVelocityX(0)
                           .withVelocityY(0)
                           .withRotationalRate((turn_power.orElse(0d) * MaxAngularRate)));
     }, () -> {
-      drivetrain.setControl(drive.withRotationalRate(0));
+      m_swerve.setControl(drive.withRotationalRate(0));
     }));
     
    NamedCommands.registerCommand("PickUpPieceUntilSensor", new FunctionalCommand(() -> {
@@ -194,9 +232,11 @@ public class RobotContainer {
     m_shooter.disableFeeder();
    }, m_shooter::getFeederStopTripped, m_intake, m_indexer, m_shooter));
 
-   NamedCommands.registerCommand("PickUpPieceUntilSensorWithTimeout", 
+
+    NamedCommands.registerCommand("PickUpPieceUntilSensorWithTimeout", 
     new PickUpPieceUntilSensorWithTimeout(m_intake, m_indexer, m_shooter)
    );
+    
   }
 
   private boolean left_climber_up = false;
@@ -209,17 +249,19 @@ public class RobotContainer {
   private boolean automatically_rotate = false;
 
   private void configureBindings() {
-    drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(() -> {
+    m_swerve.setDefaultCommand( // Drivetrain will execute this command periodically
+        m_swerve.applyRequest(() -> {
           final double multiplier = AimLocation.getAimLocation() == AimLocation.Trap ? 0.3 : 1;
           final double speed = MaxSpeed * multiplier;
           final double angular = MaxAngularRate * multiplier;
 
           final Optional<Double> turn_power = m_vision.calculateTurnPower();
-          return drive.withVelocityX(xLimiter.calculate(((-driver_joystick.getLeftY() * speed))))
+          // return drive.withVelocityX(xLimiter.calculate(((-driver_joystick.getLeftY() * speed))))
+          return drive.withVelocityX(-driver_joystick.getLeftY() * speed)
           //  Math.pow(-driver_joystick.getLeftY() * MaxSpeed, 3)) // Drive forward with
                                                                                            // negative Y (forward)
-            .withVelocityY(yLimiter.calculate(((-driver_joystick.getLeftX() * speed) )))
+            // .withVelocityY(yLimiter.calculate(((-driver_joystick.getLeftX() * speed))))
+            .withVelocityY(-driver_joystick.getLeftX() * speed)
               //Math.pow(-driver_joystick.getLeftX() * MaxSpeed, 3)) // Drive left with negative X (left)
             // use vision to rotate the robot when automatically_rotate is true; otherwise use joystick (see above)
             .withRotationalRate((
@@ -229,7 +271,7 @@ public class RobotContainer {
             );// Drive counterclockwise with negative X (left)
         }
       ));
-    driver_joystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
+    driver_joystick.start().onTrue(m_swerve.runOnce(() -> m_swerve.seedFieldRelative()));
     
     driver_joystick.a().whileTrue(Commands.startEnd(() -> {
       automatically_rotate = true;
@@ -237,10 +279,12 @@ public class RobotContainer {
       automatically_rotate = false;
     }));
 
-    driver_joystick.b().whileTrue(drivetrain.applyRequest(() -> m_robotCentricControl
+    driver_joystick.b().whileTrue(m_swerve.applyRequest(() -> m_robotCentricControl
       .withVelocityX(0.3 * MaxSpeed)
       .withRotationalRate(-driver_joystick.getRightX() * MaxAngularRate)// Drive counterclockwise with negative X (left)
     ));
+
+    driver_joystick.x().whileTrue(m_vision.getAmpPathCommand());
 
     // driver_joystick.x().whileTrue(new FunctionalCommand(() -> {
     //   m_vision.setPriorityID(ReallyDumbAllianceColor.getAlliance() == Alliance.Red ? AllianceColor.RED_AMP : AllianceColor.BLUE_AMP);
@@ -364,29 +408,29 @@ public class RobotContainer {
     operator_joystick.povUp().onTrue(new InstantCommand(() -> {
       m_launcher.disableManualMode();
       AimLocation.setAimLocation(AimLocation.Amp);
-    }, m_shooter, m_launcher));
+    }, m_launcher));
     operator_joystick.povRight().onTrue(new InstantCommand(() -> {
       m_launcher.disableManualMode();
       AimLocation.setAimLocation(AimLocation.Subwoofer);
-    }, m_shooter, m_launcher));
+    }, m_launcher));
     operator_joystick.povDown().onTrue(new InstantCommand(() -> {
       m_launcher.disableManualMode();
       AimLocation.setAimLocation(AimLocation.Trap);
-    }, m_shooter, m_launcher));
+    }, m_launcher));
     // operator_joystick.povLeft().onTrue(new InstantCommand(() -> {
     //   m_launcher.disableManualMode();
     //   AimLocation.setAimLocation(AimLocation.Speaker);
-    // }, m_shooter, m_launcher));
+    // }, m_launcher));
 
     operator_joystick.a().onTrue(new InstantCommand(() -> {
       m_launcher.disableManualMode();
       AimLocation.setAimLocation(AimLocation.Loading);
-    }, m_shooter, m_launcher));
+    }, m_launcher));
 
     operator_joystick.b().onTrue(new InstantCommand(() -> {
       m_launcher.disableManualMode();
       AimLocation.setAimLocation(AimLocation.AutoTarget);
-    }, m_shooter, m_launcher));
+    }, m_launcher));
   }
  
   {
@@ -436,7 +480,7 @@ public class RobotContainer {
   }
 
   public void autonomousExit() {
-    drivetrain.autoExit();
+    m_swerve.autoExit();
   }
 
   public Command getAutonomousCommand() {

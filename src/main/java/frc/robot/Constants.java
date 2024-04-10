@@ -33,8 +33,6 @@ public class Constants {
         public static final double AIM_TO_LOADING_DELAY_SECONDS = 0.5;
         public static final double AMP_TO_LOADING_DELAY_SECONDS = 1;
 
-
-        public static final int Indexer_Sensor_ID = 2;
         public static final int WHEEL_EXIT_SENSOR_ID = 1;
         public static final int FEEDER_SENSOR_ID = 0;
 
@@ -50,7 +48,7 @@ public class Constants {
         public static final int MOTOR_ID = 17;
         // public static final int TARGET_VELOCITY = 80; 
 
-        // public static final int SENSOR_ID = 2;
+        public static final int SENSOR_ID = 2;
     }
     public static final class ClimberConstants {
         public static final int LEFT_CLIMB_MOTOR_ID = 7;

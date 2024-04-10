@@ -34,14 +34,13 @@ public class LauncherSubsystem extends SubsystemBase {
   private boolean m_wantsToLoad = false;
 
   private final PIDController m_aimPIDController = new PIDController(
-    0.1,
+    0.06,
     0,
     0
   );
   private final double m_aimMaxSpeed = 1.5;
 
   private boolean m_manualAimEnabled = false;
-  // private AimPosition m_aimTargetPosition = AimPosition.Loading;
 
   private final VisionSubsystemLimelight m_vision;
   private DoubleSupplier m_left_stick_supplier;
@@ -91,7 +90,7 @@ public class LauncherSubsystem extends SubsystemBase {
     // double value = m_aimCANCoder.getAbsolutePosition().getValueAsDouble();
     // value = Math.abs(LauncherConstants.AIM_CANCODER_LOADING_POSITION - value);
     // m_isAtLoadingPosition = value <= LauncherConstants.ALLOWABLE_CANCODER_ERROR;
-
+  
     if (m_manualAimEnabled) {
       manualAim(m_left_stick_supplier.getAsDouble());
     } else {
@@ -125,7 +124,7 @@ public class LauncherSubsystem extends SubsystemBase {
   }, this);
   public void disableManualMode() {
     m_manualAimEnabled = false;
-  }
+  } 
 
   public void teleopInit() {
 
