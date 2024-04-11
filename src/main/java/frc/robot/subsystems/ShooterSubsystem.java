@@ -119,7 +119,7 @@ public class ShooterSubsystem extends SubsystemBase {
     feeder_configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     top_configs.CurrentLimits.SupplyCurrentLimitEnable = true;
-    top_configs.CurrentLimits.SupplyCurrentLimit = 80;
+    top_configs.CurrentLimits.SupplyCurrentLimit = 60;
 
     feeder_configs.CurrentLimits.SupplyCurrentLimitEnable = true;
     feeder_configs.CurrentLimits.SupplyCurrentLimit = 50;
@@ -138,7 +138,7 @@ public class ShooterSubsystem extends SubsystemBase {
   
   @Override
   public void periodic() {
-    m_wheelExitSensorIsTripped = Utils.isAllenBradleyTripped(m_wheelExitSensor);
+    m_wheelExitSensorIsTripped = Utils.isAllenBradleyTripped(m_wheelExitSensor); 
     m_FeederStopIsTripped = Utils.isAllenBradleyTripped(m_FeederStopSensor);
 
     m_shooterIsUpToSpeed = m_topMotor.getVelocity().getValueAsDouble() >= ShooterConstants.SHOOTER_UP_TO_SPEED_THRESHOLD;
@@ -181,6 +181,7 @@ public class ShooterSubsystem extends SubsystemBase {
         if (aimLocation == AimLocation.Amp) {
           m_topMotor.setControl(m_shooterPercentRequest);
         } else {
+
           m_topMotor.setControl(m_shooterRequest.withVelocity(aimLocation.shooter_speed_rps));
         }
       } else if (m_shooterReverseEnabled) {

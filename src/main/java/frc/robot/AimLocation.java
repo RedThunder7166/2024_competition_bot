@@ -29,7 +29,7 @@ public class AimLocation {
 
     public static final AimLocation Loading = new AimLocation("Loading",
         163.56, // 847.5
-        75, // this modified speaker speed
+        80, // this modified speaker speed
         0
     );
     public static final AimLocation AutoTarget = new AimLocation("AutoTarget",

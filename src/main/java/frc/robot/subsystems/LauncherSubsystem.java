@@ -34,7 +34,7 @@ public class LauncherSubsystem extends SubsystemBase {
   private boolean m_wantsToLoad = false;
 
   private final PIDController m_aimPIDController = new PIDController(
-    0.06,
+    0.1,
     0,
     0
   );

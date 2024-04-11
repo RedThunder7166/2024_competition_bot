@@ -37,4 +37,20 @@ public final class Utils {
     public static boolean isAllenBradleyTripped(DigitalInput allenBradley) {
         return !allenBradley.get();
     }
+
+    public static double distanceLaunchAngleCalculation(double distance) {
+        // final double m = 3.2272* Math.pow(10, 13);
+        // final double k = -1.43668;
+        // final double x_zero = -18.0102;
+        // final double b = 150.065;
+        // return (distance * (m / (1 + Math.pow(Math.E, -k * (distance - x_zero)))) + b) + 2;
+
+        final double m = -2296.26;
+        final double h = -57.3682;
+        final double k = 0.225084;
+        final double x_zero = 17.45;
+        final double b = 96.2790;
+
+        return (m / h + Math.pow(Math.E, -k * (distance - x_zero))) + b;
+      }
 }

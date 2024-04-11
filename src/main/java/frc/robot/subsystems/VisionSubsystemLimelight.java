@@ -19,6 +19,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -41,6 +42,7 @@ import frc.robot.DynamicTag;
 import frc.robot.Constants.LauncherConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.LimelightHelpers;
+import frc.robot.Utils;
 
 public class VisionSubsystemLimelight extends SubsystemBase {
   private AprilTagFieldLayout m_aprilTagFieldLayout = null;
@@ -152,35 +154,38 @@ public class VisionSubsystemLimelight extends SubsystemBase {
     }
     return Optional.empty();
   }
-
-  private double distanceLaunchAngleCalculation(double distance) {
-    // return (-42.4977/(1+Math.pow(Math.E, (-2.20952 * ( distance - 1.725))))+199.689);
-
-    // final double m = 249.295;
-    // final double k = -1.61996;
-    // final double x_zero = 0.0297632;
-    // final double b = 151.212;
-    final double m = 3.2272* Math.pow(10, 13);
-    final double k = -1.43668;
-    final double x_zero = -18.0102;
-    final double b = 150.065;
-    return (distance * (m / (1 + Math.pow(Math.E, -k * (distance - x_zero)))) + b) + 2;
-  }
     
+  // public Optional<Double> calculateLauncherSpeakerAimPosition() {
+  //   if (LimelightHelpers.getFiducialID("") != -1) {
+  //     double targetOffsetAngle_Vertical = LimelightHelpers.getTY("");
+
+  //     double angleToGoalRadians = Math.toRadians(limelightMountAngleDegrees + targetOffsetAngle_Vertical);
+
+  //     // calculate distance
+  //     double distanceFromLimelightToGoalInches = (Units.metersToInches(m_aprilTags.get(m_priorityId).pose.getZ()) - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
+  //     distanceFromLimelightToGoalInches -= VisionConstants.DISTANCE_BETWEEN_CAMERA_AND_FRONT_OF_ROBOT;
+  //     double distanceMeters = Units.inchesToMeters(distanceFromLimelightToGoalInches);
+
+  //     SmartDashboard.putNumber("LimelightDistanceMeters", distanceMeters);
+
+  //     double position = distanceLaunchAngleCalculation(distanceMeters);
+
+  //     if (position <= LauncherConstants.AIM_MOTOR_LOWEST_POSITION || position >= LauncherConstants.AIM_MOTOR_HIGHEST_POSITION) {
+  //       return Optional.empty();
+  //     }
+
+  //     return Optional.of(position);
+  //   }
+  //   return Optional.empty();
+  // }
   public Optional<Double> calculateLauncherSpeakerAimPosition() {
-    if (LimelightHelpers.getFiducialID("") != -1) {
-      double targetOffsetAngle_Vertical = LimelightHelpers.getTY("");
+    if (seesAprilTag()) {
+      final Pose3d pose = LimelightHelpers.getCameraPose3d_TargetSpace("");
+      final double distance = Math.abs(pose.getZ());
 
-      double angleToGoalRadians = Math.toRadians(limelightMountAngleDegrees + targetOffsetAngle_Vertical);
+      SmartDashboard.putNumber("LimelightDistanceMeters", distance);
 
-      // calculate distance
-      double distanceFromLimelightToGoalInches = (Units.metersToInches(m_aprilTags.get(m_priorityId).pose.getZ()) - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
-      distanceFromLimelightToGoalInches -= VisionConstants.DISTANCE_BETWEEN_CAMERA_AND_FRONT_OF_ROBOT;
-      double distanceMeters = Units.inchesToMeters(distanceFromLimelightToGoalInches);
-
-      SmartDashboard.putNumber("LimelightDistanceMeters", distanceMeters);
-
-      double position = distanceLaunchAngleCalculation(distanceMeters);
+      double position = Utils.distanceLaunchAngleCalculation(distance);
 
       if (position <= LauncherConstants.AIM_MOTOR_LOWEST_POSITION || position >= LauncherConstants.AIM_MOTOR_HIGHEST_POSITION) {
         return Optional.empty();

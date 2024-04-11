@@ -37,7 +37,7 @@ public class Constants {
         public static final int FEEDER_SENSOR_ID = 0;
 
         public static final double TARGET_SHOOTER_RPS = 30.0;
-        public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 78.0; // was 40
+        public static final double SHOOTER_UP_TO_SPEED_THRESHOLD = 70.0; // was 40
 
         public static final double TARGET_FEEDER_RPS_BACKWARDS = 6; // TODO: CHANGE THIS
         public static final double TARGET_FEEDER_RPS_SLOW_BACKWARDS = 2; // TODO: CHANGE THIS

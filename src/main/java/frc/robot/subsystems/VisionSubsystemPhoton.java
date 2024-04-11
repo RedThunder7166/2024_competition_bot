@@ -43,6 +43,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Telemetry;
+import frc.robot.Utils;
 import frc.robot.Constants;
 import frc.robot.DynamicTag;
 import frc.robot.Constants.LauncherConstants;
@@ -302,15 +303,15 @@ public class VisionSubsystemPhoton extends SubsystemBase {
     return Optional.empty();
   }
 
-  private double distanceLaunchAngleCalculation(double distance) {
-    // return (-42.4977/(1+Math.pow(Math.E, (-2.20952 * ( distance - 1.725))))+199.689);
+  // private double distanceLaunchAngleCalculation(double distance) {
+  //   // return (-42.4977/(1+Math.pow(Math.E, (-2.20952 * ( distance - 1.725))))+199.689);
 
-    final double m = -6.93887;
-    final double k = 6.87994;
-    final double x_zero = 1.92655;
-    final double b = 179.288;
-    return distance * (m / (1 + Math.pow(Math.E, -k * (distance - x_zero)))) + b;
-  }
+  //   final double m = -6.93887;
+  //   final double k = 6.87994;
+  //   final double x_zero = 1.92655;
+  //   final double b = 179.288;
+  //   return distance * (m / (1 + Math.pow(Math.E, -k * (distance - x_zero)))) + b;
+  // }
 
 
   public Optional<Double> calculateLauncherSpeakerAimPosition() {
@@ -321,7 +322,7 @@ public class VisionSubsystemPhoton extends SubsystemBase {
         final double distance = calculateDistanceToTargetMeters(target_optional.get(), FRONT_CAMERA_HEIGHT_OFF_GROUND_METERS);
         m_DistanceTarget.set(distance);
         // double position = m_distanceLaunchAngleRegression.predict(distance);
-        double position = distanceLaunchAngleCalculation(distance);
+        double position = Utils.distanceLaunchAngleCalculation(distance);
         m_equationOutput.set(position);
 
         if (position <= LauncherConstants.AIM_MOTOR_LOWEST_POSITION || position >= LauncherConstants.AIM_MOTOR_HIGHEST_POSITION) {
