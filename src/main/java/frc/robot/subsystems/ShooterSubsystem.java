@@ -76,6 +76,13 @@ public class ShooterSubsystem extends SubsystemBase {
   private final DoublePublisher m_topRPMPublisher = table.getDoubleTopic("TopRPM").publish();
   private final DoublePublisher m_bottomRPMPublisher = table.getDoubleTopic("BottomRPM").publish();
   private final DoublePublisher m_feederRPSPublisher = table.getDoubleTopic("FeederSpeed").publish();
+
+  private final DoublePublisher m_topTempPublisher = table.getDoubleTopic("TopTemp").publish();
+  private final DoublePublisher m_bottomTempPublisher = table.getDoubleTopic("BottomTemp").publish();
+
+  private final DoublePublisher m_topCurrentPublisher = table.getDoubleTopic("TopCurrent").publish();
+  private final DoublePublisher m_bottomCurrentPublisher = table.getDoubleTopic("BottomCurrent").publish();
+
   public ShooterSubsystem(){  
     TalonFXConfiguration top_configs = new TalonFXConfiguration();
     TalonFXConfiguration feeder_configs = new TalonFXConfiguration();
@@ -162,6 +169,12 @@ public class ShooterSubsystem extends SubsystemBase {
     m_feederRPSPublisher.set((
       m_feederMotor.getVelocity().getValueAsDouble()
     ));
+
+    m_topTempPublisher.set(m_topMotor.getDeviceTemp().getValueAsDouble());
+    m_bottomTempPublisher.set(m_bottomMotor.getDeviceTemp().getValueAsDouble());
+
+    m_topCurrentPublisher.set(m_topMotor.getSupplyCurrent().getValueAsDouble());
+    m_bottomCurrentPublisher.set(m_bottomMotor.getSupplyCurrent().getValueAsDouble());
 
     if (!overrideShooterLogic) {
       if (m_shooterEnabled) {

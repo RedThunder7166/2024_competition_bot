@@ -29,7 +29,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
-import frc.robot.ReallyDumbAllianceColor;
+import frc.robot.DynamicTag;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.sysidutils.ModifiedSignalLogger;
 //import frc.robot.sysidutils.SwerveVoltageRequest;
@@ -108,15 +108,15 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                                             driveBaseRadius,
                                             new ReplanningConfig()),
             () -> {
-            //   return AllianceColor.allianceColor.is_red_alliance;
-                // return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Red;
-                return ReallyDumbAllianceColor.getAlliance() == DriverStation.Alliance.Red;
+                // return ReallyDumbAllianceColor.getAlliance() == DriverStation.Alliance.Red;
+                return DynamicTag.alliance == Alliance.Red;
             },
             this); // Subsystem for requirements
     }
 
     public void autoExit() {
-        m_fieldRelativeOffset = Rotation2d.fromDegrees(ReallyDumbAllianceColor.getAlliance() == Alliance.Red ? 180 : 0);
+        // m_fieldRelativeOffset = Rotation2d.fromDegrees(ReallyDumbAllianceColor.getAlliance() == Alliance.Red ? 180 : 0);
+        m_fieldRelativeOffset = Rotation2d.fromDegrees(DynamicTag.alliance == Alliance.Red ? 180 : 0);
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {

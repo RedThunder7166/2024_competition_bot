@@ -7,6 +7,7 @@ package frc.robot;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -284,18 +285,8 @@ public class RobotContainer {
       .withRotationalRate(-driver_joystick.getRightX() * MaxAngularRate)// Drive counterclockwise with negative X (left)
     ));
 
-    driver_joystick.x().whileTrue(m_vision.getAmpPathCommand());
-
-    // driver_joystick.x().whileTrue(new FunctionalCommand(() -> {
-    //   m_vision.setPriorityID(ReallyDumbAllianceColor.getAlliance() == Alliance.Red ? AllianceColor.RED_AMP : AllianceColor.BLUE_AMP);
-    // }, () -> {
-    //   drivetrain.setControl(m_vision.modifyAmpControl(m_robotCentricControl, ReallyDumbAllianceColor.getAlliance() == Alliance.Red ? AllianceColor.RED_AMP : AllianceColor.BLUE_AMP));
-    // }, (interruped) -> {
-    //   setVisionPriorityIDToSubwooferCenter(ReallyDumbAllianceColor.getAlliance());
-    // }, () -> {
-    //   return false;
-    // }));
-
+    // TODO: put this back; removed for news people :sunglasses:
+    // driver_joystick.x().whileTrue(m_vision.getSubwooferPathCommand());
     
     // driver_joystick.leftTrigger().whileTrue(Commands.startEnd(() -> {
     //   m_climber.disablePositionBased();
@@ -450,12 +441,14 @@ public class RobotContainer {
     DriverStation.silenceJoystickConnectionWarning(true);
     configureBindings();
 
-    m_allianceChooser.onChange((Alliance alliance) -> {
-      ReallyDumbAllianceColor.setAlliance(alliance);
+    Consumer<Alliance> onChange = (Alliance alliance) -> {
+      // ReallyDumbAllianceColor.setAlliance(alliance);
+      DynamicTag.alliance = alliance;
       m_vision.setVisionPriorityIDToSubwooferCenter(alliance);
-    });
-    ReallyDumbAllianceColor.setAlliance(Alliance.Red);
-    m_vision.setVisionPriorityIDToSubwooferCenter(Alliance.Red);
+    };
+
+    m_allianceChooser.onChange(onChange);
+    onChange.accept(Alliance.Red);
 
     m_allianceChooser.addOption("Blue", Alliance.Blue);
     m_allianceChooser.setDefaultOption("Red", Alliance.Red);

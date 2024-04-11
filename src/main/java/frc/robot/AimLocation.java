@@ -29,12 +29,12 @@ public class AimLocation {
 
     public static final AimLocation Loading = new AimLocation("Loading",
         163.56, // 847.5
-        80, // this modified speaker speed
+        75, // this modified speaker speed
         0
     );
     public static final AimLocation AutoTarget = new AimLocation("AutoTarget",
         true,
-        80,//TODO Bring back to .7 once the shooter wheels are moved back
+        Loading.shooter_speed_rps,//TODO Bring back to .7 once the shooter wheels are moved back
         0
     );
     public static final double amp_percent = 0.13;

@@ -43,8 +43,8 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Telemetry;
-import frc.robot.AllianceColor;
 import frc.robot.Constants;
+import frc.robot.DynamicTag;
 import frc.robot.Constants.LauncherConstants;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
@@ -266,7 +266,8 @@ public class VisionSubsystemPhoton extends SubsystemBase {
     m_telemetry.telemeterize(m_swerve.getState());
 
     if (m_frontResult.hasTargets()) {
-      Optional<PhotonTrackedTarget> subwoofer_center_tag = getTarget(AllianceColor.RED_SUBWOOFER_CENTER, m_frontResult).or(() -> getTarget(AllianceColor.BLUE_SUBWOOFER_CENTER, m_frontResult));
+      // Optional<PhotonTrackedTarget> subwoofer_center_tag = getTarget(AllianceColor.RED_SUBWOOFER_CENTER, m_frontResult).or(() -> getTarget(AllianceColor.BLUE_SUBWOOFER_CENTER, m_frontResult));
+      Optional<PhotonTrackedTarget> subwoofer_center_tag = getTarget(DynamicTag.SubwooferCenter.getID(), m_frontResult);
       if (subwoofer_center_tag.isPresent()) {
         PhotonTrackedTarget target = subwoofer_center_tag.get();
         m_pitchPublisher.set(target.getPitch());
@@ -314,7 +315,8 @@ public class VisionSubsystemPhoton extends SubsystemBase {
 
   public Optional<Double> calculateLauncherSpeakerAimPosition() {
     if (m_frontResult.hasTargets()) {
-      final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceColor.RED_SUBWOOFER_CENTER, m_frontResult).or(() -> getTarget(AllianceColor.BLUE_SUBWOOFER_CENTER, m_frontResult));
+      // final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceColor.RED_SUBWOOFER_CENTER, m_frontResult).or(() -> getTarget(AllianceColor.BLUE_SUBWOOFER_CENTER, m_frontResult));
+      final Optional<PhotonTrackedTarget> target_optional = getTarget(DynamicTag.SubwooferCenter.getID(), m_frontResult);
       if (target_optional.isPresent()) {
         final double distance = calculateDistanceToTargetMeters(target_optional.get(), FRONT_CAMERA_HEIGHT_OFF_GROUND_METERS);
         m_DistanceTarget.set(distance);
@@ -334,7 +336,9 @@ public class VisionSubsystemPhoton extends SubsystemBase {
   }
 
   public Optional<Double> calculateTurnPower() {
-    final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceColor.RED_SUBWOOFER_CENTER, m_frontResult).or(() -> getTarget(AllianceColor.BLUE_SUBWOOFER_CENTER, m_frontResult));
+    // final Optional<PhotonTrackedTarget> target_optional = getTarget(AllianceColor.RED_SUBWOOFER_CENTER, m_frontResult).or(() -> getTarget(AllianceColor.BLUE_SUBWOOFER_CENTER, m_frontResult));
+    final Optional<PhotonTrackedTarget> target_optional = getTarget(DynamicTag.SubwooferCenter.getID(), m_frontResult);
+
     if (target_optional.isPresent()) {
       double value = turn_controller.calculate(target_optional.get().getYaw(), 0); //14
       // System.out.format("Value: %f | Error: %f\n", value, turn_controller.getPositionError());

@@ -23,6 +23,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -33,13 +34,13 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.AllianceColor;
+import frc.robot.DynamicTag;
 import frc.robot.Constants.LauncherConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.LimelightHelpers;
-import frc.robot.ReallyDumbAllianceColor;
 
 public class VisionSubsystemLimelight extends SubsystemBase {
   private AprilTagFieldLayout m_aprilTagFieldLayout = null;
@@ -114,11 +115,12 @@ public class VisionSubsystemLimelight extends SubsystemBase {
   }
   
   public void setVisionPriorityIDToSubwooferCenter(Alliance alliance) {
-    setPriorityID(alliance == Alliance.Red ? AllianceColor.RED_SUBWOOFER_CENTER : AllianceColor.BLUE_SUBWOOFER_CENTER);
+    setPriorityID(DynamicTag.SubwooferCenter.getID());
+    // setPriorityID(alliance == Alliance.Red ? AllianceColor.RED_SUBWOOFER_CENTER : AllianceColor.BLUE_SUBWOOFER_CENTER);
   }
 
   public boolean seesAprilTag() {
-    return LimelightHelpers.getFiducialID("") != -1;
+    return LimelightHelpers.getFiducialID("") > 0;
   }
 
   public Optional<Double> calculateTurnPower() {
@@ -171,7 +173,7 @@ public class VisionSubsystemLimelight extends SubsystemBase {
 
       double angleToGoalRadians = Math.toRadians(limelightMountAngleDegrees + targetOffsetAngle_Vertical);
 
-      //calculate distance
+      // calculate distance
       double distanceFromLimelightToGoalInches = (Units.metersToInches(m_aprilTags.get(m_priorityId).pose.getZ()) - limelightLensHeightInches) / Math.tan(angleToGoalRadians);
       distanceFromLimelightToGoalInches -= VisionConstants.DISTANCE_BETWEEN_CAMERA_AND_FRONT_OF_ROBOT;
       double distanceMeters = Units.inchesToMeters(distanceFromLimelightToGoalInches);
@@ -189,65 +191,102 @@ public class VisionSubsystemLimelight extends SubsystemBase {
     return Optional.empty();
   }
 
-  private Command ampPathCommand;
-
-  public static final class TagPathCommand extends Command{
-    private final int m_tag;
+  public static final class TagPathCommand extends Command {
+    private final DynamicTag m_tag;
     private final VisionSubsystemLimelight m_vision;
+    private final Transform3d m_offset;
+    private final Rotation2d m_goalRotationOffset;
+
     private boolean m_hasSeenTag = false;
     private Command m_pathCommand;
+    private boolean m_pathCommandHadBeenScheduled = false;
 
-    public TagPathCommand(VisionSubsystemLimelight vision, int tag) {
+    /**
+     * Constructs a new TagPathCommand, which path-plans to a desired AprilTag
+     * @param vision VisionSubsystem
+     * @param tag The target april tag
+     * @param offset A 3d offset from the tag that the robot will drive to
+     * @param goalRotationOffset A rotational offset from the tag that describes the robot's goal rotation
+     */
+    public TagPathCommand(VisionSubsystemLimelight vision, DynamicTag tag, Transform3d offset, Rotation2d goalRotationOffset) {
       m_vision = vision;
       m_tag = tag;
+      m_offset = offset;
+      m_goalRotationOffset = goalRotationOffset;
     }
 
     @Override
     public void initialize() {
       m_hasSeenTag = false;
-      m_vision.setPriorityID(m_tag);
+      m_pathCommand = null;
+      m_pathCommandHadBeenScheduled = false;
+      m_vision.setPriorityID(m_tag.getID());
     }
 
     @Override
     public void execute() {
       if (m_hasSeenTag) {
-        // TODO: make this a transform3d that you add to plus that you give to the constructor
-        final double degreeOffset = 180;    // FIXME: this needs to either be 0 or 180. might depend on color
-        double translationOffset = 1;       // FIXME: in meters, this is how far our desired pose is from the amp tag
-        translationOffset *= -1;            // FIXME: if this is dependant on color, then it depends on color; otherwise, it either will need to be here or not
+        if (m_pathCommand == null) {
+          final AprilTag tag = m_vision.m_aprilTags.get(m_tag.getID());
+          final List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(
+            m_vision.m_swerve.getState().Pose,
+            tag.pose.plus(m_offset).toPose2d()
+            // tag.pose.plus(new Transform3d(new Translation3d(1, 0, 0), new Rotation3d())).toPose2d()
+          );
 
-        final List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(
-          m_vision.m_aprilTags.get(m_tag).pose.plus(new Transform3d(translationOffset, 0, 0, new Rotation3d(0,0,0))).toPose2d()
-          .rotateBy(Rotation2d.fromDegrees(degreeOffset))
-        );
+          m_pathCommand = AutoBuilder.followPath(new PathPlannerPath(
+            bezierPoints,
+            new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI),
+            new GoalEndState(0.0, /* goal rotation doesn't change anything */ tag.pose.getRotation().toRotation2d().rotateBy(m_goalRotationOffset))
+            // new GoalEndState(0.0, Rotation2d.fromDegrees(-90))
+          ));
 
-        m_pathCommand = AutoBuilder.followPath(new PathPlannerPath(
-          bezierPoints,
-          new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI),
-          new GoalEndState(0.0, Rotation2d.fromDegrees(-90))
-        ));
-        m_pathCommand.schedule();
+          m_pathCommand.schedule();
+        }
       } else {
         m_hasSeenTag = m_vision.seesAprilTag();
+      }
+
+      if (!m_pathCommandHadBeenScheduled && m_pathCommand != null) {
+        m_pathCommandHadBeenScheduled = m_pathCommand.isScheduled();
       }
     }
 
     @Override
     public void end(boolean interrupted) {
-      if (m_pathCommand.isScheduled()) {
+      if (m_pathCommand != null && m_pathCommand.isScheduled()) {
         m_pathCommand.cancel();
       }
     }
 
     @Override
     public boolean isFinished() {
-      return m_pathCommand.isFinished();
+      // return m_pathCommand == null ? false : m_pathCommand.isFinished();
+      return false;
     }
   }
 
   public Command getAmpPathCommand() {
-    final int tag = ReallyDumbAllianceColor.getAlliance() == Alliance.Red ? AllianceColor.RED_AMP : AllianceColor.BLUE_AMP;
+    // final AprilTag tag = m_aprilTags.get(ReallyDumbAllianceColor.getAlliance() == Alliance.Red ? AllianceColor.RED_AMP : AllianceColor.BLUE_AMP);
+    final DynamicTag tag = DynamicTag.Amp;
 
-    return new TagPathCommand(this, tag);
+    final double degreeOffset = 180;  // FIXME: this needs to either be 0 or 180. might depend on color
+    double translationOffset = 0.3;   // FIXME: in meters, this is how far our desired pose is from the amp tag
+    translationOffset *= -1;          // FIXME: if this is dependant on color, then it depends on color; otherwise, it either will need to be here or not
+
+    return new TagPathCommand(this, tag,
+      new Transform3d(
+        translationOffset, 0, 0,
+        new Rotation3d(0, 0, degreeOffset)
+      ),
+      Rotation2d.fromDegrees(0)
+    );
+  }
+
+  public Command getSubwooferPathCommand() {
+    return new TagPathCommand(this, DynamicTag.SubwooferCenter, new Transform3d(
+      -2, 0, 0,
+      new Rotation3d(0, 0, 180)
+    ), Rotation2d.fromDegrees(0));
   }
 }
