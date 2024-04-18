@@ -12,35 +12,9 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.8
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "name": "Aim"
           }
         },
         {
@@ -50,54 +24,28 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "race",
           "data": {
             "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              },
               {
                 "type": "path",
                 "data": {
                   "pathName": "2-Piece-Amp-Second"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
+                }
               }
             ]
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.8
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "name": "Aim"
           }
         },
         {
@@ -107,79 +55,47 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.2
-          }
-        },
-        {
-          "type": "parallel",
+          "type": "race",
           "data": {
             "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              },
               {
                 "type": "path",
                 "data": {
                   "pathName": "R-Grab-5"
                 }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
+              },
               {
                 "type": "named",
                 "data": {
                   "name": "PickUpPieceUntilSensor"
                 }
-              },
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
               {
                 "type": "path",
                 "data": {
                   "pathName": "4-shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
                 }
               }
             ]
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.4
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "name": "Aim"
           }
         },
         {
@@ -189,7 +105,7 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "race",
           "data": {
             "commands": [
               {
@@ -208,54 +124,28 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "deadline",
           "data": {
             "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              },
               {
                 "type": "path",
                 "data": {
                   "pathName": "5-shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
                 }
               }
             ]
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.4
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "name": "Aim"
           }
         },
         {

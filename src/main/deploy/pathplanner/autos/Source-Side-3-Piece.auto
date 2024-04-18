@@ -62,7 +62,7 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "race",
           "data": {
             "commands": [
               {
@@ -144,7 +144,7 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "race",
           "data": {
             "commands": [
               {
@@ -220,7 +220,7 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "race",
           "data": {
             "commands": [
               {
@@ -243,15 +243,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              },
-              {
                 "type": "path",
                 "data": {
                   "pathName": "SourceShootFar"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
                 }
               }
             ]

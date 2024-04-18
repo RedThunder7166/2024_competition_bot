@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.AimLocation;
 import frc.robot.Constants;
+import frc.robot.RobotState;
 import frc.robot.Utils;
 import frc.robot.Constants.ShooterConstants;
 
@@ -142,6 +143,10 @@ public class ShooterSubsystem extends SubsystemBase {
     m_FeederStopIsTripped = Utils.isAllenBradleyTripped(m_FeederStopSensor);
 
     m_shooterIsUpToSpeed = m_topMotor.getVelocity().getValueAsDouble() >= ShooterConstants.SHOOTER_UP_TO_SPEED_THRESHOLD;
+
+    if (m_wheelExitSensorIsTripped) {
+      RobotState.shooterExitWheelsTripped();
+    }
 
     final AimLocation aimLocation = AimLocation.getAimLocation();
 

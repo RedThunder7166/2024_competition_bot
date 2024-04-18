@@ -12,35 +12,9 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.4
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "name": "Aim"
           }
         },
         {
@@ -60,15 +34,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              },
-              {
                 "type": "path",
                 "data": {
                   "pathName": "F-PieceAmp1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
                 }
               }
             ]
@@ -81,35 +55,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.4
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "name": "Aim"
           }
         },
         {
@@ -119,54 +67,28 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "race",
           "data": {
             "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              },
               {
                 "type": "path",
                 "data": {
                   "pathName": "F-PieceAmp1-2"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
+                }
               }
             ]
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.4
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "name": "Aim"
           }
         },
         {
@@ -176,19 +98,19 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "race",
           "data": {
             "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              },
               {
                 "type": "path",
                 "data": {
                   "pathName": "F-Piece1-3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
                 }
               }
             ]
@@ -201,35 +123,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.4
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "name": "Aim"
           }
         },
         {

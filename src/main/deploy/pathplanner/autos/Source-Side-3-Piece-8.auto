@@ -18,35 +18,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.8
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "name": "Aim"
           }
         },
         {
@@ -56,13 +30,7 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.3
-          }
-        },
-        {
-          "type": "parallel",
+          "type": "race",
           "data": {
             "commands": [
               {
@@ -81,41 +49,28 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "Aim-Source"
-          }
-        },
-        {
-          "type": "parallel",
+          "type": "deadline",
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "AutoAim"
+                  "pathName": "Aim-Source"
                 }
               },
               {
-                "type": "race",
+                "type": "named",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.4
-                      }
-                    }
-                  ]
+                  "name": "PickUpPieceUntilSensor"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim"
           }
         },
         {
@@ -131,60 +86,47 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "race",
           "data": {
             "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              },
               {
                 "type": "path",
                 "data": {
                   "pathName": "Source4-8"
                 }
-              }
-            ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "SourceShootFar"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
+              },
               {
                 "type": "named",
                 "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.4
-                      }
-                    }
-                  ]
+                  "name": "PickUpPieceUntilSensor"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "SourceShootFar"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim"
           }
         },
         {
@@ -194,60 +136,47 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "race",
           "data": {
             "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "PickUpPieceUntilSensor"
-                }
-              },
               {
                 "type": "path",
                 "data": {
                   "pathName": "Source4-7"
                 }
-              }
-            ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "SourceShootFar"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
+              },
               {
                 "type": "named",
                 "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.6
-                      }
-                    }
-                  ]
+                  "name": "PickUpPieceUntilSensor"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "SourceShootFar"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PickUpPieceUntilSensor"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim"
           }
         },
         {

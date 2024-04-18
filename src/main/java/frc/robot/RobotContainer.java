@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -89,7 +90,7 @@ public class RobotContainer {
   private final JetEngineSubsystem m_jetEngine = new JetEngineSubsystem();
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
   private final IndexerSubsystem m_indexer = new IndexerSubsystem(m_shooter);
-  private final IntakeSubsystem m_intake = new IntakeSubsystem(m_indexer);
+  private final IntakeSubsystem m_intake = new IntakeSubsystem(m_indexer, m_shooter);
   private final LEDSubsystem m_led = new LEDSubsystem(m_intake, m_indexer, m_shooter, m_vision); 
   // private final DeflectorSubsystem m_deflector = new DeflectorSubsystem(m_shooter);
   
@@ -134,6 +135,17 @@ public class RobotContainer {
       System.out.println("end");
       m_shooter.disableFeederReverse();
     }, shouldStopShooterPrep::getAsBoolean);
+  }
+
+  private void lineUpRun() {
+    final Optional<Double> turn_power = m_vision.calculateTurnPower();
+    m_swerve.setControl(drive
+      .withVelocityX(0)
+      .withVelocityY(0)
+      .withRotationalRate((turn_power.orElse(0d) * MaxAngularRate)));
+  }
+  private void lineUpEnd() {
+    m_swerve.setControl(drive.withRotationalRate(0));
   }
    
   {
@@ -180,7 +192,6 @@ public class RobotContainer {
       new InstantCommand(m_shooter::disableFeeder),
       new InstantCommand(() -> AimLocation.setAimLocation(AimLocation.Loading))
     ));
- 
     NamedCommands.registerCommand("AimFromSubwoofer", getShooterPrep().andThen(new InstantCommand(() -> {
       AimLocation.setAimLocation(AimLocation.Subwoofer);
     })));
@@ -197,32 +208,17 @@ public class RobotContainer {
       AimLocation.setAimLocation(AimLocation.AutoTarget);
     })));
 
-    // NamedCommands.registerCommand("AimFromSubwoofer", new InstantCommand(() -> {
-    //   AimLocation.setAimLocation(AimLocation.Subwoofer);
-    // }));
-    // NamedCommands.registerCommand("AimFromLoading", new InstantCommand(()-> {
-    //   AimLocation.setAimLocation(AimLocation.Loading);
-    // }));
-    // NamedCommands.registerCommand("AimFromAmp", new InstantCommand(() -> {
-    //   AimLocation.setAimLocation(AimLocation.Amp);
-    // }));
-    // NamedCommands.registerCommand("AimFromTrap", new InstantCommand(() -> {
-    //   AimLocation.setAimLocation(AimLocation.Trap);
-    // }));
-    //  NamedCommands.registerCommand("AutoAim", new InstantCommand(() -> {
-    //   AimLocation.setAimLocation(AimLocation.AutoTarget);
-    // }));
+    final double lineUpTime = 0.8;
 
-    NamedCommands.registerCommand("LineUp", Commands.runEnd(() -> {
-      final Optional<Double> turn_power = m_vision.calculateTurnPower();
-      m_swerve.setControl(drive
-                          .withVelocityX(0)
-                          .withVelocityY(0)
-                          .withRotationalRate((turn_power.orElse(0d) * MaxAngularRate)));
-    }, () -> {
-      m_swerve.setControl(drive.withRotationalRate(0));
-    }));
-    
+    NamedCommands.registerCommand("Aim", new ParallelCommandGroup(
+      getShooterPrep().andThen(new InstantCommand(() -> {
+        AimLocation.setAimLocation(AimLocation.AutoTarget);
+      })),
+      Commands.runEnd(this::lineUpRun, this::lineUpEnd).withTimeout(lineUpTime))
+    );
+
+    NamedCommands.registerCommand("LineUp", Commands.runEnd(this::lineUpRun, this::lineUpEnd).withTimeout(lineUpTime));
+ 
    NamedCommands.registerCommand("PickUpPieceUntilSensor", new FunctionalCommand(() -> {
     m_intake.enableForward();
     m_indexer.enableForward();

@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.3640618606832815,
-      "y": 5.625324579910002
+      "x": 1.3792181035797626,
+      "y": 5.5192308796346365
     },
     "rotation": -178.8982938847936
   },
@@ -14,7 +14,7 @@
         {
           "type": "named",
           "data": {
-            "name": "AimFromSubwoofer"
+            "name": "Aim"
           }
         },
         {
@@ -49,35 +49,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AutoAim"
-                }
-              },
-              {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.4
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "name": "Aim"
           }
         },
         {
@@ -87,7 +61,7 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "race",
           "data": {
             "commands": [
               {
@@ -106,41 +80,40 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "AimThroughStage"
+            "name": "Aim"
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        },
+        {
+          "type": "deadline",
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "AutoAim"
+                  "pathName": "AimThroughStage"
                 }
               },
               {
-                "type": "race",
+                "type": "named",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "LineUp"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.4
-                      }
-                    }
-                  ]
+                  "name": "PickUpPieceUntilSensor"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim"
           }
         },
         {

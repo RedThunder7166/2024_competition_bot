@@ -51,6 +51,6 @@ public final class Utils {
         final double x_zero = 17.45;
         final double b = 96.2790;
 
-        return (m / h + Math.pow(Math.E, -k * (distance - x_zero))) + b;
+        return (m / (h + Math.pow(Math.E, -k * (distance - x_zero)))) + b;
       }
 }
