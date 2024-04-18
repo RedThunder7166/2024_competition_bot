@@ -38,6 +38,8 @@ public final class Utils {
         return !allenBradley.get();
     }
 
+    /*  measure distances, manually find 'working' angles,
+     use table with logistic model to set angle automatically through desmos*/
     public static double distanceLaunchAngleCalculation(double distance) {
         // final double m = 3.2272* Math.pow(10, 13);
         // final double k = -1.43668;

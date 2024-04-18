@@ -57,7 +57,7 @@ public class ClimberSubsystem extends SubsystemBase {
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 10;
+    config.CurrentLimits.SupplyCurrentLimit = 15;
 
     config.Slot0.kP = 0.01;
 
