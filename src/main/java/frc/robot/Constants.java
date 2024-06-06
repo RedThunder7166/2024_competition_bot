@@ -42,7 +42,7 @@ public class Constants {
         public static final double TARGET_FEEDER_RPS_BACKWARDS = 6; // TODO: CHANGE THIS
         public static final double TARGET_FEEDER_RPS_SLOW_BACKWARDS = 2; // TODO: CHANGE THIS
 
-        public static final double TARGET_FEEDER_RPS = 14; // TODO: CHANGE THIS
+        public static final double TARGET_FEEDER_RPS = 14;      // TODO: CHANGE THIS
     }
     public static final class IndexerConstants {
         public static final int MOTOR_ID = 17;
